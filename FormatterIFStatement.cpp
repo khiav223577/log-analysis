@@ -4,70 +4,143 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+
 class FormatterIFStatement : public FormatterController{
 public:
     typedef FormatterController super;
+//-------------------------------------------------------------------------
+//  transform config-format to appropriate format. (for speed up)
+//-------------------------------------------------------------------------
     class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
-    public:
-    //-------------------------------------------------------------------------
-    //  transform config-format to appropriate format. (for speed up)
-    //-------------------------------------------------------------------------
-        char *trans_format(const char *_format){
-            if (_format == NULL) return NULL;
-            char *format = (char *) malloc(strlen(_format) + 1);
-            strcpy(format, _format);
-            return format; //Ex: format = "iisfw"
-        }
+        virtual char *trans_format(const char *_format)=0;
 	};
-	FormatterIFStatement *lExpr, *rExpr;
-	FormatterController *compareTarget;
 	char boolOperator;
 	//<------------The following two should be set by hand.------------>
 	FormatList formatList; //execute extra statement if check_condition is TRUE
 	int skip;              //skip some statement if executed
-    //-------------------------------------------------------------------------
-    //  target == format  /  target != format
-    //-------------------------------------------------------------------------
-    FormatterIFStatement(char op, FormatterController *_target, const char *_format) : super(_format, new VirtualCreator()){
-        if (op != 'T' && op != 'F') Perror(op);
+	FormatterIFStatement(const char *_format, char op, VirtualCreator *v) : super(_format, v){
         skip = 0;
         boolOperator = op;
-        compareTarget = _target;
-        lExpr = NULL;
-        rExpr = NULL;
-    }
-    //-------------------------------------------------------------------------
-    //  result == lExpr && rExpr  /  result == lExpr || rExpr
-    //-------------------------------------------------------------------------
-    FormatterIFStatement(char op, FormatterIFStatement *_lExpr, FormatterIFStatement *_rExpr) : super(NULL, new VirtualCreator()){
-        if (op != '&' && op != '|') Perror(op);
-        skip = 0;
-        boolOperator = op;
-        compareTarget = NULL;
-        lExpr = _lExpr;
-        rExpr = _rExpr;
-    }
-    ~FormatterIFStatement(){
+	}
+    virtual ~FormatterIFStatement(){
         for(FormatList::iterator iter = formatList.begin(); iter != formatList.end(); ++iter) delete *iter;
         formatList.clear();
-        delete lExpr;
-        delete rExpr;
     }
     inline void Perror(char op){
-        printf("Unknown operator in FormatterIFStatement: %c(%d)", op, op);
+        printf("Unknown operator in FormatterIFStatement: '%c'", op);
         exit(1);
     }
 public:
-
 //--------------------------------------
 //  execute
 //--------------------------------------
+    virtual bool check_condition()=0;
     inline int execute(const char ** inputStream){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(inputStream);
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(inputStream); //execute回傳要skip掉的指令數
         return skip;
     }
-    inline bool check_condition(){
+};
+
+//====================================================================
+//  Compare string.
+//====================================================================
+
+class FormatterIF_CmpString : public FormatterIFStatement{
+public:
+    typedef FormatterIFStatement super;
+    class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
+        char *trans_format(const char *_format){ //_format = "\"string\""
+            if (_format == NULL) return NULL;
+            int len = strlen(_format);
+            char *format = (char *) malloc(len - 1);
+            memcpy(format, _format + 1, (len - 2) * sizeof(char));
+            format[len - 2] = '\0';
+            return format; //Ex: format = "iisfw"
+        }
+	};
+	FormatterController *compareTarget;
+//-------------------------------------------------------------------------
+//  target == format  /  target != format
+//-------------------------------------------------------------------------
+    FormatterIF_CmpString(char op, FormatterController *_target, const char *_format) : super(_format, op,  new VirtualCreator()){
+        if (op != '=' && op != '!') Perror(op);
+        compareTarget = _target;
+    }
+    bool check_condition(){
+        switch(boolOperator){
+        case '=':{ return (strcmp(compareTarget->get_prev_result(), format) == 0);} //operator = "=="
+        case '!':{ return (strcmp(compareTarget->get_prev_result(), format) != 0);} //operator = "!="
+        default:{
+            Perror(boolOperator);
+            return false;}
+        }
+    }
+};
+
+//====================================================================
+//  Compare Integer.
+//====================================================================
+
+class FormatterIF_CmpInt : public FormatterIFStatement{
+public:
+    typedef FormatterIFStatement super;
+    class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
+        char *trans_format(const char *_format){
+            return NULL;
+        }
+	};
+	FormatterController *compareTarget;
+	int format_int;
+//-------------------------------------------------------------------------
+//  target == format  /  target != format
+//-------------------------------------------------------------------------
+    FormatterIF_CmpInt(char op, FormatterController *_target, const char *_format) : super(_format, op,  new VirtualCreator()){
+        if (op != '=' && op != '!' && op != '>' && op != '<' && op != '.' && op != ',') Perror(op);
+        compareTarget = _target;
+        format_int = atoi(_format);
+    }
+    bool check_condition(){
+        switch(boolOperator){
+        case '=':{ return (compareTarget->get_prev_int() == format_int);}  //operator = "=="
+        case '!':{ return (compareTarget->get_prev_int() != format_int);}  //operator = "!="
+        case '>':{ return (compareTarget->get_prev_int() >  format_int);}  //operator = ">"
+        case '<':{ return (compareTarget->get_prev_int() <  format_int);}  //operator = "<"
+        case '.':{ return (compareTarget->get_prev_int() >= format_int);}  //operator = ">="
+        case ',':{ return (compareTarget->get_prev_int() <= format_int);}  //operator = "<="
+        default:{
+            Perror(boolOperator);
+            return false;}
+        }
+    }
+};
+
+//====================================================================
+//  Compare boolean expression.
+//====================================================================
+
+class FormatterIF_CmpIF : public FormatterIFStatement{
+public:
+    typedef FormatterIFStatement super;
+    class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
+        char *trans_format(const char *_format){
+            return NULL;
+        }
+	};
+	FormatterIFStatement *lExpr, *rExpr;
+    //-------------------------------------------------------------------------
+    //  result == lExpr && rExpr  /  result == lExpr || rExpr
+    //-------------------------------------------------------------------------
+    FormatterIF_CmpIF(char op, FormatterIFStatement *_lExpr, FormatterIFStatement *_rExpr) : super(NULL, op, new VirtualCreator()){
+        if (op != '&' && op != '|') Perror(op);
+        lExpr = _lExpr;
+        rExpr = _rExpr;
+    }
+    ~FormatterIF_CmpIF(){
+        delete lExpr;
+        delete rExpr;
+    }
+    bool check_condition(){
         switch(boolOperator){
         case '|':{
             if (lExpr->check_condition() == true ) return true;
@@ -77,12 +150,6 @@ public:
             if (lExpr->check_condition() == false) return false;
             if (rExpr->check_condition() == false) return false;
             return true;}
-        case 'T':  case 'F':{
-            char *prev_result = compareTarget->get_prev_result();
-            if (prev_result == NULL) return false;
-            int cmp_result = strcmp(format, prev_result);
-            return (boolOperator == 'T') ? (cmp_result == 0) : (cmp_result != 0);
-            Perror(boolOperator);}
         default:{
             Perror(boolOperator);
             return false;}

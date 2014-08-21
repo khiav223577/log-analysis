@@ -50,6 +50,7 @@ public:
                 continue;
             }
             switch(FIX2INT(type)){
+            case 0:{ puts("Unknown type! in ruby return_string"); exit(1); }
             case 1:{ node = new FormatterDate   (StringValuePtr(format));                 break;} //Date
             case 2:{ node = new FormatterString (StringValuePtr(format), FIX2INT(extra)); break;} //String
             case 3:{ node = new FormatterInteger(StringValuePtr(format));                 break;} //Int
@@ -57,7 +58,7 @@ public:
             case 5:{ node = new FormatterDiscard(StringValuePtr(format));                 break;} //DROP
             case 6: case 7:{ //#if, #elsif
                 FormatterIFStatement *ifnode = parse_bool_statement(format);
-                ifList.push_back(ifnode);
+                ifList.push_back(ifnode); //記錄elsif數量。(elsif也是一個node，每多一個elsif，skip要再加1)。
                 node = ifnode;
                 inner_retrieve_format(&ifnode->formatList);
                 break;}
@@ -69,6 +70,7 @@ public:
                 break;}
             case 9:{  //#end
                 for(IFList::reverse_iterator it = ifList.rbegin(); it != ifList.rend(); ++it) (*it)->skip = skip_base++;
+                ifList.clear(); //elsif, else也都是node，需要被skip。例如(if, elsif, else)的skip量分別為(skip+2, skip+1, skip+0)
                 continue;
                 break;}
             case 10:{ //EXIT_BLOCK
@@ -94,16 +96,19 @@ public:
 //printf("[%c]\n",FIX2INT(element));
                 FormatterIFStatement *rExpr = FormatStack::pop(&stack);
                 FormatterIFStatement *lExpr = FormatStack::pop(&stack);
-                FormatStack::push(&stack, new FormatterIFStatement(FIX2INT(element), rExpr, lExpr));
+                FormatStack::push(&stack, new FormatterIF_CmpIF(FIX2INT(element), rExpr, lExpr));
                 break;}
             case T_ARRAY:{  //[idx, "==", "string"]
                 VALUE a0 = rb_ary_entry(element,0);
                 VALUE a1 = rb_ary_entry(element,1);
                 VALUE a2 = rb_ary_entry(element,2);
                 FormatterController *target = global_formatList[FIX2INT(a0)];
-                char type = (FIX2INT(a1) == '!' ? 'F' : 'T');
+                char type = FIX2INT(a1);
                 char *string = StringValuePtr(a2);
-                FormatStack::push(&stack, new FormatterIFStatement(type, target, string));
+                switch(string[0]){
+                case '"':{ FormatStack::push(&stack, new FormatterIF_CmpString(type, target, string)); break;} //string
+                default:{  FormatStack::push(&stack, new FormatterIF_CmpInt(   type, target, string)); break;} //integer
+                }
                 break;}
             default:{
                 puts("not valid value in 'parse_bool_statement'");

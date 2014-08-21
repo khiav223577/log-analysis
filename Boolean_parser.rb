@@ -3,12 +3,11 @@ class Boolean_parser
 #  parse statement
 #---------------------------------
 	#match string: "(?:\\"|[^"])*"
-	@@regular_expr = /\s*(?:(\|\||or)|(&&|and)|\((.*)\)|(\w+)\s*(==|!=)\s*"((?:\\"|[^"])*)"|\S+)/
+	@@regular_expr = /\s*(?:(\|\||or)|(&&|and)|\((.*)\)|(\w+)\s*(==|!=|>|>=|<|<=)\s*("(?:\\"|[^"])*"|[0-9]+)|\S+)/
 	def parse(input)
 		@postfix_buffer = []
-		output_expr(input)
+		return output_expr(input)
 		#return build_parsing_tree #debug
-		return @postfix_buffer
 	end
 #---------------------------------
 #  Operator Precedence
@@ -24,14 +23,13 @@ class Boolean_parser
 #---------------------------------
 	def output_expr(input)
 		op_buffer = [0]
-		input.gsub(@@regular_expr){|s| 
-			#p [s,$1,$2,$3,$4,$5,$6]
+		input.scan(@@regular_expr){|s|
 			case 
 			when $1 ; prior = 1                     #or
 			when $2 ; prior = 2                     #and		
 			when $3 ; output_expr($3)               #()
 			when $4 ; @postfix_buffer << [$4,$5,$6] #symbol. Ex: [AAA, ==, "str"]
-			else    ; puts("syntax error:" + s)	
+			else    ; return nil                    #syntax error
 			end
 			next if prior == nil
 			output_op(op_buffer.pop) while prior <= op_buffer[-1]

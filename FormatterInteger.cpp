@@ -4,14 +4,14 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
+#define NAN (1 << 31)
 class FormatterInteger : public FormatterController{
 public:
     typedef FormatterController super;
+//-------------------------------------------------------------------------
+//  transform config-format to appropriate format. (for speed up)
+//-------------------------------------------------------------------------
     class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
-	public:
-    //-------------------------------------------------------------------------
-    //  transform config-format to appropriate format. (for speed up)
-    //-------------------------------------------------------------------------
         char *trans_format(const char *_format){
             char *format = (char *) malloc(5 * sizeof(char));
             format[0] = '%';
@@ -28,8 +28,14 @@ public:
             return format; //Ex: format = "%d%n"
         }
 	};
+	int prev_int;
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
-
+        prev_int = NAN;
+    }
+    int get_prev_int(){ //Will be called by FormatterIFStatement.
+        if (prev_int != NAN) return prev_int;
+        printf("Error: fails to get_prev_int() in FormatterInteger.");
+        exit(1);
     }
 public:
     bool SuccessFlag;
@@ -43,6 +49,7 @@ public:
             exit(1);
         }
         SetColor2(); printf("[%d] ",num); SetColor(7);//DEBUG
+        prev_int = num;
         return 0;
     }
 //-------------------------------------------------------------------------

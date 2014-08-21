@@ -23,7 +23,7 @@ if !$IN_C_CODE
 		#end
 	}
 	a = %{
-		String[ ] Action
+		String[\\n] Action
 		#if Action == "allow" or (Action == "deny" and Action == "deny")
 			Int[10] string1
 		#elsif Action == "alert"

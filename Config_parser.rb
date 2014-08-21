@@ -1,22 +1,14 @@
-
 class Config_Parser
 	attr_reader   :setting_drop_after 
 	attr_reader   :setting_max_size 
+	MAP_OPERATOR = {"==" => "=".ord, "!=" => "!".ord, ">" => ">".ord, "<" => "<".ord, ">=" => ".".ord, "<=" => ",".ord}
 	def parse(input)
 		@setting_drop_after = {}
 		@setting_max_size   = {}
 		global_symbols      = {}
 		local_symbols       = {:buffer_start => 0} #recode outer symbol hidden by local symbol.
 		nested_symbols      = [local_symbols]
-		buffer              = []
-		buffer.instance_variable_set(:@buffer_len, 0)
-		def buffer.<<(other)
-			super(other)
-			@buffer_len += 1
-		end
-		def buffer.size
-			return @buffer_len
-		end
+		buffer              = create_buffer()
 		line = nil
 		line_count = 0
 		bparser = Boolean_parser.new
@@ -42,12 +34,13 @@ class Config_Parser
 				exit_block.call if $1 == "#elsif" #exit block and get into another block
 				nested_symbols << (local_symbols = {:buffer_start => buffer.size})
 				imfs = bparser.parse($2)
+				perror.call("Syntax error") and next if imfs == nil
 				imfs.each{|s| #["name", "==", "string"]
 					next if s.class != Array
 					idx = global_symbols[s[0]]
 					perror.call("undefined symbol '%s'" % s[0]) and next if idx == nil
-					s[0] = idx[0]
-					s[1] = s[1][0].ord
+					s[0] = idx[0] 				#map variable name to global_index
+					s[1] = MAP_OPERATOR[s[1]]	#map operator to integer
 				}
 				buffer << [$1, imfs]
 			when line =~ /^(#else)/
@@ -65,15 +58,16 @@ class Config_Parser
 				when line =~ /^(Int)\[([0-9]+)\] \s*(\w+)/
 				when line =~ /^(IPv4)\[(.*)\] \s*(\w+)/
 				when line =~ /^(DROP)\[(.*)\]/
-				else
-					puts "Syntax error at line %3d:  %s" % [line_count, line] and next
+				else ; perror.call("Syntax error") and next
 				end
 				if $3 != nil
-					puts "duplicate symbol at line %3d:  %s" % [line_count, line] and next if local_symbols[$3] != nil
+				    perror.call("Duplicate symbol") and next if local_symbols[$3] != nil
 					local_symbols[$3] = global_symbols[$3]
 					global_symbols[$3] = [buffer.size, local_symbols[:buffer_start]]
 				end
-				buffer << ($3 == nil ? [$1,$2] : [$1,$2,$3])
+				data = [$1,extract_escape_symbol($2)]
+				data << $3 if $3
+				buffer << data #[Type, format, vocabulary, extra]
 				if (drop_after = @setting_drop_after[$1])
 					buffer << ["DROP", drop_after]
 				end
@@ -85,5 +79,29 @@ class Config_Parser
 		#p nested_symbols
 		#p buffer, buffer.size
 		return buffer
+	end
+	def create_buffer
+		buffer = []
+		buffer.instance_variable_set(:@buffer_len, 0)
+		def buffer.<<(other)
+			super(other)
+			@buffer_len += 1
+		end
+		def buffer.size
+			return @buffer_len
+		end
+		return buffer
+	end
+	def extract_escape_symbol(input)
+		return input.gsub(/\\(?:\\|n|r|t|"|')/){|t| #處理config中跳脫字元
+			case t
+			when '\r'   ; "\r"
+			when '\n'   ; "\n"
+			when '\t'   ; "\t"
+			when "\\\\" ; "\\"
+			when "\\\"" ; "\""
+			when "\\\'" ; "\'"
+			end
+		}
 	end
 end

@@ -11,7 +11,7 @@
 
 (X) #if語句支援比對   Date 欄位
 (O) #if語句支援比對 String 欄位
-(X) #if語句支援比對    Int 欄位
+(O) #if語句支援比對    Int 欄位
 (X) #if語句支援比對   IPv4 欄位
 (O) 複雜的#if語句 //EX: #if (a == 1 && b == 2 || c == 3 && d == 3)
 (O) if語法支援用"and","or"分別代表"&&","||"。
@@ -23,11 +23,13 @@
 (O) 單行註解 //comment
 (X) 多行註解 /*comments*/
 
-(X) 連結ruby與C
+(O) 連結ruby與C
 
 //----------------------
 //  Formatter:
 //----------------------
+
+(O) 支援String[\n] //注意windows中\r\n的問題
 
 (O) 偵測Int overflow
 (X) 處理Int overflow

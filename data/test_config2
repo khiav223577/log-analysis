@@ -19,5 +19,9 @@ String[ ] Type
 	String[~] Serial2
 	String[ ] Serial3
 #end
+#if Type != "str1\"str2"
+#else
+#end
+
 String[,] Serial4
 String[,] Serial5

@@ -10,7 +10,7 @@ public:
 		virtual char *trans_format(const char *_format)=0;
 	};
 	char *format;
-    virtual int execute(const char ** inputStream)=0;
+    virtual int execute(const char ** inputStream)=0; //回傳要skip掉的指令數
     FormatterController(const char *_format, VirtualCreator *v){
         format = v->trans_format(_format);
         delete v;
@@ -20,6 +20,10 @@ public:
     }
     virtual char *get_prev_result(){ //Will be called by FormatterIFStatement.
         printf("Error: fails to get_prev_result()");
+        exit(1);
+    }
+    virtual int get_prev_int(){
+        printf("Error: fails to get_prev_int()");
         exit(1);
     }
 };

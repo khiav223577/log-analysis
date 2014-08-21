@@ -27,7 +27,7 @@ public:
 //--------------------------------------
     void execute(const char *_input){
         inputStream = _input;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(&inputStream);
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(&inputStream); //execute回傳要skip掉的指令數
     }
 };
 #include "ConfigRubyInterface.cpp"
@@ -42,11 +42,10 @@ FILE *fopen2(const char *filename, const char *mode){
 
 #include "testing.cpp"
 int main(){
-
     ConfigRubyInterface ruby_interface;
-    InputFormatter *formatter = ruby_interface.CreateFormatter("test_config2");
+    InputFormatter *formatter = ruby_interface.CreateFormatter("data/test_config2");
     char buffer[MAX_LOG_SIZE];
-    FILE *file = fopen2("test_input2","r");
+    FILE *file = fopen2("data/test_input2","r");
     int i = 0;
     while(fgets(buffer, MAX_LOG_SIZE, file) != NULL){
         printf("%02d: ", ++i);

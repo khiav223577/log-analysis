@@ -10,11 +10,10 @@
 class FormatterDate : public FormatterController{
 public:
     typedef FormatterController super;
+//-------------------------------------------------------------------------
+//  transform config-format to appropriate format. (for speed up)
+//-------------------------------------------------------------------------
     class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
-	public:
-    //--------------------------------------
-    //  transform config-format to appropriate format. (for speed up)
-    //--------------------------------------
         char *trans_format(const char *_format){
             char *format = (char *) malloc((strlen(_format) + 1) * sizeof(char));
             strcpy(format, _format);
