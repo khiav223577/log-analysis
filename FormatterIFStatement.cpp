@@ -33,6 +33,8 @@ public:
         skip = 0;
         boolOperator = op;
         compareTarget = _target;
+        lExpr = NULL;
+        rExpr = NULL;
     }
     //-------------------------------------------------------------------------
     //  result == lExpr && rExpr  /  result == lExpr || rExpr
@@ -41,6 +43,7 @@ public:
         if (op != '&' && op != '|') Perror(op);
         skip = 0;
         boolOperator = op;
+        compareTarget = NULL;
         lExpr = _lExpr;
         rExpr = _rExpr;
     }
@@ -79,6 +82,7 @@ public:
         if (boolOperator == 'T') return (strcmp(format, prev_result) == 0);
         if (boolOperator == 'F') return (strcmp(format, prev_result) != 0);
         Perror(boolOperator);
+        return false;
     }
 };
 

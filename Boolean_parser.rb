@@ -1,18 +1,27 @@
 class Boolean_parser
+#---------------------------------
+#  parse statement
+#---------------------------------
 	#match string: "(?:\\"|[^"])*"
 	@@regular_expr = /\s*(?:(\|\||or)|(&&|and)|\((.*)\)|(\w+)\s*(==|!=)\s*"((?:\\"|[^"])*)"|\S+)/
 	def parse(input)
 		@postfix_buffer = []
 		output_expr(input)
-		return @postfix_buffer
 		#return build_parsing_tree #debug
+		return @postfix_buffer
 	end
+#---------------------------------
+#  Operator Precedence
+#---------------------------------
 	def output_op(op)
 		case op
-		when 1 ; @postfix_buffer << "|" #or
-		when 2 ; @postfix_buffer << "&" #and	
+		when 1 ; @postfix_buffer << "|".ord #or
+		when 2 ; @postfix_buffer << "&".ord #and	
 		end
 	end
+#---------------------------------
+#  recursive
+#---------------------------------
 	def output_expr(input)
 		op_buffer = [0]
 		input.gsub(@@regular_expr){|s| 
@@ -31,6 +40,9 @@ class Boolean_parser
 		op_buffer.reverse_each{|op| output_op(op) }
 		return @postfix_buffer
 	end
+#---------------------------------
+#  Build tree from postfix
+#---------------------------------
 	def build_parsing_tree
 		buffer = [] #[[op, rExpr, lExpr], ...]
 		@postfix_buffer.each{|s| buffer << (s.class == Array ? s : [s, buffer.pop, buffer.pop]) }

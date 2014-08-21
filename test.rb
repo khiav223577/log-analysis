@@ -22,6 +22,14 @@ if !$IN_C_CODE
 			String[,] string2
 		#end
 	}
+	a = %{
+		String[ ] Action
+		#if Action == "allow" or (Action == "deny" and Action == "deny")
+			Int[10] string1
+		#elsif Action == "alert"
+			String[,] string1
+		#end
+	}
 	$config = Config_Parser.new
 	$config.parse(a)
 	
@@ -29,7 +37,7 @@ if !$IN_C_CODE
 end
 $config = Config_Parser.new
 def read_config(config_path)
-	$result_buffer = $config.parse_file(config_path)
+	$result_buffer = $config.parse(IO.read(config_path))
 end
 $hash = {}
 def register_hash(string, value)
