@@ -10,9 +10,31 @@ inline std::string FUNCNAME(const char *inputStream){\
     char buffer[BUFFERLEN + 1];\
     while(*inputStream != '\0'){\
         int flag = sscanf(inputStream, "%" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
-        if (buffer == 0 || flag == 0) break;\
+        if (scanfLen == 0 || flag == 0) break;\
         if (0) printf("\"%s\" %d %d\n",buffer,scanfLen, flag);\
         inputStream += scanfLen;\
+        output += buffer;\
+    }\
+    return output;\
+}\
+inline std::string FUNCNAME(FILE *file){\
+    std::string output("");\
+    int scanfLen;\
+    char buffer[BUFFERLEN + 1];\
+    while(1){\
+        int flag = fscanf(file, "%" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
+        if (scanfLen == 0 || flag == 0) break;\
+        output += buffer;\
+    }\
+    return output;\
+}\
+inline std::string FUNCNAME(){\
+    std::string output("");\
+    int scanfLen;\
+    char buffer[BUFFERLEN + 1];\
+    while(1){\
+        int flag = scanf("%" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
+        if (scanfLen == 0 || flag == 0) break;\
         output += buffer;\
     }\
     return output;\

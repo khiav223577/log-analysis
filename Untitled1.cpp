@@ -11,23 +11,23 @@
 RubyInterpreter *ruby;
 ConfigInterfaceIN1 *ruby_interface;
 InputFormatter *formatter;
-inline void first_pass(const char *input_path, const char *output_path, const char *config_path){
+inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     OutputManager *outputer = new OutputManager(output_path);
     FILE *file1 = fopen2(input_path,"r");
     int i = 0;
     char buffer[MAX_LOG_SIZE];
-    while(fgets(buffer, MAX_LOG_SIZE, file1) != NULL){
+    while(fgets(buffer, sizeof(buffer), file1) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
         printf("%02d: ", ++i);
         formatter->execute1(outputer, buffer);
         puts("");
     }
-    ruby_interface->save_config1(config_path);
+    ruby_interface->save_config1(output_config);
     fclose(file1);
     delete outputer;
 }
-inline void second_pass(const char *input_path, const char *output_path, const char *config_path){
-
+inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
+    ruby_interface->load_config1(input_config);
 }
 int main(int argc, char **argv){
 
@@ -44,32 +44,37 @@ int main(int argc, char **argv){
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath);
-        char *input_path  = (char *) malloc(sizeof(char) * strlen( InputPath) + 1 + 0);
-        char *output_path = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
-        char *config_path = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
-        sprintf( input_path, "%s"        ,  InputPath);
-        sprintf(output_path, "%s.temp1"  , OutputPath);
-        sprintf(config_path, "%s.config1", OutputPath);
-        first_pass(input_path, output_path, config_path);
+        char *input_path    = (char *) malloc(sizeof(char) * strlen( InputPath) + 1 + 0);
+        char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
+        char *input_config  = NULL;
+        char *output_config = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
+        sprintf( input_path  , "%s"        ,  InputPath);
+        sprintf(output_path  , "%s.temp1"  , OutputPath);
+        sprintf(output_config, "%s.config1", OutputPath);
+        first_pass(input_path, output_path, input_config, output_config);
         free( input_path);
         free(output_path);
-        free(config_path);
+        free(input_config);
+        free(output_config);
         delete formatter;
         delete ruby_interface;
     }
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath);
-        char *input_path  = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
-        char *output_path = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
-        char *config_path = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
-        sprintf(input_path , "%s.temp1"  , OutputPath);
-        sprintf(output_path, "%s.temp2"  , OutputPath);
-        sprintf(config_path, "%s.config2", OutputPath);
-        second_pass(input_path, output_path, config_path);
+        char *input_path    = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
+        char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
+        char *input_config  = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
+        char *output_config = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
+        sprintf(input_path   , "%s.temp1"  , OutputPath);
+        sprintf(output_path  , "%s.temp2"  , OutputPath);
+        sprintf(input_config , "%s.config1", OutputPath);
+        sprintf(output_config, "%s.config2", OutputPath);
+        second_pass(input_path, output_path, input_config, output_config);
         free( input_path);
         free(output_path);
-        free(config_path);
+        free(input_config);
+        free(output_config);
         delete formatter;
         delete ruby_interface;
     }

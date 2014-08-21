@@ -16,7 +16,7 @@
 #include <ruby.h> // it defines F_OK
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename,mode);
-    PERROR(f == NULL, printf("Cannot open %s.",filename); );
+    PERROR(f == NULL, printf("Cannot open %s",filename); );
     return f;
 }
 bool file_exists(const char *filename){
