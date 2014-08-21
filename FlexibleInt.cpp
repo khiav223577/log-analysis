@@ -51,6 +51,7 @@ public:
     inline bool            isBigInt() const { return bigInt_flag;         }
     inline BigInteger*  getValuePtr() const { return inner_data.valuePtr; }
     inline int             getValue() const { return inner_data.value;    }
+    inline std::string getValuePtrAsStr() const { return bigIntegerToString(*inner_data.valuePtr); }
 
     inline void output() const{
         std::cout << GETVALUE(*this) << " ";

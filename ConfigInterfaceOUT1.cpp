@@ -1,6 +1,5 @@
 
 
-
 #ifndef ___ConfigInterfaceOUT1_cpp__
 #define ___ConfigInterfaceOUT1_cpp__
     inline void FormatterDate::output_config1(FILE *file){
@@ -12,7 +11,12 @@
         fprintf(file, "IF\n");
     };
     inline void FormatterInteger::output_config1(FILE *file){
-        fprintf(file, "Int %d %d\n", record_min.getValue(), record_max.getValue()); //TODO output BigInt
+        if (BigIntFlagAt == -1){ //Int
+            fprintf(file, "Int %d %d\n", record_min.getValue(), record_max.getValue());
+        }else{  //BigInt
+            fprintf(file, "BigInt %d %s %s\n", BigIntFlagAt, record_min.getValuePtrAsStr().c_str(), record_max.getValuePtrAsStr().c_str());
+        }
+
     };
     inline void FormatterIPaddr::output_config1(FILE *file){
         fprintf(file, "IPv4\n");

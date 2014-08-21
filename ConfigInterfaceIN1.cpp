@@ -11,15 +11,18 @@
 class ConfigInterfaceIN1{
 private:
     FormatList global_formatList;
+    RubyInterpreter *ruby;
 public:
+    ConfigInterfaceIN1(RubyInterpreter *_ruby) : ruby(_ruby){
+    }
 //-------------------------------------------------------------------------
 //  CreateFormatter
 //-------------------------------------------------------------------------
     InputFormatter* CreateFormatters(const char *filename){
         InputFormatter *formatter = new InputFormatter();
-        RubyInterpreter ruby;
-        ruby.execute_code("$IN_C_CODE = true");
-        ruby.execute_file("./test.rb");
+
+        ruby->execute_code("$IN_C_CODE = true");
+        ruby->execute_file("./test.rb");
 
         rb_eval_string("register_hash(['INVALID', 'Date', 'String', 'Int', 'IPv4', 'DROP', '#DEBUG', '#if', '#elsif', '#else', '#end', 'EXIT_BLOCK'])");
         rb_funcall(rb_gv_get("$!"), rb_intern("read_config"),  1, rb_str_new2(filename));
@@ -82,13 +85,10 @@ public:
     FormatterIFStatement* parse_bool_statement(VALUE format){ //format = [[XXX],[XXX],OP,...] #postfix
         long len = RARRAY_LEN(format);
         FormatStack *stack = NULL;
-//puts("=================================");
-//printf("%d",(int)len);
         for (int i = 0; i < len; ++i){
             VALUE element = rb_ary_entry(format,i);
             switch (TYPE(element)) {
             case T_FIXNUM:{ //element = '|' or '&'
-//printf("[%c]\n",FIX2INT(element));
                 FormatterIFStatement *rExpr = FormatStack::pop(&stack);
                 FormatterIFStatement *lExpr = FormatStack::pop(&stack);
                 FormatStack::push(&stack, new FormatterIF_CmpIF(FIX2INT(element), rExpr, lExpr));
@@ -113,16 +113,13 @@ public:
         }
         FormatterIFStatement *result = FormatStack::pop(&stack);
         FormatStack::clear(&stack);
-//puts("=================================");
         return result;
     }
 //-------------------------------------------------------------------------
 //  config
 //-------------------------------------------------------------------------
     void output_config(const char *filename){
-        char *nfilename = (char *) malloc(sizeof(char) * strlen(filename) + 1 + 7);
-        sprintf(nfilename, "%s.config", filename);
-        FILE *file = fopen2(nfilename, "w");
+        FILE *file = fopen2(filename, "w");
         int size = global_formatList.size();
         for(int i = 0; i < size; ++i) global_formatList[i]->output_config1(file);
         fclose(file);

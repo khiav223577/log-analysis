@@ -4,15 +4,23 @@
 #define OUTPUT_MANAGER_BUFFER_SIZE 256
 #define SIZE_OF_UINT sizeof(unsigned int)
 //DATA >>= (SIZE_OF_UINT << 3); will trigger compiler warning....
-#define CHECK_AND_WRITE_BLOCK(DATA, INDEX) if (sizeof(DATA) > (INDEX * SIZE_OF_UINT)){ write((unsigned int) DATA); DATA >>= (SIZE_OF_UINT << 2); DATA >>= (SIZE_OF_UINT << 2);}
+#define CHECK_AND_WRITE_BLOCK(DATA, INDEX) \
+    if (sizeof(DATA) > (INDEX * SIZE_OF_UINT)){ \
+        write((unsigned int) DATA); \
+        DATA >>= (SIZE_OF_UINT << 2);\
+        DATA >>= (SIZE_OF_UINT << 2);\
+    }
 #include<stdio.h>
 #include<stdlib.h>
 #include "FlexibleInt.cpp"
-
+#include <ruby.h> // it defines F_OK
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename,mode);
     PERROR(f == NULL, printf("Cannot open %s.",filename); );
     return f;
+}
+bool file_exists(const char *filename){
+    return (access(filename, F_OK) != -1);
 }
 
 class OutputManager{
@@ -48,7 +56,7 @@ public:
     }
     inline void write(unsigned long data){
         CHECK_AND_WRITE_BLOCK(data, 0);
-        CHECK_AND_WRITE_BLOCK(data, 1); //for compatibility
+        CHECK_AND_WRITE_BLOCK(data, 1); //for the compatibility when "long" is not 4-bytes.
         CHECK_AND_WRITE_BLOCK(data, 2);
         CHECK_AND_WRITE_BLOCK(data, 3);
         CHECK_AND_WRITE_BLOCK(data, 4);

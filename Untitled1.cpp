@@ -1,10 +1,5 @@
 
 #include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<ctype.h>
-#include<time.h>
-#include<vector>
 #include<iostream>
 #include "windows.cpp"
 
@@ -34,49 +29,12 @@ public:
 #include "FlexibleInt.cpp"
 
 #define MAX_LOG_SIZE 8192
-int main(){
-    /*
-    PERROR(1 == 1, printf("read BigInt fail, format = %s, input = %s", "000", ":???"););
-    return 0;
-    std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
-    return 0;
-    int a1;
-    scanf("%x", &a1);
-    printf("%d",a1);
-
-    return 0;
-    std::string s = "TT";
-    char test1[] = "12345";
-    char test2[] = "ABCDE";
-    s += test1;
-    s += test2;
-    std::cout << s;
-
-    return 0;*/
-    /*
-    if (1 >= BigInteger(1)){ return 1;}
-
-    FlexibleInt a(new BigInteger(1)), b(new BigInteger(3));
-    a = b + b + FlexibleInt(new BigInteger(12));
-    Sleep(500);
-    printf("!");
-
-    FlexibleInt c(new BigInteger(100)), d(new BigInteger(300));
-    FlexibleInt e = c + d;
-    Sleep(500);
-    printf("!");
-
-    FlexibleInt f = FlexibleInt(new BigInteger(2000));
-    Sleep(500);
-    printf("!");
-    return 0;*/
-    const char *ConfigPath = "data/test_config2";
-    const char *InputPath  = "data/test_input2";
-    const char *OutputPath = "data/test_output2";
-    ConfigInterfaceIN1 *ruby_interface = new ConfigInterfaceIN1();
-    InputFormatter *formatter = ruby_interface->CreateFormatters(ConfigPath);
-    OutputManager *outputer = new OutputManager(OutputPath);
-    FILE *file1 = fopen2(InputPath,"r");
+RubyInterpreter *ruby;
+ConfigInterfaceIN1 *ruby_interface;
+InputFormatter *formatter;
+inline void first_pass(const char *input_path, const char *output_path, const char *config_path){
+    OutputManager *outputer = new OutputManager(output_path);
+    FILE *file1 = fopen2(input_path,"r");
     int i = 0;
     char buffer[MAX_LOG_SIZE];
     while(fgets(buffer, MAX_LOG_SIZE, file1) != NULL){
@@ -85,11 +43,58 @@ int main(){
         formatter->execute1(outputer, buffer);
         puts("");
     }
-    ruby_interface->output_config(OutputPath);
+    ruby_interface->output_config(config_path);
     fclose(file1);
     delete outputer;
-    delete formatter;
-    delete ruby_interface;
+}
+inline void second_pass(const char *input_path, const char *output_path, const char *config_path){
+
+}
+int main(int argc, char **argv){
+
+    /*
+    PERROR(1 == 1, printf("read BigInt fail, format = %s, input = %s", "000", ":???"););
+    return 0;
+    std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
+    return 0;
+    */
+    const char *ConfigPath = "data/test_config2";
+    const char *InputPath  = "data/test_input2";
+    const char *OutputPath = "data/test_output2";
+    ruby = new RubyInterpreter();
+
+    {
+        ruby_interface = new ConfigInterfaceIN1(ruby);
+        formatter = ruby_interface->CreateFormatters(ConfigPath);
+        char *input_path  = (char *) malloc(sizeof(char) * strlen( InputPath) + 1 + 0);
+        char *output_path = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
+        char *config_path = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
+        sprintf( input_path, "%s"        ,  InputPath);
+        sprintf(output_path, "%s.temp1"  , OutputPath);
+        sprintf(config_path, "%s.config1", OutputPath);
+        first_pass(input_path, output_path, config_path);
+        free( input_path);
+        free(output_path);
+        free(config_path);
+        delete formatter;
+        delete ruby_interface;
+    }
+    {
+        ruby_interface = new ConfigInterfaceIN1(ruby);
+        formatter = ruby_interface->CreateFormatters(ConfigPath);
+        char *input_path  = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
+        char *output_path = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
+        char *config_path = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
+        sprintf(input_path , "%s.temp1"  , OutputPath);
+        sprintf(output_path, "%s.temp2"  , OutputPath);
+        sprintf(config_path, "%s.config2", OutputPath);
+        second_pass(input_path, output_path, config_path);
+        free( input_path);
+        free(output_path);
+        free(config_path);
+        delete formatter;
+        delete ruby_interface;
+    }
 
     //test_InputFormatter();
     //test_FormatterDate();
