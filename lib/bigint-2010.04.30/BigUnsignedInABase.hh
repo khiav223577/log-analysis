@@ -46,7 +46,7 @@ protected:
 
 	// Decreases len to eliminate any leading zero digits.
 	void zapLeadingZeros() {
-		while (curr_len > 0 && blk[curr_len - 1] == 0) curr_len -= 1;
+		while (curr_len > 0 && buffer[curr_len - 1] == 0) curr_len -= 1;
 	}
 
 public:
@@ -104,7 +104,7 @@ public:
 
 	/* Returns the requested digit, or 0 if it is beyond the length (as if
 	 * the number had 0s infinitely to the left). */
-	Digit getDigit(unsigned int i) const { return i >= curr_len ? 0 : blk[i]; }
+	Digit getDigit(unsigned int i) const { return i >= curr_len ? 0 : buffer[i]; }
 
 	// The number is zero if and only if the canonical length is zero.
 	bool isZero() const { return NumberlikeArray<Digit>::isEmpty(); }

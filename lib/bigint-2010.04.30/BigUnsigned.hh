@@ -27,7 +27,7 @@ protected:
 
 	// Decreases len to eliminate any leading zero blocks.
 	void zapLeadingZeros() {
-		while (curr_len > 0 && blk[curr_len - 1] == 0) --curr_len;
+		while (curr_len > 0 && buffer[curr_len - 1] == 0) --curr_len;
 	}
 
 public:
@@ -87,7 +87,7 @@ public:
 
 	/* Returns the requested block, or 0 if it is beyond the length (as if
 	 * the number had 0s infinitely to the left). */
-	Blk getBlock(unsigned int i) const { return i >= curr_len ? 0 : blk[i]; }
+	Blk getBlock(unsigned int i) const { return i >= curr_len ? 0 : buffer[i]; }
 	/* Sets the requested block.  The number grows or shrinks as necessary. */
 	void setBlock(unsigned int i, Blk newBlock);
 
@@ -356,9 +356,9 @@ void BigUnsigned::initFromPrimitive(X x) {
 	else {
 		// Create a single block.  blk is NULL; no need to delete it.
 		capacity = 1;
-		blk = new Blk[1];
+		buffer = new Blk[1];
 		curr_len = 1;
-		blk[0] = Blk(x);
+		buffer[0] = Blk(x);
 	}
 }
 
@@ -387,9 +387,9 @@ X BigUnsigned::convertToPrimitive() const {
 		return 0;
 	else if (curr_len == 1) {
 		// The single block might fit in an X.  Try the conversion.
-		X x = X(blk[0]);
+		X x = X(buffer[0]);
 		// Make sure the result accurately represents the block.
-		if (Blk(x) == blk[0])
+		if (Blk(x) == buffer[0])
 			// Successful conversion.
 			return x;
 		// Otherwise fall through.

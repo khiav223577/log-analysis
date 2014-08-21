@@ -35,10 +35,10 @@ public:
 
 #define MAX_LOG_SIZE 8192
 int main(){
-    /*
-    PERROR(1 == 1, printf("read BigInt fail, format = %s, input = %s", "000", ":???"););
-    return 0;
-    std::cout << BigInteger(BigUnsignedInABase("01Aa", 16));
+
+    //PERROR(1 == 1, printf("read BigInt fail, format = %s, input = %s", "000", ":???"););
+    //return 0;
+    std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
     return 0;
     int a1;
     scanf("%x", &a1);
@@ -52,7 +52,7 @@ int main(){
     s += test2;
     std::cout << s;
 
-    return 0;*/
+    return 0;
     /*
     if (1 >= BigInteger(1)){ return 1;}
 

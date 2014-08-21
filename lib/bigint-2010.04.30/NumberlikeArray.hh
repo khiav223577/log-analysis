@@ -22,7 +22,7 @@ template <typename XXXXX> class NumberlikeArray {
 protected:
 	unsigned int capacity; // The current allocated capacity of this NumberlikeArray (in blocks)
 	unsigned int curr_len; // The actual length of the value stored in this NumberlikeArray (in blocks)
-	XXXXX *blk;
+	XXXXX *buffer;
 public:
 	// The number of bits in a block, defined below.
 	static const unsigned int N = 8 * sizeof(XXXXX);
@@ -32,47 +32,47 @@ public:
 	// Heap-allocated array of the blocks (can be NULL if curr_len == 0)
 	// Constructs a ``zero'' NumberlikeArray with the given capacity.
 	NumberlikeArray(unsigned int c) : capacity(c), curr_len(0){
-		blk = (capacity > 0) ? (new XXXXX[capacity]) : NULL;
+		buffer = (capacity > 0) ? (new XXXXX[capacity]) : NULL;
 	}
 	/* Constructs a zero NumberlikeArray without allocating a backing array.
 	 * A subclass that doesn't know the needed capacity at initialization
-	 * time can use this constructor and then overwrite blk without first
+	 * time can use this constructor and then overwrite buffer without first
 	 * deleting it. */
 	NumberlikeArray() : capacity(0), curr_len(0) {
-		blk = NULL;
+		buffer = NULL;
 	}
 	// Copy constructor
 	NumberlikeArray(const NumberlikeArray<XXXXX> &x) : capacity(x.curr_len), curr_len(x.curr_len){
-        blk = new XXXXX[capacity];
-        memcpy(blk, x.blk, sizeof(XXXXX) * curr_len);
+        buffer = new XXXXX[capacity];
+        memcpy(buffer, x.buffer, sizeof(XXXXX) * curr_len);
 	}
 	// Constructor that copies from a given array of blocks
 	NumberlikeArray(const XXXXX *b, unsigned int blen) : capacity(blen), curr_len(blen){
-        blk = new XXXXX[capacity]; // Create array
-        memcpy(blk, b, sizeof(XXXXX) * curr_len);
+        buffer = new XXXXX[capacity]; // Create array
+        memcpy(buffer, b, sizeof(XXXXX) * curr_len);
     }
 	~NumberlikeArray(){
-		delete [] blk;
+		delete [] buffer;
 	}
 //-------------------------------------------------------------------------
 //  Functions
 //-------------------------------------------------------------------------
 	/* Ensures that the array has at least the requested capacity; may destroy the contents. */
     inline void allocate(unsigned int c){
-        if (c <= capacity) return; // If the requested capacity is not more than the current capacity...
-        delete [] blk;             // Delete the old number array
+        if (c <= capacity) return;     // If the requested capacity is not more than the current capacity...
+        delete [] buffer;             // Delete the old number array
         capacity = c;
-        blk = new XXXXX[capacity]; // Allocate the new array
+        buffer = new XXXXX[capacity]; // Allocate the new array
     }
 
 	/* Ensures that the array has at least the requested capacity; does not destroy the contents. */
     inline void allocateAndCopy(unsigned int c){
-        if (c <= capacity) return; // If the requested capacity is not more than the current capacity...
-        XXXXX *oldBlk = blk;
+        if (c <= capacity) return;    // If the requested capacity is not more than the current capacity...
+        XXXXX *oldBlk = buffer;
         capacity = c;
-        blk = new XXXXX[capacity]; // Allocate the new array
-        memcpy(blk, oldBlk, sizeof(XXXXX) * curr_len);
-        delete [] oldBlk;          // Delete the old number array
+        buffer = new XXXXX[capacity]; // Allocate the new array
+        memcpy(buffer, oldBlk, sizeof(XXXXX) * curr_len);
+        delete [] oldBlk;             // Delete the old number array
     }
 //-------------------------------------------------------------------------
 //  Operator
@@ -84,7 +84,7 @@ public:
         if (this == &x) return;
         curr_len = x.curr_len;  // Copy length
         allocate(curr_len);     // Expand array if necessary
-        memcpy(blk, x.blk, sizeof(XXXXX) * curr_len);
+        memcpy(buffer, x.buffer, sizeof(XXXXX) * curr_len);
 	}
 	/* Equality comparison: checks if both objects have the same length and
 	 * equal (==) array elements to that length.  Subclasses may wish to
@@ -92,7 +92,7 @@ public:
 	inline bool operator ==(const NumberlikeArray<XXXXX> &x) const{
         if (curr_len != x.curr_len) return false; // Definitely unequal.
         unsigned int i;
-        for (i = 0; i < curr_len; i++) if (blk[i] != x.blk[i]) return false; // Compare corresponding blocks one by one.
+        for (i = 0; i < curr_len; i++) if (buffer[i] != x.buffer[i]) return false; // Compare corresponding blocks one by one.
 		return true; // No blocks differed, so the objects are equal.
 	}
 
@@ -104,7 +104,7 @@ public:
 //-------------------------------------------------------------------------
 	inline unsigned int getCapacity()     const { return capacity;      }
 	inline unsigned int getLength()       const { return curr_len;      }
-	inline XXXXX getBlock(unsigned int i) const { return blk[i];        }
+	inline XXXXX getBlock(unsigned int i) const { return buffer[i];        }
 	inline bool  isEmpty()                const { return curr_len == 0; }
 };
 

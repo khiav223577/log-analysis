@@ -11,7 +11,7 @@ BigUnsignedInABase::BigUnsignedInABase(const Digit *d, unsigned int l, Base base
 
 	// Validate the digits.
 	for (unsigned int i = 0; i < l; i++)
-		if (blk[i] >= base)
+		if (buffer[i] >= base)
 			throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, unsigned int, Base): A digit is too large for the specified base";
 
 	// Eliminate any leading zeros we may have been passed.
@@ -53,7 +53,7 @@ BigUnsignedInABase::BigUnsignedInABase(const BigUnsigned &x, Base base) {
 		BigUnsigned lastDigit(x2);
 		lastDigit.divideWithRemainder(buBase, x2);
 		// Save the digit.
-		blk[digitNum] = lastDigit.toUnsignedShort();
+		buffer[digitNum] = lastDigit.toUnsignedShort();
 		// Move on.  We can't run out of room: we figured it out above.
 		digitNum++;
 	}
@@ -68,7 +68,7 @@ BigUnsignedInABase::operator BigUnsigned() const {
 	while (digitNum > 0) {
 		digitNum--;
 		temp.multiply(ans, buBase);
-		ans.add(temp, BigUnsigned(blk[digitNum]));
+		ans.add(temp, BigUnsigned(buffer[digitNum]));
 	}
 	return ans;
 }
@@ -91,15 +91,15 @@ BigUnsignedInABase::BigUnsignedInABase(const std::string &s, Base base) {
 		symbolNumInString = curr_len - 1 - digitNum;
 		char theSymbol = s[symbolNumInString];
 		if (theSymbol >= '0' && theSymbol <= '9')
-			blk[digitNum] = theSymbol - '0';
+			buffer[digitNum] = theSymbol - '0';
 		else if (theSymbol >= 'A' && theSymbol <= 'Z')
-			blk[digitNum] = theSymbol - 'A' + 10;
+			buffer[digitNum] = theSymbol - 'A' + 10;
 		else if (theSymbol >= 'a' && theSymbol <= 'z')
-			blk[digitNum] = theSymbol - 'a' + 10;
+			buffer[digitNum] = theSymbol - 'a' + 10;
 		else
 			throw "BigUnsignedInABase(std::string, Base): Bad symbol in input.  Only 0-9, A-Z, a-z are accepted.";
 
-		if (blk[digitNum] >= base)
+		if (buffer[digitNum] >= base)
 			throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, unsigned int, Base): A digit is too large for the specified base";
 	}
 	zapLeadingZeros();
@@ -116,7 +116,7 @@ BigUnsignedInABase::operator std::string() const {
 	unsigned int digitNum, symbolNumInString;
 	for (symbolNumInString = 0; symbolNumInString < curr_len; symbolNumInString++) {
 		digitNum = curr_len - 1 - symbolNumInString;
-		Digit theDigit = blk[digitNum];
+		Digit theDigit = buffer[digitNum];
 		if (theDigit < 10)
 			s[symbolNumInString] = char('0' + theDigit);
 		else
