@@ -28,14 +28,19 @@ public:
 //--------------------------------------
     int execute1(OutputManager *outputer, const char **inputStream){
         unsigned int result = retrieve(inputStream, format);
-        printf("%d.%d.%d.%d ",(result >> 24) & 255,(result >> 16) & 255,(result >> 8) & 255,(result >> 0) & 255);
         outputer->write((int) result);
+        debug(result);
         return 0;
     }
     int execute2(InputManager *inputer){
         unsigned int result = (unsigned int) inputer->read_int();
-        printf("%d.%d.%d.%d ",(result >> 24) & 255,(result >> 16) & 255,(result >> 8) & 255,(result >> 0) & 255);
+        debug(result);
         return 0;
+    }
+    inline void debug(int result){
+        #ifdef DEBUG
+            printf("%d.%d.%d.%d ",(result >> 24) & 255,(result >> 16) & 255,(result >> 8) & 255,(result >> 0) & 255);
+        #endif
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.

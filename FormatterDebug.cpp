@@ -27,12 +27,17 @@ public:
 //  execute
 //--------------------------------------
     int execute1(OutputManager *outputer, const char **inputStream){
-        printf("%s", format);
+        debug();
         return 0;
     }
     int execute2(InputManager *inputer){
-        printf("%s", format);
+        debug();
         return 0;
+    }
+    inline void debug(){
+        #ifdef DEBUG
+            printf("%s", format);
+        #endif
     }
 };
 

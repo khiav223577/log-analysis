@@ -57,7 +57,6 @@ public:
             else BigIntFlagAt = execute1Counter;
         }
         if (BigIntFlagAt != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
-        SetColor2(); prev_int.output(); SetColor(7);//DEBUG
         if (initialized){
             if (prev_int < record_min) record_min = prev_int;
             if (prev_int > record_max) record_max = prev_int;
@@ -68,14 +67,20 @@ public:
         }
         outputer->write(prev_int);
         execute1Counter += 1;
+        debug();
         return 0;
     }
     int execute2(InputManager *inputer){
         bool is_BigInt = (BigIntFlagAt != -1 && execute1Counter >= BigIntFlagAt);
         prev_int = (is_BigInt ? FlexibleInt(inputer->read_bigInt()) : FlexibleInt(inputer->read_int()));
-        SetColor2(); prev_int.output(); SetColor(7);//DEBUG
         execute1Counter += 1;
+        debug();
         return 0;
+    }
+    inline void debug(){
+        #ifdef DEBUG
+            SetColor2(); prev_int.output(); SetColor(7);
+        #endif
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.

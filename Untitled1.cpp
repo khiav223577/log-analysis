@@ -1,4 +1,4 @@
-
+#define DEBUG1
 #include<stdio.h>
 #include<iostream>
 #include "windows.cpp"
@@ -18,9 +18,12 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
     char buffer[MAX_LOG_SIZE];
     while(fgets(buffer, sizeof(buffer), file) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
-        printf("%02d: ", ++line_count);
+        line_count += 1;
+        //printf("%02d: ", line_count);
         formatter->execute1(outputer, buffer);
-        puts("");
+        //puts("");
+        if (line_count % 1000 == 0) printf("%03dk\n", line_count / 1000);
+        //if (line_count == 3) break;
     }
     ruby_interface->save_config1(line_count, output_config);
     fclose(file);
@@ -29,11 +32,13 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
 inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     InputManager *inputer = new InputManager(input_path);
     int line_count = ruby_interface->load_config1(input_config);
-    for(int i = 0; i < line_count; ++i){
-        printf("%02d: ", i);
+    for(int i = 1; i <= line_count; ++i){
+        //printf("%02d: ", i);
         formatter->execute2(inputer);
-        puts("");
+        //puts("");
+        if (i % 1000 == 0) printf("%03dk\n", i / 1000);
     }
+    printf("~~~~~~~~~~~~~~");
     delete inputer;
 }
 int main(int argc, char **argv){
@@ -45,12 +50,13 @@ int main(int argc, char **argv){
     return 0;
     */
     const char *ConfigPath = "data/input.config";
-    const char *InputPath  = "data/input_min";
+    const char *InputPath  = "data/input_large";
     const char *OutputPath = "data/output_min";
     ruby = new RubyInterpreter();
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath);
+        //return 0;
         char *input_path    = (char *) malloc(sizeof(char) * strlen( InputPath) + 1 + 0);
         char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
         char *input_config  = NULL;

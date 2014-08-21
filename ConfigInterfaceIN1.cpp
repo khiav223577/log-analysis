@@ -69,6 +69,7 @@ public:
             case 10:{  //#end
                 for(IFList::reverse_iterator it = ifList.rbegin(); it != ifList.rend(); ++it) (*it)->skip = skip_base++;
                 ifList.clear(); //elsif, else也都是node，需要被skip。例如(if, elsif, else)的skip量分別為(skip+2, skip+1, skip+0)
+                skip_base = 0;
                 continue;
                 break;}
             case 11:{ //EXIT_BLOCK

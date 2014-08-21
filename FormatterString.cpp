@@ -46,15 +46,19 @@ public:
         char *str = retrieve(inputStream, format);
         prev_result = str;
         outputer->write(compress(str));
-        SetColor2(); printf("[%s] ",prev_result); SetColor(7);//DEBUG
-        //printf("~~~~~~[%s => %d]         ", str, value); //DEBUG
+        debug();
         return 0;
     }
     int execute2(InputManager *inputer){
         unsigned int data = (unsigned int) inputer->read_int();
         prev_result = decompress(data);
-        SetColor2(); printf("[%s] ",prev_result); SetColor(7);//DEBUG
+        debug();
         return 0;
+    }
+    inline void debug(){
+        #ifdef DEBUG
+            SetColor2(); printf("[%s] ",prev_result); SetColor(7);//DEBUG
+        #endif
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.

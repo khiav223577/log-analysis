@@ -8,7 +8,8 @@ class Config_Parser
 		global_symbols      = {}
 		local_symbols       = {:buffer_start => 0} #recode outer symbol hidden by local symbol.
 		nested_symbols      = [local_symbols]
-		buffer              = create_buffer()
+		buffer              = []
+		buffer_item_counter = 0
 		line = nil
 		line_count = 0
 		bparser = Boolean_parser.new
@@ -32,7 +33,7 @@ class Config_Parser
 				@setting_drop_after[$3] = ($2 == "" ? nil : $2)
 			when line =~ /^(#(?:els)?if) \s*(.*)/
 				exit_block.call if $1 == "#elsif" #exit block and get into another block
-				nested_symbols << (local_symbols = {:buffer_start => buffer.size})
+				nested_symbols << (local_symbols = {:buffer_start => buffer_item_counter})
 				imfs = bparser.parse($2)
 				perror.call("Syntax error") and next if imfs == nil
 				imfs.each{|s| #s = ["name", "==", "string"]
@@ -43,9 +44,10 @@ class Config_Parser
 					s[1] = MAP_OPERATOR[s[1]]	#map operator to integer
 				}
 				buffer << [$1, imfs]
+				buffer_item_counter += 1
 			when line =~ /^(#else)/
 				exit_block.call
-				nested_symbols << (local_symbols = {:buffer_start => buffer.size})
+				nested_symbols << (local_symbols = {:buffer_start => buffer_item_counter})
 				buffer << [$1]
 			when line =~ /^(#end)/
 				exit_block.call
@@ -64,13 +66,15 @@ class Config_Parser
 				if $3 != nil
 				    perror.call("Duplicate symbol") and next if local_symbols[$3] != nil
 					local_symbols[$3] = global_symbols[$3]
-					global_symbols[$3] = [buffer.size, local_symbols[:buffer_start]]
+					global_symbols[$3] = [buffer_item_counter, local_symbols[:buffer_start]]
 				end
 				data = [$1,$2.extract_escape_symbol]
 				data << $3 if $3
 				buffer << data #[Type, format, vocabulary, extra]
+				buffer_item_counter += 1
 				if (drop_after = @setting_drop_after[$1])
 					buffer << ["DROP", drop_after]
+					buffer_item_counter += 1
 				end
 			end
 		end
@@ -79,18 +83,6 @@ class Config_Parser
 		#p global_symbols
 		#p nested_symbols
 		#p buffer, buffer.size
-		return buffer
-	end
-	def create_buffer
-		buffer = []
-		buffer.instance_variable_set(:@buffer_len, 0)
-		def buffer.<<(other)
-			super(other)
-			@buffer_len += 1
-		end
-		def buffer.size
-			return @buffer_len
-		end
 		return buffer
 	end
 end

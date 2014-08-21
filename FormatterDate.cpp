@@ -31,14 +31,19 @@ public:
 //--------------------------------------
     int execute1(OutputManager *outputer, const char **inputStream){
         int date = retrieve(inputStream, format);
-        RDate::show(date); //DEBUG
         outputer->write(date);
+        debug(date);
         return 0;
     }
     int execute2(InputManager *inputer){
         int date = inputer->read_int();
-        RDate::show(date); //DEBUG
+        debug(date);
         return 0;
+    }
+    inline void debug(int date){
+        #ifdef DEBUG
+            RDate::show(date);
+        #endif
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
