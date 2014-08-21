@@ -1,48 +1,99 @@
-Date:[MMM d HH:mm:ss ]
-String:[ ]
-Int:[10],
-Date:[yyyy/MM/dd HH:mm:ss],
-String:[,]
-String:[,]
-String:[,]
-Int:[10],
-Date:[yyyy/MM/dd HH:mm:ss],
-IPv4:[.],
-IPv4:[.],
-IPv4:[.],
-IPv4:[.],
-String:[,]
-String:[,]
-String:[,]
-String:[,]
-String:[,]
-String:[,]
-String:[,]
-String:[,]
-String:[,]
-String:[,]
-Date:[yyyy/MM/dd HH:mm:ss],
-Int:[10],
-Int:[10],
-Int:[10],
-Int:[10],
-Int:[10],
-Int:[10],
-Int:[16],
-String:[,]
-String:[,]
-Int:[10],
-Int:[10],
-Int:[10],
-Int:[10],
-Date:[yyyy/MM/dd HH:mm:ss],
-Int:[10],
-String:[,]
-Int:[10],
-Int:[10],
-Int:[16],
-String:[,]
-String:[,]
-Int:[10],
-Int:[10],
-Int:[10],
+#DROP_AFTER[,] Int
+#DROP_AFTER[,] IPv4
+Date[MMM d HH:mm:ss ] time1
+String[ ] string1
+Int[10] Domain
+#DROP[,]
+Date[yyyy/MM/dd HH:mm:ss,] Receive_Time
+String[,] Serial
+String[,] Type
+String[,] Threat_OR_Content_Type
+Int[10] Config_Version
+#DROP[,]
+Date[yyyy/MM/dd HH:mm:ss,] Generate_Time
+IPv4[.] Source_address
+#DROP[,]
+IPv4[.] Destination_address
+#DROP[,]
+IPv4[.] NAT_Source_IP
+#DROP[,]
+IPv4[.] NAT_Destination_IP
+#DROP[,]
+String[,] Rule
+String[,] Source_User
+String[,] Destination_User
+String[,] Application
+String[,] Virtual_System
+String[,] Source_Zone
+String[,] Destination_Zone
+String[,] Inbound_Interface
+String[,] Outbound_Interface
+String[,] Log_Action
+Date[yyyy/MM/dd HH:mm:ss,] Time_Logged
+Int[10] Session_ID
+#DROP[,]
+Int[10] Repeat_Count
+#DROP[,]
+Int[10] Source_Port
+#DROP[,]
+Int[10] Destination_Port
+#DROP[,]
+Int[10] NAT_Source_Port
+#DROP[,]
+Int[10] NAT_Destination_Port
+#DROP[,]
+Int[16] Flags
+#DROP[,]
+String[,] IP_Protocol
+String[,] Action
+
+#if Action == "allow" or Action == "deny"
+	Int[10] Bytes
+	#DROP[,]
+	Int[10] Bytes_Sent
+	#DROP[,]
+	Int[10] Bytes_Received
+	#DROP[,]
+	Int[10] Packets
+	#DROP[,]
+	Date[yyyy/MM/dd HH:mm:ss,] Start_Time
+	Int[10] Elapsed_Time_sec
+	#DROP[,]
+	String[,] Category
+	Int[10] Padding
+	#DROP[,]
+	Int[10] seqno
+	#DROP[,]
+	Int[16] actionflags
+	#DROP[,]
+	String[,] Source_Country
+	String[,] Destination_Country
+	Int[10] cpadding
+	#DROP[,]
+	Int[10] pkts_sent
+	#DROP[,]
+	Int[10] pkts_received
+	#DROP[,]
+#elsif Action == "alert"
+	String[,] string2
+	String[,] string3
+	String[,] string4
+	String[,] string5
+	String[,] direction
+	Int[10] int2
+	#DROP[,]	
+	Int[16] actionflags
+	#DROP[,]
+	String[,] Source_Country
+	String[,] Destination_Country
+	Int[10] int3
+#end
+
+
+
+
+
+
+
+
+

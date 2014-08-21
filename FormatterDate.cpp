@@ -7,20 +7,36 @@
 #include "RDate.cpp"
 
 #define DEBUG_SHOW
-class FormatterDate{
+class FormatterDate : public FormatterController{
 public:
-//-------------------------------------------------------------------------
-//  transform config-format to appropriate format. (for speed up)
-//-------------------------------------------------------------------------
-    static char *trans_format(const char *_format){
-        char *format = (char *) malloc((strlen(_format) + 1) * sizeof(char));
-        strcpy(format, _format);
-        return format;
+    typedef FormatterController super;
+    class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
+	public:
+    //--------------------------------------
+    //  transform config-format to appropriate format. (for speed up)
+    //--------------------------------------
+        char *trans_format(const char *_format){
+            char *format = (char *) malloc((strlen(_format) + 1) * sizeof(char));
+            strcpy(format, _format);
+            return format;
+        }
+	};
+    FormatterDate(const char *_format) : super(_format, new VirtualCreator()){
+
+    }
+public:
+//--------------------------------------
+//  execute
+//--------------------------------------
+    void execute(const char ** inputStream){
+        int date = retrieve(inputStream, format);
+        RDate::show(date); //DEBUG
+
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
-    static int retrieve(const char **input, const char *format){
+    int retrieve(const char **input, const char *format){
         const char *inputPtr = *input;
         RDate date;
         int scanfLen,counter = 0; //longest common char

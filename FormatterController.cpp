@@ -1,54 +1,37 @@
 #ifndef ___FormatterController_cpp__
 #define ___FormatterController_cpp__
+#define FormatList std::vector<FormatterController*>
 #include<stdlib.h>
-#include "FormatterDate.cpp"
-#include "FormatterString.cpp"
-#include "FormatterInteger.cpp"
+#include <vector>
 class FormatterController{
 public:
-    enum TYPE{ DATE,STRING,INTEGER };
-    TYPE type;
-    char *format;
-    FormatterController(TYPE _type, const char *_format) : type(_type){
-        format = trans_format(_format);
+    class VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
+	public:
+		virtual char *trans_format(const char *_format)=0;
+	};
+	char *format, *prev_result;
+    virtual void execute(const char ** inputStream)=0;
+    FormatterController(const char *_format, VirtualCreator *v){
+        prev_result = NULL;
+        format = v->trans_format(_format);
+        delete v;
     }
-    ~FormatterController(){
+    virtual ~FormatterController(){
+        free(prev_result);
         free(format);
     }
-//--------------------------------------
-//  transform config-format to appropriate format. (for speed up)
-//--------------------------------------
-    char *trans_format(const char *_format){
-        switch(type){
-        case DATE:{    return FormatterDate::trans_format(_format);}
-        case STRING:{  return FormatterString<MAX_STRING_SIZE>::trans_format(_format);}
-        case INTEGER:{ return FormatterInteger::trans_format(_format);}
-        default:
-            printf("Unknown type:%d",type);
-            exit(1);
-        }
-    }
-//--------------------------------------
-//  execute
-//--------------------------------------
-    void execute(const char ** inputStream){
-        switch(type){
-        case DATE:{
-            int date = FormatterDate::retrieve(inputStream, format);
-            RDate::show(date); //DEBUG
-            break;}
-        case STRING:{
-            char *str = FormatterString<MAX_STRING_SIZE>::retrieve(inputStream, format);
-            printf("[%s]\n",str); //DEBUG
-            free(str); //TODO
-            break;}
-        case INTEGER:{
-
-            break;}
-        }
+    virtual char *get_prev_result(){ //Will be call by FormatterIFStatement.
+        return prev_result;
     }
 };
 
+
+#include "FormatterDate.cpp"
+#include "FormatterString.cpp"
+#include "FormatterInteger.cpp"
+#include "FormatterDiscard.cpp"
+#include "FormatterIPaddr.cpp"
+#include "FormatterIFStatement.cpp"
 
 
 

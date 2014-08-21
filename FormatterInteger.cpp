@@ -4,31 +4,49 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
-class FormatterInteger{
+class FormatterInteger : public FormatterController{
 public:
-    static bool SuccessFlag;
-//-------------------------------------------------------------------------
-//  transform config-format to appropriate format. (for speed up)
-//-------------------------------------------------------------------------
-    static char *trans_format(const char *_format){
-        char *format = (char *) malloc(5 * sizeof(char));
-        format[0] = '%';
-        format[1] = '?';
-        format[2] = '%';
-        format[3] = 'n';
-        format[4] = '\0';
-        if (_format[0] == '8' && _format[1] == '\0'                     ) format[1] = 'o';  //"%o%n"
-        if (_format[0] == '1' && _format[1] == '0' && _format[2] == '\0') format[1] = 'd';  //"%d%n"
-        if (_format[0] == '1' && _format[1] == '6' && _format[2] == '\0') format[1] = 'x';  //"%x%n"
-        return format; //Ex: format = "%d%n"
+    typedef FormatterController super;
+    class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
+	public:
+    //-------------------------------------------------------------------------
+    //  transform config-format to appropriate format. (for speed up)
+    //-------------------------------------------------------------------------
+        char *trans_format(const char *_format){
+            char *format = (char *) malloc(5 * sizeof(char));
+            format[0] = '%';
+            format[1] = '?';
+            format[2] = '%';
+            format[3] = 'n';
+            format[4] = '\0';
+            if (_format[0] == '8' && _format[1] == '\0'                     ) format[1] = 'o';  //"%o%n"
+            if (_format[0] == '1' && _format[1] == '0' && _format[2] == '\0') format[1] = 'd';  //"%d%n"
+            if (_format[0] == '1' && _format[1] == '6' && _format[2] == '\0') format[1] = 'x';  //"%x%n"
+            return format; //Ex: format = "%d%n"
+        }
+	};
+    FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
+
+    }
+public:
+    bool SuccessFlag;
+//--------------------------------------
+//  execute
+//--------------------------------------
+    void execute(const char ** inputStream){
+        int num = FormatterInteger::retrieve(inputStream, format);
+        if (!SuccessFlag){ //TODO overflow
+            exit(1);
+        }
+        printf("[%d]\n",num);
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
-    static int retrieve(const char **input, const char *format){ //format = "%d%n","%x%n","%o%n"
+    int retrieve(const char **input, const char *format){   //format = "%d%n","%x%n","%o%n"
         SuccessFlag = false;
         const char *inputPtr = *input;
-        int scanfLen, result;
+        int scanfLen = 0, result;
         sscanf(inputPtr, "%*[ \f\n\r\t\v]%n", &scanfLen);   //remove white-space characters
         inputPtr += scanfLen;
         sscanf(inputPtr, format, &result, &scanfLen);       //read integer.
@@ -63,13 +81,6 @@ public:
         *input = inputPtr + scanfLen;
         SuccessFlag = true;
         return result;
-        /*
-        int scanfLen = 0;
-        char *buffer = (char *) malloc((MAXLEN + 1) * sizeof(char));
-        sscanf(*input, format, buffer, &scanfLen);
-        *input += scanfLen;
-        buffer[scanfLen] = '\0'; //avoid error when scanfLen == 0
-        return buffer;*/
     }
 };
 

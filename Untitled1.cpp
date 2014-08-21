@@ -3,6 +3,7 @@
 #include<string.h>
 #include<ctype.h>
 #include<time.h>
+#include<vector>
 
 #define MAX_STRING_SIZE 511
 #define MAX_CONFIG_SIZE 1024
@@ -10,16 +11,30 @@
 #include "windows.cpp"
 #include "FormatterController.cpp"
 #include "RMap.cpp"
-#include <vector>
-
 class InputFormatter{
 public:
-#define FormatList std::vector<FormatterController*>
     FormatList formatList;
     const char *inputStream;
     InputFormatter(){
-        formatList.push_back(new FormatterController(FormatterController::DATE,"MMM d HH:mm:ss "));
-        formatList.push_back(new FormatterController(FormatterController::STRING," "));
+        formatList.push_back(new FormatterDate("MMM d HH:mm:ss "));
+        formatList.push_back(new FormatterString<MAX_STRING_SIZE>(" "));
+        formatList.push_back(new FormatterInteger("10"));
+        formatList.push_back(new FormatterDiscard(","));
+        formatList.push_back(new FormatterDate("yyyy/MM/dd HH:mm:ss,"));
+        formatList.push_back(new FormatterString<MAX_STRING_SIZE>(","));
+        formatList.push_back(new FormatterString<MAX_STRING_SIZE>(","));
+        formatList.push_back(new FormatterString<MAX_STRING_SIZE>(","));
+        formatList.push_back(new FormatterInteger("10"));
+        formatList.push_back(new FormatterDiscard(","));
+        formatList.push_back(new FormatterDate("yyyy/MM/dd HH:mm:ss,"));
+        formatList.push_back(new FormatterIPaddr(NULL));
+        formatList.push_back(new FormatterDiscard(","));
+        formatList.push_back(new FormatterIPaddr(NULL));
+        formatList.push_back(new FormatterDiscard(","));
+        formatList.push_back(new FormatterIPaddr(NULL));
+        formatList.push_back(new FormatterDiscard(","));
+        formatList.push_back(new FormatterIPaddr(NULL));
+        formatList.push_back(new FormatterDiscard(","));
     }
     ~InputFormatter(){
         for(FormatList::iterator iter = formatList.begin(); iter != formatList.end(); ++iter) delete *iter;
@@ -32,8 +47,6 @@ public:
         inputStream = _input;
         for(int i = 0, size = formatList.size(); i < size; ++i) formatList[i]->execute(&inputStream);
     }
-
-#undef FormatList
 };
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename,mode);
@@ -43,31 +56,9 @@ FILE *fopen2(const char *filename, const char *mode){
     }
     return f;
 }
-void SetColor2(){
-    static int i = 2;
-    SetColor(i);
-    i = (i == 8 ? 2 : i + 1);
-}
-void test_date_formatter(){
-    InputFormatter formatter;
-    srand(time(NULL));
-    for(int i = 0; i < 1000; ++i){
-        int year = 2000 - rand() % 61 + 30;
-        int month = rand() % 12 + 1;
-        int dates[] = {31,28,31,30,31,30,31,31,30,31,30,31};
-        if (RDate::is_leapyear(year)) dates[1] = 29;
-        int day = rand() % dates[month - 1] + 1;
-        int hour = rand() % 24;
-        int min = rand() % 60;
-        int sec = rand() % 60;
-        char data[999];
-        const char *inputStream = data;
-        sprintf(data,"%d/%02d/%02d %02d:%02d:%02d",year,month,day,hour,min,sec);
-        SetColor2();FormatterDate::retrieve(&inputStream,"yyyy/MM/dd HH:mm:ss");
-    }
-    SetColor(7);
-}
+#include "testing.cpp"
 int main(){
+
 
 /*
     MapChar(int) BlahBlah;
@@ -82,7 +73,7 @@ int main(){
     printf("%d",BlahBlah["123"]);
     return 0;*/
     InputFormatter formatter2;
-    formatter2.execute("Dec  3 04:00:01 iisfw");
+    formatter2.execute("Dec  3 04:00:01 iisfw 1,2013/12/03 04:00:01,0011C101825,TRAFFIC,end,1,2013/12/03 04:00:00,140.109.23.120,140.109.254.5,");
 return 0;
     test_date_formatter();
 return 0;
