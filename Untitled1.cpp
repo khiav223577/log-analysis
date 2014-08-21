@@ -1,7 +1,8 @@
-#define DEBUG 1
+//#define DEBUG 1
 #include<stdio.h>
 #include<iostream>
 #include "windows.cpp"
+#include "lib/ShowTime.cpp"
 #include "FormatterController.cpp"
 //#include "RMap.cpp"
 //#include "testing.cpp"
@@ -11,11 +12,14 @@
 RubyInterpreter *ruby;
 ConfigInterfaceIN1 *ruby_interface;
 InputFormatter *formatter;
+ShowTime showtime;
+#define SHOW_LINE_COUNT(COUNT) printf("%6d", (COUNT)); showtime.show("","");
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     OutputManager *outputer = new OutputManager(output_path);
     FILE *file = fopen2(input_path,"r");
     int line_count = 0;
     char buffer[MAX_LOG_SIZE];
+    SHOW_LINE_COUNT(0);
     while(fgets(buffer, sizeof(buffer), file) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
         line_count += 1;
@@ -27,8 +31,9 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
             puts("");
             if (line_count == DEBUG) break;
         #endif
-        if (line_count % 10000 == 0) printf("%03dk\n", line_count / 1000);
+        if (line_count % 10000 == 0){ SHOW_LINE_COUNT(line_count); }
     }
+    SHOW_LINE_COUNT(line_count);
     ruby_interface->save_config1(line_count, output_config);
     fclose(file);
     delete outputer;
@@ -37,6 +42,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     OutputManager *outputer = new OutputManager(output_path);
     InputManager *inputer = new InputManager(input_path);
     int line_count = ruby_interface->load_config1(input_config);
+    SHOW_LINE_COUNT(0);
     for(int i = 1; i <= line_count; ++i){
         #ifdef DEBUG
             printf("%02d: ", i);
@@ -45,8 +51,9 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         #ifdef DEBUG
             puts("");
         #endif
-        if (i % 10000 == 0) printf("%03dk\n", i / 1000);
+        if (i % 10000 == 0){ SHOW_LINE_COUNT(i); }
     }
+    SHOW_LINE_COUNT(line_count);
     ruby_interface->save_config2(line_count, output_config);
     delete inputer;
     delete outputer;
@@ -54,6 +61,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
 inline void third_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     InputManager *inputer = new InputManager(input_path);
     int line_count = ruby_interface->load_config2(input_config);
+    SHOW_LINE_COUNT(0);
     for(int i = 1; i <= line_count; ++i){
         #ifdef DEBUG
             printf("%02d: ", i);
@@ -62,12 +70,14 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
         #ifdef DEBUG
             puts("");
         #endif
-        if (i % 10000 == 0) printf("%03dk\n", i / 1000);
+        if (i % 10000 == 0){ SHOW_LINE_COUNT(i); }
     }
+    SHOW_LINE_COUNT(line_count);
     delete inputer;
 }
 
 int main(int argc, char **argv){
+
     /*
     PERROR(1 == 1, printf("read BigInt fail, format = %s, input = %s", "000", ":???"););
     return 0;
@@ -78,6 +88,9 @@ int main(int argc, char **argv){
     const char *InputPath  = "data/input_large";
     const char *OutputPath = "data/output_min";
     ruby = new RubyInterpreter();
+    puts("#==========================================================");
+    puts("#  First Pass");
+    puts("#==========================================================");
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath);
@@ -97,7 +110,9 @@ int main(int argc, char **argv){
         delete formatter;
         delete ruby_interface;
     }
-    puts("==============================================");
+    puts("#==========================================================");
+    puts("#  Second Pass");
+    puts("#==========================================================");
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath);
@@ -117,7 +132,9 @@ int main(int argc, char **argv){
         delete formatter;
         delete ruby_interface;
     }
-    puts("==============================================");
+    puts("#==========================================================");
+    puts("#  Third Pass");
+    puts("#==========================================================");
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath);

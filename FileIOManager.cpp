@@ -14,7 +14,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<memory.h>
-#include "FlexibleInt.cpp"
+#include "lib/FlexibleInt.cpp"
 #include <ruby.h> // it defines F_OK
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename,mode);

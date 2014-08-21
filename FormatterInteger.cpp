@@ -4,7 +4,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
-#include "FlexibleInt.cpp"
+#include "lib/FlexibleInt.cpp"
 #include "SafeScanf.cpp"
 
 class FormatterInteger : public FormatterController{

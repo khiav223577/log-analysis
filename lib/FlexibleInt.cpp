@@ -2,7 +2,7 @@
 #ifndef ___FlexibleInt_cpp__
 #define ___FlexibleInt_cpp__
 //#include <iostream>
-#include "lib/bigint-2010.04.30/_BigIntegerLibrary.cc"
+#include "bigint-2010.04.30/_BigIntegerLibrary.cc"
 #define GETVALUE(x) ((x).isBigInt() ? *(x).getValuePtr() : (x).getValue())
 class FlexibleInt{
 private:
