@@ -21,11 +21,11 @@ public:
 
     }
 public:
-
+    virtual void output_config1(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------
-    inline int execute(OutputManager *outputer, const char **inputStream){
+    int execute1(OutputManager *outputer, const char **inputStream){
         unsigned int result = retrieve(inputStream, format);
         printf("%d.%d.%d.%d ",(result >> 24) & 255,(result >> 16) & 255,(result >> 8) & 255,(result >> 0) & 255);
         outputer->write((int) result);

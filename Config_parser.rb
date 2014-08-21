@@ -35,7 +35,7 @@ class Config_Parser
 				nested_symbols << (local_symbols = {:buffer_start => buffer.size})
 				imfs = bparser.parse($2)
 				perror.call("Syntax error") and next if imfs == nil
-				imfs.each{|s| #["name", "==", "string"]
+				imfs.each{|s| #s = ["name", "==", "string"]
 					next if s.class != Array
 					idx = global_symbols[s[0]]
 					perror.call("undefined symbol '%s'" % s[0]) and next if idx == nil

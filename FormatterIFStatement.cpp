@@ -31,13 +31,14 @@ public:
         exit(1);
     }
 public:
+    virtual void output_config1(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------
     virtual bool check_condition()=0;
-    inline int execute(OutputManager *outputer, const char **inputStream){
+    inline int execute1(OutputManager *outputer, const char **inputStream){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(outputer, inputStream); //execute回傳要skip掉的指令數
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(outputer, inputStream); //execute回傳要skip掉的指令數
         return skip;
     }
 };
@@ -69,8 +70,8 @@ public:
     }
     bool check_condition(){
         switch(boolOperator){
-        case '=':{ return (strcmp(compareTarget->get_prev_result(), format) == 0);} //operator = "=="
-        case '!':{ return (strcmp(compareTarget->get_prev_result(), format) != 0);} //operator = "!="
+        case '=':{ return (strcmp(compareTarget->get_prev_string(), format) == 0);} //operator = "=="
+        case '!':{ return (strcmp(compareTarget->get_prev_string(), format) != 0);} //operator = "!="
         default:{
             Perror(boolOperator);
             return false;}

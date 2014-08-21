@@ -20,7 +20,7 @@ public:
 //  Insert (key, value) into a map if map[key] doesn't exist. And return map[key].
 //----------------------------------------------------------------
     inline static VALUE &InsertKeyToMap(MAP &map, KEY const& key, VALUE const& value) {
-        return map.insert(PAIR(key, value)).first->second; //insert(XXX).first is the iterator of map[key] which pointers to std::pair<key, value>
+        return map.insert(PAIR(key, value)).first->second; //insert(XXX).first is the iterator of map[key] which points to std::pair<key, value>
     }
 //----------------------------------------------------------------
 //  Clear map and free elements.

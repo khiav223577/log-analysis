@@ -5,7 +5,7 @@
 #include<time.h>
 #include<vector>
 
-#define MAX_STRING_SIZE 511
+
 #define MAX_CONFIG_SIZE 1024
 #define MAX_LOG_SIZE 8192
 #include "windows.cpp"
@@ -25,29 +25,35 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    void execute(OutputManager *outputer, const char *_input){
+    void execute1(OutputManager *outputer, const char *_input){
         inputStream = _input;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(outputer, &inputStream); //execute回傳要skip掉的指令數
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(outputer, &inputStream); //execute回傳要skip掉的指令數
     }
 };
-#include "ConfigRubyInterface.cpp"
+#include "ConfigInterfaceIN1.cpp"
 #include "testing.cpp"
 int main(){
+    const char *ConfigPath = "data/test_config2";
+    const char *InputPath  = "data/test_input2";
+    const char *OutputPath = "data/test_output2";
 
-    ConfigRubyInterface ruby_interface;
-    InputFormatter *formatter = ruby_interface.CreateFormatter("data/test_config2");
-    char buffer[MAX_LOG_SIZE];
-    FILE *file1 = fopen2("data/test_input2","r");
-    OutputManager outputer("data/test_output2");
+    ConfigInterfaceIN1 *ruby_interface = new ConfigInterfaceIN1();
+    InputFormatter *formatter = ruby_interface->CreateFormatters(ConfigPath);
+    OutputManager *outputer = new OutputManager(OutputPath);
+    FILE *file1 = fopen2(InputPath,"r");
     int i = 0;
+    char buffer[MAX_LOG_SIZE];
     while(fgets(buffer, MAX_LOG_SIZE, file1) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
         printf("%02d: ", ++i);
-        formatter->execute(&outputer, buffer);
+        formatter->execute1(outputer, buffer);
         puts("");
     }
+    ruby_interface->output_config(OutputPath);
     fclose(file1);
+    delete outputer;
     delete formatter;
+    delete ruby_interface;
 
     //test_InputFormatter();
     //test_FormatterDate();

@@ -8,6 +8,7 @@
 (O) 讀取    Int 資料型態
 (O) 讀取   IPv4 資料型態
 (O) 讀取   DROP 資料型態
+(O) 讀取  DEBUG 資料型態
 
 (X) #if語句支援比對   Date 欄位
 (O) #if語句支援比對 String 欄位

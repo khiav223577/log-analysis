@@ -24,10 +24,11 @@ public:
 
     }
 public:
+    virtual void output_config1(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute(OutputManager *outputer, const char **inputStream){
+    int execute1(OutputManager *outputer, const char **inputStream){
         int date = retrieve(inputStream, format);
         RDate::show(date); //DEBUG
         outputer->write(date);
@@ -36,7 +37,7 @@ public:
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
-    int retrieve(const char **input, const char *format){
+    inline int retrieve(const char **input, const char *format){
         const char *inputPtr = *input;
         RDate date;
         int scanfLen,counter = 0; //longest common char

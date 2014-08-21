@@ -36,12 +36,15 @@ public:
         exit(1);
     }
 public:
-    bool SuccessFlag;
-    int record_min, record_max;
+    virtual void output_config1(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------
-    inline int execute(OutputManager *outputer, const char **inputStream){
+private:
+    bool SuccessFlag;
+    int record_min, record_max;
+public:
+    int execute1(OutputManager *outputer, const char **inputStream){
         int num = FormatterInteger::retrieve(inputStream, format);
         if (!SuccessFlag){ //TODO overflow
             puts("overflow");
@@ -63,7 +66,7 @@ public:
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
-    int retrieve(const char **input, const char *format){   //format = "%d%n","%x%n","%o%n"
+    inline int retrieve(const char **input, const char *format){   //format = "%d%n","%x%n","%o%n"
         SuccessFlag = false;
         const char *inputPtr = *input;
         int scanfLen = 0, result;

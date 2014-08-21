@@ -57,7 +57,7 @@ public:
 //  Run code
 //--------------------------------------------------------
     void execute_code(const char *code){
-        rb_eval_string_protect(code,&error_status);
+        rb_eval_string_protect(code, &error_status);
         error_handling();
     }
     void execute_file(const char *path){ //will not exit C program when ruby raise RuntimeError.

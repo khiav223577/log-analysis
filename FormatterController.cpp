@@ -22,15 +22,16 @@ public:
     virtual ~FormatterController(){
         free(format);
     }
-    virtual char *get_prev_result(){    //Will be called by FormatterIFStatement.
-        printf("Error: fails to get_prev_result()");
+    virtual char *get_prev_string(){    //Will be called by FormatterIFStatement.
+        printf("Error: fails to get_prev_string()");
         exit(1);
     }
     virtual int get_prev_int(){         //Will be called by FormatterIFStatement.
         printf("Error: fails to get_prev_int()");
         exit(1);
     }
-    virtual int execute(OutputManager *outputer, const char **inputStream)=0; //回傳要skip掉的指令數
+    virtual int execute1(OutputManager *outputer, const char **inputStream)=0; //回傳要skip掉的指令數
+    virtual void output_config1(FILE *file)=0;
 };
 
 
@@ -41,7 +42,7 @@ public:
 #include "FormatterDebug.cpp"
 #include "FormatterIPaddr.cpp"
 #include "FormatterIFStatement.cpp"
-
+#include "ConfigInterfaceOUT1.cpp"
 
 
 #endif

@@ -21,11 +21,11 @@ public:
 
     }
 public:
-
+    virtual void output_config1(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------
-    inline int execute(OutputManager *outputer, const char **inputStream){
+    int execute1(OutputManager *outputer, const char **inputStream){
         printf("%s", format);
         return 0;
     }

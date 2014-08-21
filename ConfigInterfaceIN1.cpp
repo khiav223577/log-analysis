@@ -1,21 +1,21 @@
 
 
-#ifndef ___ConfigRubyInterface_cpp__
-#define ___ConfigRubyInterface_cpp__
+#ifndef ___ConfigInterfaceIN1_cpp__
+#define ___ConfigInterfaceIN1_cpp__
 
 #include "FormatterController.cpp"
 #include "RStack.cpp"
 #include "RubyInterpreter.cpp"
 #define FormatStack RStack<FormatterIFStatement>
 #define IFList std::vector<FormatterIFStatement*>
-class ConfigRubyInterface{
+class ConfigInterfaceIN1{
 private:
     FormatList global_formatList;
 public:
 //-------------------------------------------------------------------------
 //  CreateFormatter
 //-------------------------------------------------------------------------
-    InputFormatter* CreateFormatter(const char *filename){
+    InputFormatter* CreateFormatters(const char *filename){
         InputFormatter *formatter = new InputFormatter();
         RubyInterpreter ruby;
         ruby.execute_code("$IN_C_CODE = true");
@@ -98,11 +98,11 @@ public:
                 VALUE a1 = rb_ary_entry(element,1);
                 VALUE a2 = rb_ary_entry(element,2);
                 FormatterController *target = global_formatList[FIX2INT(a0)];
-                char type = FIX2INT(a1);
+                char op = FIX2INT(a1);
                 char *string = StringValuePtr(a2);
                 switch(string[0]){
-                case '"':{ FormatStack::push(&stack, new FormatterIF_CmpString(type, target, string)); break;} //string
-                default:{  FormatStack::push(&stack, new FormatterIF_CmpInt   (type, target, string)); break;} //integer
+                case '"':{ FormatStack::push(&stack, new FormatterIF_CmpString(op, target, string)); break;} //string
+                default:{  FormatStack::push(&stack, new FormatterIF_CmpInt   (op, target, string)); break;} //integer
                 }
                 break;}
             default:{
@@ -115,6 +115,17 @@ public:
         FormatStack::clear(&stack);
 //puts("=================================");
         return result;
+    }
+//-------------------------------------------------------------------------
+//  config
+//-------------------------------------------------------------------------
+    void output_config(const char *filename){
+        char *nfilename = (char *) malloc(sizeof(char) * strlen(filename) + 1 + 7);
+        sprintf(nfilename, "%s.config", filename);
+        FILE *file = fopen2(nfilename, "w");
+        int size = global_formatList.size();
+        for(int i = 0; i < size; ++i) global_formatList[i]->output_config1(file);
+        fclose(file);
     }
 };
 
