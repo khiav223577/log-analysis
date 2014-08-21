@@ -21,7 +21,10 @@ class Config_Parser
 		line_count = 0
 		bparser = Boolean_parser.new
 		perror = lambda{|msg| puts msg + " at line %3d:  %s" % [line_count, line]}
-		exit_block = lambda{ nested_symbols.pop.each{|key, value| global_symbols[key] = value } }
+		exit_block = lambda{ 
+			buffer << ["EXIT_BLOCK"]
+			nested_symbols.pop.each{|key, value| global_symbols[key] = value } 
+		}
 		for line in input.split("\n")
 			line_count += 1
 			line.sub!(/^\s*/,"")
@@ -47,9 +50,14 @@ class Config_Parser
 					s[1] = s[1][0].ord
 				}
 				buffer << [$1, imfs]
+			when line =~ /^(#else)/
+				exit_block.call
+				nested_symbols << (local_symbols = {:buffer_start => buffer.size})
+				buffer << [$1]
 			when line =~ /^(#end)/
 				exit_block.call
 				local_symbols = nested_symbols[-1]
+				buffer << [$1]
 			else
 				case
 				when line =~ /^(Date)\[(.*)\] \s*(\w+)/

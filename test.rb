@@ -28,6 +28,8 @@ if !$IN_C_CODE
 			Int[10] string1
 		#elsif Action == "alert"
 			String[,] string1
+		#else
+			String[,] string5
 		#end
 	}
 	$config = Config_Parser.new
