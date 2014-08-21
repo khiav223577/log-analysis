@@ -18,12 +18,12 @@
 #include "lib/FlexibleInt.cpp"
 #include "lib/FlexibleFile.cpp"
 #include <ruby.h> // it defines F_OK
-
+#ifndef PERROR
+  #include "windows.cpp"
+#endif
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename, mode);
-    #ifdef PERROR
-        PERROR(f == NULL, printf("Cannot open %s",filename); );
-    #endif
+    PERROR(f == NULL, printf("Cannot open %s",filename); );
     return f;
 }
 bool file_exists(const char *filename){
@@ -261,9 +261,7 @@ public:
         case 3:{int val = read_int(3); return (val > 8388607 ? val - 16777216 : val); }
         case 4:{return read_int(4); }
         }
-        #ifdef PERROR
-            PERROR((byte_num == 0 || byte_num > 4), printf("byte_num should be 1,2,3,4."););
-        #endif
+        PERROR((byte_num == 0 || byte_num > 4), printf("byte_num should be 1,2,3,4."););
         return -1;
     }
     inline unsigned int read_bits(unsigned char bit_num){

@@ -1,4 +1,4 @@
-#define DEBUG 5
+//#define DEBUG 5
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 //---------------------------------------------------
@@ -31,11 +31,19 @@ InputFormatter *formatter;
 ShowTime showtime;
 #define SHOW_LINE_RANGE 20000
 #define SHOW_LINE_COUNT(COUNT) printf("%8d", (COUNT)); showtime.show("","");
-void showFormatList(){
+inline void showFormatList(){
     FormatList &global_formatList = ruby_interface->global_formatList;
     for(int i = 0, size = global_formatList.size(); i < size; ++i) printf("%d:%s\n", i, typeid(*(global_formatList[i])).name());
 }
-void setInOutputer(InputManager *inputer, OutputManager *outputer){
+inline void setInputer(InputManager *inputer){
+    FormatList &global_formatList = ruby_interface->global_formatList;
+    for(int i = 0, size = global_formatList.size(); i < size; ++i) global_formatList[i]->inputer  = inputer;
+}
+inline void setOutputer(OutputManager *outputer){
+    FormatList &global_formatList = ruby_interface->global_formatList;
+    for(int i = 0, size = global_formatList.size(); i < size; ++i) global_formatList[i]->outputer  = outputer;
+}
+inline void setInOutputer(InputManager *inputer, OutputManager *outputer){
     FormatList &global_formatList = ruby_interface->global_formatList;
     for(int i = 0, size = global_formatList.size(); i < size; ++i){
         global_formatList[i]->inputer  = inputer;
@@ -46,33 +54,32 @@ void setInOutputer(InputManager *inputer, OutputManager *outputer){
 //  first_pass
 //------------------------------------------------------------
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config, unsigned int block_size){
-    OutputManager *outputer = new OutputManager(output_path, FILE_MODE_RAW);
-    setInOutputer(NULL, outputer);
+    BlockOutputManager *blockoutputer = new BlockOutputManager(output_path, block_size, FILE_MODE_RAW, &setOutputer);
     InputManager *inputer = new InputManager(input_path, INPUT_MODE);
-    unsigned int line_count = 0, current_block = 0;
+    unsigned int line_count = 0;
     char buffer[MAX_LOG_SIZE];
     SHOW_LINE_COUNT(0);
     while(inputer->readLine(buffer, sizeof(buffer)) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
-        line_count += 1;
+        line_count = blockoutputer->getLineCount() + 1;
         #ifdef DEBUG
             printf("%02d: ", line_count);
         #endif
         formatter->execute1(buffer);
+        blockoutputer->nextLine();
         #ifdef DEBUG
             puts("");
             if (line_count == DEBUG) break;
         #endif
         if (line_count % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(line_count); }
-        if (line_count % block_size == 0) current_block += 1;
-        if (line_count > 1000000) break;
+        //if (line_count > 1000000) break;
     }
     if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
-    BlockConfig *config = new BlockConfig(line_count, block_size);
+    BlockConfig *config = blockoutputer->createBlockConfig();
     ruby_interface->save_config1(output_config, config);
     delete config;
     delete inputer;
-    delete outputer;
+    delete blockoutputer;
     #ifdef EVALUATE_TIME
         evalu_int.show("Int");
         evalu_string.show("String");
@@ -81,6 +88,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
         evalu_ip.show("IP");
         evalu_discard.show("Discard");
     #endif
+    exit(1);
 }
 //------------------------------------------------------------
 //  second_pass
@@ -194,7 +202,7 @@ int main(int argc, char **argv){
         sprintf( input_path  , "%s%s"      ,  InputPath, fileExtension);
         sprintf(output_path  , "%s.temp1"  , OutputPath);
         sprintf(output_config, "%s.config1", OutputPath);
-        first_pass(input_path, output_path, input_config, output_config, 99999999);
+        first_pass(input_path, output_path, input_config, output_config, 30000);
         free(input_path);
         free(output_path);
         free(input_config);
