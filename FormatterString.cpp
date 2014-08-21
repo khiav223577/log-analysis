@@ -54,7 +54,7 @@ private:
     int executeCounter, Size4FlagAt;
     unsigned char byte_num, bit_num;
 public:
-    int execute1(OutputManager *outputer, const char **inputStream){
+    int execute1(const char **inputStream){
         char *str = retrieve(inputStream, format);
         free(prev_result);
         prev_result = str;
@@ -65,7 +65,7 @@ public:
         debug();
         return 0;
     }
-    int execute2(OutputManager *outputer, InputManager *inputer){
+    int execute2(){
         if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
         prev_result = decompress(output);
@@ -76,7 +76,7 @@ public:
         debug();
         return 0;
     }
-    int execute3(InputManager *inputer){
+    int execute3(){
         if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
         unsigned int output;
         if (bit_num == 0) output = 0;

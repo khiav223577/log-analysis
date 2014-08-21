@@ -143,7 +143,9 @@ public:
     static inline FlexibleInt load(FILE *file){
         char tmp;
         fscanf(file, " %c", &tmp);
-        PERROR(tmp != 'B' && tmp != 'I', printf("syntax error"););
+        #ifdef PERROR
+            PERROR(tmp != 'B' && tmp != 'I', printf("syntax error"););
+        #endif
         if (tmp == 'B'){
             std::string bigIntString = SafeScanf::readBigInt10(file);
             return FlexibleInt(new BigInteger(BigUnsignedInABase(bigIntString, 10)));

@@ -28,19 +28,19 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute1(OutputManager *outputer, const char **inputStream){
+    int execute1(const char **inputStream){
         unsigned int result = retrieve(inputStream, format);
         outputer->write((int) result);
         debug(result);
         return 0;
     }
-    int execute2(OutputManager *outputer, InputManager *inputer){
+    int execute2(){
         unsigned int result = (unsigned int) inputer->read_int();
         outputer->write((int) result);
         debug(result);
         return 0;
     }
-    int execute3(InputManager *inputer){
+    int execute3(){
         unsigned int result = (unsigned int) inputer->read_int();
         debug(result);
         return 0;

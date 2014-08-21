@@ -38,19 +38,19 @@ public:
 //  execute
 //--------------------------------------
     virtual bool check_condition()=0;
-    int execute1(OutputManager *outputer, const char **inputStream){
+    int execute1(const char **inputStream){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(outputer, inputStream); //execute回傳要skip掉的指令數
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(inputStream); //execute回傳要skip掉的指令數
         return skip;
     }
-    int execute2(OutputManager *outputer, InputManager *inputer){
+    int execute2(){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute2(outputer, inputer); //execute回傳要skip掉的指令數
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute2(); //execute回傳要skip掉的指令數
         return skip;
     }
-    int execute3(InputManager *inputer){
+    int execute3(){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute3(inputer); //execute回傳要skip掉的指令數
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute3(); //execute回傳要skip掉的指令數
         return skip;
     }
 };

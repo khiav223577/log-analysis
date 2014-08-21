@@ -42,6 +42,7 @@ public:
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
+        PERROR(prev_int.isBigInt(), printf("Unable to compare with BigInteger in IF-Statement."););
         return prev_int.getValue(); // TODO BigInt.
     }
 public:
@@ -59,7 +60,7 @@ private:
     FlexibleInt record_min, record_max, record_range;
     DeltaEncoding<FlexibleInt> delta_encoding;
 public:
-    int execute1(OutputManager *outputer, const char **inputStream){
+    int execute1(const char **inputStream){
         FlexibleInt prev_int_sav = prev_int;
         if (BigIntFlagAt1 == -1){
             int value = retrieve(inputStream, format);
@@ -86,7 +87,7 @@ public:
         debug();
         return 0;
     }
-    int execute2(OutputManager *outputer, InputManager *inputer){
+    int execute2(){
         bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
         if (isBigInt){
             prev_int = FlexibleInt(inputer->read_bigInt());
@@ -126,7 +127,7 @@ public:
         debug();
         return 0;
     }
-    int execute3(InputManager *inputer){
+    int execute3(){
         if (SameFlag){
             prev_int = record_min;
         }else if (increasingFuncFlag == true){

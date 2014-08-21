@@ -18,7 +18,9 @@
 #include <ruby.h> // it defines F_OK
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename,mode);
-    PERROR(f == NULL, printf("Cannot open %s",filename); );
+    #ifdef PERROR
+        PERROR(f == NULL, printf("Cannot open %s",filename); );
+    #endif
     return f;
 }
 bool file_exists(const char *filename){
@@ -225,7 +227,9 @@ public:
         case 3:{int val = read_int(3); return (val > 8388607 ? val - 16777216 : val); }
         case 4:{return read_int(4); }
         }
-        PERROR((byte_num == 0 || byte_num > 4), printf("byte_num should be 1,2,3,4."););
+        #ifdef PERROR
+            PERROR((byte_num == 0 || byte_num > 4), printf("byte_num should be 1,2,3,4."););
+        #endif
         return -1;
     }
     inline unsigned int read_bits(unsigned char bit_num){

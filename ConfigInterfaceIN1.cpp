@@ -9,7 +9,7 @@
 #define FormatStack RStack<FormatterIFStatement>
 #define IFList std::vector<FormatterIFStatement*>
 class ConfigInterfaceIN1{
-private:
+public:
     FormatList global_formatList;
     RubyInterpreter *ruby;
 public:

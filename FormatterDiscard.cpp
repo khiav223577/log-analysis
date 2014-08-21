@@ -28,14 +28,14 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute1(OutputManager *outputer, const char **inputStream){
+    int execute1(const char **inputStream){
         retrieve(inputStream, format);
         return 0;
     }
-    int execute2(OutputManager *outputer, InputManager *inputer){
+    int execute2(){
         return 0;
     }
-    int execute3(InputManager *inputer){
+    int execute3(){
         return 0;
     }
 //-------------------------------------------------------------------------

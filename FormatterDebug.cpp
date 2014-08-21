@@ -28,15 +28,15 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute1(OutputManager *outputer, const char **inputStream){
+    int execute1(const char **inputStream){
         debug();
         return 0;
     }
-    int execute2(OutputManager *outputer, InputManager *inputer){
+    int execute2(){
         debug();
         return 0;
     }
-    int execute3(InputManager *inputer){
+    int execute3(){
         debug();
         return 0;
     }

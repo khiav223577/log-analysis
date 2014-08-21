@@ -38,7 +38,7 @@ private:
     int executeCounter, Size4FlagAt;
     unsigned char byte_num;
 public:
-    int execute1(OutputManager *outputer, const char **inputStream){
+    int execute1(const char **inputStream){
         int date = retrieve(inputStream, format);
         int output = delta_encoding.encode(date); //delta encoding
         if (Size4FlagAt == -1 && (output > 127 || output < -128)) Size4FlagAt = executeCounter;
@@ -47,7 +47,7 @@ public:
         debug(date);
         return 0;
     }
-    int execute2(OutputManager *outputer, InputManager *inputer){
+    int execute2(){
         if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
         int output = inputer->read_n_byte_int(byte_num);
         int date = delta_encoding.decode(output); //delta encoding
@@ -56,7 +56,7 @@ public:
         debug(date);
         return 0;
     }
-    int execute3(InputManager *inputer){
+    int execute3(){
         if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
         int output = inputer->read_n_byte_int(byte_num);
         int date = delta_encoding.decode(output); //delta encoding
