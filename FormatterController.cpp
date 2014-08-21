@@ -9,21 +9,24 @@
 #include "SizeFlagManager.cpp"
 #include "HashCompressor.cpp"
 
+class InputFormatter;
 class FormatterController{
 public:
     class VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
 	public:
 		virtual char *trans_format(const char *_format)=0;
 	};
+	InputFormatter *formatter;
 	OutputManager *outputer;
 	InputManager *inputer;
 	char *format;
-	bool initialized, attr_drop, attr_peek;
+	bool initialized, attr_drop, attr_peek, attr_index;
     FormatterController(const char *_format, VirtualCreator *v) : outputer(NULL), inputer(NULL){
         format = v->trans_format(_format);
         initialized = false;
-        attr_drop = false;
-        attr_peek = false;
+        attr_drop   = false;
+        attr_peek   = false;
+        attr_index  = false;
         delete v;
     }
     virtual ~FormatterController(){
@@ -56,7 +59,6 @@ public:
 class InputFormatter{
 public:
     FormatList formatList;
-    const char *inputStream;
     InputFormatter(){
     }
     ~InputFormatter(){
@@ -67,7 +69,7 @@ public:
 //  execute
 //--------------------------------------
     void execute1(const char *_input){
-        inputStream = _input;
+        const char *inputStream = _input;
         for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(&inputStream); //execute回傳要skip掉的指令數
     }
     void execute2(){

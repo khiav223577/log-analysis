@@ -4,12 +4,15 @@
 #define ___ConfigInterfaceIN1_cpp__
 
 #include "FormatterController.cpp"
+#include "BlockDataManager.cpp"
 #include "RStack.cpp"
 #include "RubyInterpreter.cpp"
 #define FormatStack RStack<FormatterIFStatement>
 #define IFList std::vector<FormatterIFStatement*>
+
 class ConfigInterfaceIN1{
 public:
+    InputFormatter *formatter;
     FormatList global_formatList;
     RubyInterpreter *ruby;
     bool ignore_drop_node;
@@ -20,7 +23,7 @@ public:
 //  CreateFormatter
 //-------------------------------------------------------------------------
     InputFormatter* CreateFormatters(const char *filename, bool flag){
-        InputFormatter *formatter = new InputFormatter();
+        formatter = new InputFormatter();
         ignore_drop_node = flag;
 
         ruby->execute_code("$IN_C_CODE = true");
@@ -31,6 +34,10 @@ public:
 
         inner_retrieve_format(&formatter->formatList);
         return formatter;
+    }
+    void push_node(FormatterController *node){
+        node->formatter = formatter;
+        global_formatList.push_back(node);
     }
 //-------------------------------------------------------------------------
 //  mapping Ruby data to C classes
@@ -53,7 +60,7 @@ public:
             case  1: case  2:{ //#if, #elsif
                 FormatterIFStatement *ifnode = parse_bool_statement(format);
                 ifList.push_back(ifnode); //記錄elsif數量。(elsif也是一個node，每多一個elsif，skip要再加1)。
-                global_formatList.push_back(ifnode);
+                push_node(ifnode);
                 formatList->push_back(ifnode);
                 inner_retrieve_format(&ifnode->formatList);
                 continue;}
@@ -81,10 +88,11 @@ public:
             case 12:{ node = new FormatterChar   (StringValuePtr(format));                                     break;} //Char
             }
             if (hash != Qnil){
-                node->attr_drop = RTEST(rb_hash(hash, "drop"));
-                node->attr_peek = RTEST(rb_hash(hash, "peek"));
+                node->attr_drop  = RTEST(rb_hash(hash, "drop"));
+                node->attr_peek  = RTEST(rb_hash(hash, "peek"));
+                node->attr_index = RTEST(rb_hash(hash, "index"));
             }
-            global_formatList.push_back(node);
+            push_node(node);
             if (ignore_drop_node == false || node->attr_drop == false) formatList->push_back(node);
         }
     }
@@ -127,35 +135,35 @@ public:
 //-------------------------------------------------------------------------
 //  config
 //-------------------------------------------------------------------------
-    void save_config1(int line_count, const char *filename){
-        FILE *file = fopen2(filename, "w");
-        fprintf(file, "%d\n", line_count);
-        int size = global_formatList.size();
-        for(int i = 0; i < size; ++i) global_formatList[i]->save_config1(file);
+    void save_config1(const char *filename, BlockConfig *config){
+        FILE *file = fopen2(filename, "wb");
+        fprintf(file, "%u %u\n", config->line_count, config->block_size);
+        unsigned int size = global_formatList.size();
+        for(unsigned int i = 0; i < size; ++i) global_formatList[i]->save_config1(file);
         fclose(file);
     }
-    void save_config2(int line_count, const char *filename){
-        FILE *file = fopen2(filename, "w");
-        fprintf(file, "%d\n", line_count);
+    void save_config2(const char *filename, BlockConfig *config){
+        FILE *file = fopen2(filename, "wb");
+        fprintf(file, "%u %u\n", config->line_count, config->block_size);
         int size = global_formatList.size();
         for(int i = 0; i < size; ++i) global_formatList[i]->save_config2(file);
         fclose(file);
     }
-    int load_config1(const char *filename){
-        FILE *file = fopen2(filename, "r");
-        int line_count, size = global_formatList.size();
-        fscanf(file, "%d\n", &line_count);
-        for(int i = 0; i < size; ++i) global_formatList[i]->load_config1(file);
+    BlockConfig *load_config1(const char *filename){
+        FILE *file = fopen2(filename, "rb");
+        unsigned int line_count, block_size, size = global_formatList.size();
+        fscanf(file, "%u %u\n", &line_count, &block_size);
+        for(unsigned int i = 0; i < size; ++i) global_formatList[i]->load_config1(file);
         fclose(file);
-        return line_count;
+        return new BlockConfig(line_count, block_size);
     }
-    int load_config2(const char *filename){
-        FILE *file = fopen2(filename, "r");
-        int line_count, size = global_formatList.size();
-        fscanf(file, "%d\n", &line_count);
-        for(int i = 0; i < size; ++i) global_formatList[i]->load_config2(file);
+    BlockConfig *load_config2(const char *filename){
+        FILE *file = fopen2(filename, "rb");
+        unsigned int line_count, block_size, size = global_formatList.size();
+        fscanf(file, "%u %u\n", &line_count, &block_size);
+        for(unsigned int i = 0; i < size; ++i) global_formatList[i]->load_config2(file);
         fclose(file);
-        return line_count;
+        return new BlockConfig(line_count, block_size);
     }
 };
 

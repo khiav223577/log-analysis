@@ -81,7 +81,12 @@ public:
     }
 protected:
     inline void inner_save(FILE *file, unsigned int unused){
-        for(unsigned int i = 0 ; i < hashValueCounter; ++i) fprintf(file, "%x\n", hashKeys[i]);
+        unsigned int *buffer = (unsigned int *) malloc(hashValueCounter * sizeof(unsigned int));
+        for(unsigned int i = 0 ; i < hashValueCounter; ++i) buffer[i] = hashKeys[i];
+        fprintf(file, ":"); //prevent white characters be dropped by fscanf("\n").
+        fwrite(buffer, sizeof(unsigned int), hashValueCounter, file);
+        fprintf(file, "\n");
+        free(buffer);
     }
     inline void inner_save(FILE *file, char *unused){
         for(unsigned int i = 0 ; i < hashValueCounter; ++i) fprintf(file, ":%s\n", hashKeys[i]); //prevent empty line.
@@ -97,12 +102,16 @@ public:
     }
 protected:
     inline void inner_load(FILE *file, unsigned int unused){
-        unsigned int input;
+        unsigned int *buffer = (unsigned int *) malloc(hashValueCounter * sizeof(unsigned int));
+        fscanf(file, ":");
+        fread(buffer, sizeof(unsigned int), hashValueCounter, file);
+        fscanf(file, "\n");
         for(unsigned int idx = 0; idx < hashValueCounter; ++idx){
-            fscanf(file, "%x\n", &input);
+            unsigned int input = buffer[idx];
             hashKeys[idx] = input;
             RMap<MAP_TYPE>::InsertKeyToMap(hashTable, input, idx);
         }
+        free(buffer);
     }
     inline void inner_load(FILE *file, char *unused){
         for(unsigned int idx = 0; idx < hashValueCounter; ++idx){
