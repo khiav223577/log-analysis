@@ -1,7 +1,7 @@
 
 
-#ifndef ___BlockDataManager_cpp__
-#define ___BlockDataManager_cpp__
+#ifndef ___BlockIOManager_cpp__
+#define ___BlockIOManager_cpp__
 #include<string.h>
 #include<stdlib.h>
 class BlockConfig{

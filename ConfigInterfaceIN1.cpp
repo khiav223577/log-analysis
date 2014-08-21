@@ -4,7 +4,7 @@
 #define ___ConfigInterfaceIN1_cpp__
 
 #include "FormatterController.cpp"
-#include "BlockDataManager.cpp"
+#include "BlockIOManager.cpp"
 #include "RStack.cpp"
 #include "RubyInterpreter.cpp"
 #define FormatStack RStack<FormatterIFStatement>

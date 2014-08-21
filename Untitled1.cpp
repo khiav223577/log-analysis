@@ -1,6 +1,7 @@
 //#define DEBUG 5
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
+#define BLOCK_SIZE 20000
 //---------------------------------------------------
 #include<stdio.h>
 #include<typeinfo>
@@ -17,7 +18,7 @@
     EvaluateTime evalu_discard;
 #endif
 #include "FormatterController.cpp"
-#include "BlockDataManager.cpp"
+#include "BlockIOManager.cpp"
 //#include "RMap.cpp"
 //#include "testing.cpp"
 //#include "FlexibleInt.cpp"
@@ -97,15 +98,15 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     unsigned int line_count = config->line_count;
     unsigned int block_size = config->block_size;
     BlockIOManager<InputManager > *blockinputer  = new BlockIOManager<InputManager >(input_path , block_size, FILE_MODE_RAW, &setInputer );
-    BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer);
     #ifdef GROUP_FORMATTER_DATA
-        exit(123); //TODO block?
         char *output_path2 = (char *) malloc((strlen(output_path) + 1 + 64) * sizeof(char));
         FormatList &global_formatList = ruby_interface->global_formatList;
         for(int i = 0, size = global_formatList.size(); i < size; ++i){
             sprintf(output_path2, "%s_%d_%s", output_path, i, typeid(*(global_formatList[i])).name());
             global_formatList[i]->outputer = new OutputManager(output_path2, FILE_MODE_RAW);
         }
+    #else
+        BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer);
     #endif
     SHOW_LINE_COUNT(0);
     for(unsigned int i = 1; i <= line_count; ++i){
@@ -114,7 +115,9 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         #endif
         formatter->execute2();
         blockinputer->nextLine();
-        blockoutputer->nextLine();
+        #ifndef GROUP_FORMATTER_DATA
+            blockoutputer->nextLine();
+        #endif
         #ifdef DEBUG
             puts("");
         #endif
@@ -124,7 +127,6 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     ruby_interface->save_config2(output_config, config);
     delete config;
     delete blockinputer;
-    delete blockoutputer;
     #ifdef GROUP_FORMATTER_DATA
         CopyFilesManager *copy_file = new CopyFilesManager(output_path);
         for(int i = 0, size = global_formatList.size(); i < size; ++i){ //merge all files
@@ -133,6 +135,8 @@ inline void second_pass(const char *input_path, const char *output_path, const c
             copy_file->copy(output_path2, false);
         }
         free(output_path2);
+    #else
+        delete blockoutputer;
     #endif
 }
 //------------------------------------------------------------
@@ -197,7 +201,7 @@ int main(int argc, char **argv){
         sprintf( input_path  , "%s%s"      ,  InputPath, fileExtension);
         sprintf(output_path  , "%s.temp1"  , OutputPath);
         sprintf(output_config, "%s.config1", OutputPath);
-        first_pass(input_path, output_path, input_config, output_config, 20000);
+        first_pass(input_path, output_path, input_config, output_config, BLOCK_SIZE);
         free(input_path);
         free(output_path);
         free(input_config);
