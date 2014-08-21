@@ -11,30 +11,12 @@
 #include "windows.cpp"
 #include "FormatterController.cpp"
 #include "RMap.cpp"
+#include "RubyInterpreter.cpp"
 class InputFormatter{
 public:
     FormatList formatList;
     const char *inputStream;
     InputFormatter(){
-        formatList.push_back(new FormatterDate("MMM d HH:mm:ss "));
-        formatList.push_back(new FormatterString<MAX_STRING_SIZE>(" "));
-        formatList.push_back(new FormatterInteger("10"));
-        formatList.push_back(new FormatterDiscard(","));
-        formatList.push_back(new FormatterDate("yyyy/MM/dd HH:mm:ss,"));
-        formatList.push_back(new FormatterString<MAX_STRING_SIZE>(","));
-        formatList.push_back(new FormatterString<MAX_STRING_SIZE>(","));
-        formatList.push_back(new FormatterString<MAX_STRING_SIZE>(","));
-        formatList.push_back(new FormatterInteger("10"));
-        formatList.push_back(new FormatterDiscard(","));
-        formatList.push_back(new FormatterDate("yyyy/MM/dd HH:mm:ss,"));
-        formatList.push_back(new FormatterIPaddr(NULL));
-        formatList.push_back(new FormatterDiscard(","));
-        formatList.push_back(new FormatterIPaddr(NULL));
-        formatList.push_back(new FormatterDiscard(","));
-        formatList.push_back(new FormatterIPaddr(NULL));
-        formatList.push_back(new FormatterDiscard(","));
-        formatList.push_back(new FormatterIPaddr(NULL));
-        formatList.push_back(new FormatterDiscard(","));
     }
     ~InputFormatter(){
         for(FormatList::iterator iter = formatList.begin(); iter != formatList.end(); ++iter) delete *iter;
@@ -57,7 +39,59 @@ FILE *fopen2(const char *filename, const char *mode){
     return f;
 }
 #include "testing.cpp"
+InputFormatter* CreateFormatter(){
+    InputFormatter *formatter = new InputFormatter();
+    RubyInterpreter ruby;
+    ruby.execute_code("$IN_C_CODE = true");
+    ruby.execute_file("./test.rb");
+    const char *types[9] = {"INVALID", "Date", "String", "Int", "IPv4", "DROP", "#if", "#elsif", "#end"};
+    for (int i = 0; i < 9; ++i) rb_funcall(rb_gv_get("$!"), rb_intern("register_hash"),  2, rb_str_new2(types[i]), INT2FIX(i));
+    rb_funcall(rb_gv_get("$!"), rb_intern("read_config"),  1, rb_str_new2("test_config"));
+
+    VALUE array, type, format, extra;
+    while((array  = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0)) != Qnil){
+        type   = rb_ary_entry(array,0);
+        format = rb_ary_entry(array,1);
+        extra  = rb_ary_entry(array,3);
+        if (type == Qnil){
+            puts("Unown type in CreateFormatter");
+            continue;
+        }
+        switch(FIX2INT(type)){
+        case 1:{ //Date
+            formatter->formatList.push_back(new FormatterDate(StringValuePtr(format)));
+            break;}
+        case 2:{ //String
+            formatter->formatList.push_back(new FormatterString(StringValuePtr(format), FIX2INT(extra)));
+            break;}
+        case 3:{ //Int
+            formatter->formatList.push_back(new FormatterInteger(StringValuePtr(format)));
+            break;}
+        case 4:{ //IPv4
+            formatter->formatList.push_back(new FormatterIPaddr(NULL));
+            break;}
+        case 5:{ //DROP
+            formatter->formatList.push_back(new FormatterDiscard(StringValuePtr(format)));
+            break;}
+        }
+    }
+    formatter->execute("Dec  3 04:00:01 iisfw 1,2013/12/03 04:00:01,0011C101825,TRAFFIC,end,1,2013/12/03 04:00:00,140.109.23.120,140.109.254.5,0.0.0.0,0.0.0.0");
+    return formatter;
+/*
+    VALUE array = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0);
+    VALUE test1 = rb_ary_entry(array,0);
+    printf("%s\n",StringValuePtr(test1));
+    VALUE test2 = rb_ary_entry(array,1);
+    printf("%s\n",StringValuePtr(test2));*/
+}
 int main(){
+
+    //InputFormatter *formatter = CreateFormatter();
+    //delete formatter;
+
+    test_InputFormatter();
+    //test_FormatterDate();
+
 
 
 /*
@@ -72,10 +106,8 @@ int main(){
     printf("%d",BlahBlah[key]);
     printf("%d",BlahBlah["123"]);
     return 0;*/
-    InputFormatter formatter2;
-    formatter2.execute("Dec  3 04:00:01 iisfw 1,2013/12/03 04:00:01,0011C101825,TRAFFIC,end,1,2013/12/03 04:00:00,140.109.23.120,140.109.254.5,");
-return 0;
-    test_date_formatter();
+
+
 return 0;
     /*
     char string[] = "a string,of ,,tokens";

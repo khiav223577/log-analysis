@@ -59,12 +59,12 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute(const char ** inputStream){
+    inline int execute(const char ** inputStream){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) formatList[i]->execute(inputStream);
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(inputStream);
         return skip;
     }
-    bool check_condition(){
+    inline bool check_condition(){
         if (boolOperator == '|'){
             if (lExpr->check_condition() == true ) return true;
             if (rExpr->check_condition() == true ) return true;

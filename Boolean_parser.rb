@@ -1,6 +1,6 @@
 class Boolean_parser
 	#match string: "(?:\\"|[^"])*"
-	@@regular_expr = /\s*(?:(\|\|)|(&&)|\((.*)\)|(\w+)\s*(==|!=)\s*"((?:\\"|[^"])*)"|\S+)/
+	@@regular_expr = /\s*(?:(\|\||or)|(&&|and)|\((.*)\)|(\w+)\s*(==|!=)\s*"((?:\\"|[^"])*)"|\S+)/
 	def parse(input)
 		@postfix_buffer = []
 		output_expr(input)

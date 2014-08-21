@@ -3,7 +3,7 @@ void SetColor2(){
     SetColor(i);
     i = (i == 8 ? 2 : i + 1);
 }
-void test_date_formatter(){
+void test_FormatterDate(){
     FormatterDate formatData("yyyy/MM/dd HH:mm:ss");
     InputFormatter formatter;
     srand(time(NULL));
@@ -22,4 +22,27 @@ void test_date_formatter(){
         SetColor2();formatData.execute(&inputStream);
     }
     SetColor(7);
+}
+void test_InputFormatter(){
+    InputFormatter formatter2;
+    formatter2.formatList.push_back(new FormatterDate("MMM d HH:mm:ss "));
+    formatter2.formatList.push_back(new FormatterString(" ", MAX_STRING_SIZE));
+    formatter2.formatList.push_back(new FormatterInteger("10"));
+    formatter2.formatList.push_back(new FormatterDiscard(","));
+    formatter2.formatList.push_back(new FormatterDate("yyyy/MM/dd HH:mm:ss,"));
+    formatter2.formatList.push_back(new FormatterString(",", MAX_STRING_SIZE));
+    formatter2.formatList.push_back(new FormatterString(",", MAX_STRING_SIZE));
+    formatter2.formatList.push_back(new FormatterString(",", MAX_STRING_SIZE));
+    formatter2.formatList.push_back(new FormatterInteger("10"));
+    formatter2.formatList.push_back(new FormatterDiscard(","));
+    formatter2.formatList.push_back(new FormatterDate("yyyy/MM/dd HH:mm:ss,"));
+    formatter2.formatList.push_back(new FormatterIPaddr(NULL));
+    formatter2.formatList.push_back(new FormatterDiscard(","));
+    formatter2.formatList.push_back(new FormatterIPaddr(NULL));
+    formatter2.formatList.push_back(new FormatterDiscard(","));
+    formatter2.formatList.push_back(new FormatterIPaddr(NULL));
+    formatter2.formatList.push_back(new FormatterDiscard(","));
+    formatter2.formatList.push_back(new FormatterIPaddr(NULL));
+    formatter2.formatList.push_back(new FormatterDiscard(","));
+    formatter2.execute("Dec  3 04:00:01 iisfw 1,2013/12/03 04:00:01,0011C101825,TRAFFIC,end,1,2013/12/03 04:00:00,140.109.23.120,140.109.254.5,0.0.0.0,0.0.0.0");
 }

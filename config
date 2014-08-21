@@ -1,3 +1,4 @@
+#MAX_SIZE[511] String
 #DROP_AFTER[,] Int
 #DROP_AFTER[,] IPv4
 Date[MMM d HH:mm:ss ] time1

@@ -33,7 +33,7 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute(const char ** inputStream){
+    inline int execute(const char ** inputStream){
         int num = FormatterInteger::retrieve(inputStream, format);
         if (!SuccessFlag){ //TODO overflow
             exit(1);

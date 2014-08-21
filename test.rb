@@ -3,6 +3,7 @@ require './Config_parser.rb'
 
 if !$IN_C_CODE
 	a = %{
+		#MAX_SIZE[511] String
 		#DROP_AFTER[,] Int
 		#DROP_AFTER[~] IPv4
 		DROP[@]  		//123
@@ -26,17 +27,24 @@ if !$IN_C_CODE
 	
 	exit
 end
-$aaa = ["Date[MMM d HH:mm:ss ] time1;","String:[ ] string1;"]
+$config = Config_Parser.new
 def read_config(config_path)
-	File.open(config_path, 'r'){|f| $buffer = f.read }
-	$buffer = $buffer.split("\n").delete_if{|s| s == ""}
+	$result_buffer = $config.parse_file(config_path)
+end
+$hash = {}
+def register_hash(string, value)
+	$hash[string] = value
 end
 def return_string
-	return [$aaa.shift,"123"]
+	data = $result_buffer.shift #[Type, format, vocabulary, extra]
+	return nil if data == nil
+	case data[0]
+	when "String" ; data[3] = ($config.setting_max_size["String"] || 511)
+	end
+	data[0] = ($hash[data[0]] || 0) #0 is invalid
+	return data
 end
 
-
-$config = Config_Parser.new
 
 
 

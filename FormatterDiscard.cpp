@@ -26,14 +26,14 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute(const char ** inputStream){
+    inline int execute(const char ** inputStream){
         retrieve(inputStream, format);
         return 0;
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
-    void retrieve(const char **input, const char *format){
+    inline void retrieve(const char **input, const char *format){
         int scanfLen = 0;
         sscanf(*input, format, &scanfLen);
         *input += scanfLen;

@@ -20,7 +20,7 @@ public:
         free(prev_result);
         free(format);
     }
-    virtual char *get_prev_result(){ //Will be call by FormatterIFStatement.
+    virtual char *get_prev_result(){ //Will be called by FormatterIFStatement.
         return prev_result;
     }
 };

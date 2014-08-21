@@ -26,7 +26,7 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute(const char ** inputStream){
+    inline int execute(const char ** inputStream){
         unsigned int resule = retrieve(inputStream, format);
         printf("%d.%d.%d.%d\n",(resule >> 24) & 255,(resule >> 16) & 255,(resule >> 8) & 255,(resule >> 0) & 255);
         return 0;
@@ -34,7 +34,7 @@ public:
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
-    unsigned int retrieve(const char **input, const char *format){ //EX: input = 140.109.23.120
+    inline unsigned int retrieve(const char **input, const char *format){ //EX: input = 140.109.23.120
         int scanfLen = 0;
         int a = -1,b = -1,c = -1,d = -1;
         sscanf(*input, format, &a, &b, &c, &d, &scanfLen);
