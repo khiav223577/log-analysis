@@ -1,6 +1,7 @@
-//#define DEBUG 5
+//#define DEBUG 2
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
+//---------------------------------------------------
 #include<stdio.h>
 #include<typeinfo>
 #include<iostream>
@@ -21,6 +22,7 @@
 //#include "FlexibleInt.cpp"
 
 #define MAX_LOG_SIZE 8192
+#define INPUT_MODE FILE_MODE_RAW
 RubyInterpreter *ruby;
 ConfigInterfaceIN1 *ruby_interface;
 InputFormatter *formatter;
@@ -29,19 +31,17 @@ ShowTime showtime;
 #define SHOW_LINE_RANGE 20000
 #define SHOW_LINE_COUNT(COUNT) printf("%8d", (COUNT)); showtime.show("","");
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
-    OutputManager *outputer = new OutputManager(output_path);
+    OutputManager *outputer = new OutputManager(output_path, FILE_MODE_RAW);
     FormatList &global_formatList = ruby_interface->global_formatList;
     for(int i = 0, size = global_formatList.size(); i < size; ++i) global_formatList[i]->outputer = outputer;
     #ifdef DEBUG
       //for(int i = 0, size = global_formatList.size(); i < size; ++i) printf("%d:%s\n", i, typeid(*(global_formatList[i])).name());
     #endif
-
-
-    FILE *file = fopen2(input_path,"r");
+    InputManager *inputer = new InputManager(input_path, INPUT_MODE);
     int line_count = 0;
     char buffer[MAX_LOG_SIZE];
     SHOW_LINE_COUNT(0);
-    while(fgets(buffer, sizeof(buffer), file) != NULL){
+    while(inputer->readLine(buffer, sizeof(buffer)) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
         line_count += 1;
         #ifdef DEBUG
@@ -52,13 +52,12 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
             puts("");
             if (line_count == DEBUG) break;
         #endif
-        //if (line_count == 10000000) break;
         if (line_count % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(line_count); }
         //if (line_count > 10000) break;
     }
     if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
     ruby_interface->save_config1(line_count, output_config);
-    fclose(file);
+    delete inputer;
     delete outputer;
     #ifdef EVALUATE_TIME
         evalu_int.show("Int");
@@ -73,14 +72,14 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     #ifdef GROUP_FORMATTER_DATA
         char *output_path2 = (char *) malloc((strlen(output_path) + 1 + 64) * sizeof(char));
     #else
-        OutputManager *outputer = new OutputManager(output_path);
+        OutputManager *outputer = new OutputManager(output_path, FILE_MODE_RAW);
     #endif
-    InputManager *inputer = new InputManager(input_path);
+    InputManager *inputer = new InputManager(input_path, FILE_MODE_RAW);
     FormatList &global_formatList = ruby_interface->global_formatList;
     for(int i = 0, size = global_formatList.size(); i < size; ++i){
         #ifdef GROUP_FORMATTER_DATA
             sprintf(output_path2, "%s_%d_%s", output_path, i, typeid(*(global_formatList[i])).name());
-            global_formatList[i]->outputer = new OutputManager(output_path2);
+            global_formatList[i]->outputer = new OutputManager(output_path2, FILE_MODE_RAW);
         #else
             global_formatList[i]->outputer = outputer;
         #endif
@@ -115,7 +114,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     #endif
 }
 inline void third_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
-    InputManager *inputer = new InputManager(input_path);
+    InputManager *inputer = new InputManager(input_path, FILE_MODE_RAW);
     FormatList &global_formatList = ruby_interface->global_formatList;
     for(int i = 0, size = global_formatList.size(); i < size; ++i) global_formatList[i]->inputer = inputer;
 
@@ -134,8 +133,10 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
     if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
     delete inputer;
 }
-
 int main(int argc, char **argv){
+    BzipManager::loadBz2Library("lib/bzip2-1.0.6/libbz2-1.0.2.DLL");
+
+
     /*
     PERROR(1 == 1, printf("read BigInt fail, format = %s, input = %s", "000", ":???"););
     return 0;
@@ -145,6 +146,11 @@ int main(int argc, char **argv){
     const char *ConfigPath = "data/input.config";
     //const char *InputPath  = "D:/test/iisfw.log.89"; const char *OutputPath = "D:/test/iisfw.log.89.output";
     const char *InputPath  = "data/input_large"; const char *OutputPath = "data/output_min";
+    #if INPUT_MODE == FILE_MODE_BZ2
+        const char *fileExtension = ".bz2";
+    #elif INPUT_MODE == FILE_MODE_RAW
+        const char *fileExtension = "";
+    #endif
     const int start_pass = 1;
     ruby = new RubyInterpreter();
     switch(start_pass){
@@ -155,11 +161,11 @@ int main(int argc, char **argv){
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, false);
         //return 0;
-        char *input_path    = (char *) malloc(sizeof(char) * strlen( InputPath) + 1 + 0);
+        char *input_path    = (char *) malloc(sizeof(char) * strlen( InputPath) + 1 + 0 + strlen(fileExtension));
         char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
         char *input_config  = NULL;
         char *output_config = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
-        sprintf( input_path  , "%s"        ,  InputPath);
+        sprintf( input_path  , "%s%s"      ,  InputPath, fileExtension);
         sprintf(output_path  , "%s.temp1"  , OutputPath);
         sprintf(output_config, "%s.config1", OutputPath);
         first_pass(input_path, output_path, input_config, output_config);

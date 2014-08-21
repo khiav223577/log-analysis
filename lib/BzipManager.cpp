@@ -9,7 +9,6 @@
 #include "bzip2-1.0.6/bzlib.h"
 
 #ifdef _WIN32
-    #define BZ2_LIBNAME "bzip2-1.0.6/libbz2-1.0.2.DLL"
     #include <windows.h>
 #endif
 
@@ -17,8 +16,8 @@
 
 class BzipManager{
 public:
-    BzipManager(){
-        BzipManager::loadBz2Library();
+    BzipManager(const char *path){
+        if (path != NULL) BzipManager::loadBz2Library(path);
     }
     ~BzipManager(){
     }
@@ -29,12 +28,13 @@ private:
     static bool bz2Loaded;
     static HINSTANCE bz2hLib;
 public:
+
     #ifdef _WIN32
-        static int loadBz2Library(){
+        static int loadBz2Library(const char *path){
             if (bz2Loaded == true) return 0;
-            HINSTANCE lib = LoadLibrary(BZ2_LIBNAME);
+            HINSTANCE lib = LoadLibrary(path);
             if (lib == NULL){
-                fprintf(stderr, "Can't load %s\n", BZ2_LIBNAME);
+                fprintf(stderr, "Can't load %s\n", path);
                 return -1;
             }
             BZ2_bzlibVersion = (const char * (__stdcall *)(       void                    )) GetProcAddress(lib, "BZ2_bzlibVersion");
@@ -59,7 +59,7 @@ public:
             bz2Loaded = false;
         }
     #else
-        static int loadBz2Library(){
+        static int loadBz2Library(const char *path){
             bz2Loaded = true;
         }
         static void freeBz2Library(){
@@ -69,8 +69,8 @@ public:
 //-------------------------------------------
 //  File methods
 //-------------------------------------------
-protected:
-    FILE *openFile(const char *path, const char *mode){
+public:
+    static FILE *openFile(const char *path, const char *mode){
         FILE *file = (path == NULL ? stdout : fopen(path, mode));
         if (file == NULL){
             printf("can't open [%s]\n", path);
@@ -79,7 +79,7 @@ protected:
         }
         return file;
     }
-    BZFILE *openBz2File(const char *path, const char *mode){
+    static BZFILE *openBz2File(const char *path, const char *mode){
         BZFILE *file = (path == NULL ? BZ2_bzdopen(fileno(stdin), mode) : BZ2_bzopen(path, mode));
         if (file == NULL){
             printf("can't bz2openstream\n");
@@ -87,10 +87,10 @@ protected:
         }
         return file;
     }
-    void closeFile(FILE *file){
+    static void closeFile(FILE *file){
         if(file != stdout) fclose(file);
     }
-    void closeFile(BZFILE *file){
+    static void closeFile(BZFILE *file){
         BZ2_bzclose(file);
     }
 //-------------------------------------------

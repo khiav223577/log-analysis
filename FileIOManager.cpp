@@ -18,8 +18,9 @@
 #include "lib/FlexibleInt.cpp"
 #include "lib/FlexibleFile.cpp"
 #include <ruby.h> // it defines F_OK
+
 FILE *fopen2(const char *filename, const char *mode){
-    FILE *f = fopen(filename,mode);
+    FILE *f = fopen(filename, mode);
     #ifdef PERROR
         PERROR(f == NULL, printf("Cannot open %s",filename); );
     #endif
@@ -35,8 +36,12 @@ private:
     unsigned char buffer[OUTPUT_MANAGER_BUFFER_SIZE], bit_counter;
     unsigned int buffer_counter;
 public:
-    OutputManager(const char *filename){
-        file = fopen2(filename, "wb");
+    OutputManager(const char *filename, unsigned int mode = 1){
+        switch(mode){
+        case FILE_MODE_RAW: { file = fopen2(filename, "wb");                    break; }
+        case FILE_MODE_BZ2: { file = BzipManager::openBz2File(filename, "w9");  break; }
+        default:{ PERROR(true, printf("Unknown mode: %d", mode);)}
+        }
         buffer_counter = 0;
         bit_counter = 0;
         memset(buffer, 0, sizeof(buffer));
@@ -148,10 +153,15 @@ class InputManager{
 private:
     FlexibleFile file;
     unsigned char buffer[INPUT_MANAGER_BUFFER_SIZE], bit_counter;
-    unsigned int buffer_counter;
+    unsigned int buffer_counter, buffer_counter_max;
+    bool eof_flag;
 public:
-    InputManager(const char *filename){
-        file = fopen2(filename, "rb");
+    InputManager(const char *filename, unsigned int mode = 1) : eof_flag(false){
+        switch(mode){
+        case FILE_MODE_RAW: { file = fopen2(filename, "rb");                    break; }
+        case FILE_MODE_BZ2: { file = BzipManager::openBz2File(filename, "rb");  break; }
+        default:{ PERROR(true, printf("Unknown mode: %d", mode);)}
+        }
         buffer_counter = 0;
         bit_counter = 0;
         load_data();
@@ -173,13 +183,19 @@ public:
 //-------------------------------------------
     inline void plus_buffer_counter(){
         buffer_counter += 1;
-        if (buffer_counter == OUTPUT_MANAGER_BUFFER_SIZE) load_data();
+        if (buffer_counter == buffer_counter_max) load_data();
     }
     inline void load_data(){
-        file.read(buffer, sizeof(char), INPUT_MANAGER_BUFFER_SIZE);
+        buffer_counter_max = file.read(buffer, sizeof(char), INPUT_MANAGER_BUFFER_SIZE);
         buffer_counter = 0;
+        if (buffer_counter_max == 0) eof_flag = true;
     }
+//-------------------------------------------
+//  ACCESS
+//-------------------------------------------
+    inline bool is_eof(){ return eof_flag; }
     inline unsigned char read_char(){
+        if (eof_flag) return 0;
         if (bit_counter == 0){
             unsigned char data = buffer[buffer_counter];
             plus_buffer_counter();
@@ -192,6 +208,7 @@ public:
         }
     }
     inline int read_int(){
+        if (eof_flag) return 0;
         unsigned char fourBytes[4];
         fourBytes[0] = read_char();
         fourBytes[1] = read_char();
@@ -200,6 +217,7 @@ public:
         return bytes_to_int_Little(fourBytes);
     }
     inline int read_int(unsigned char byte_num){
+        if (eof_flag) return 0;
         unsigned char fourBytes[4];
         fourBytes[0] = (byte_num > 0 ? read_char() : 0);
         fourBytes[1] = (byte_num > 1 ? read_char() : 0);
@@ -210,10 +228,23 @@ public:
     inline long read_long(){
         return (long) read_int(); //TODO: What to do when "long" is not 4-bytes.
     }
+    inline char *readLine(char *output, int maxLength){
+        if (is_eof()) return NULL;
+        int idx = 0;
+        maxLength -= 1;
+        while(idx < maxLength){
+            char c = (char) read_char();
+            output[idx++] = c;
+            if (c == '\n' || is_eof()) break;
+        }
+        output[idx] = '\0';
+        return output;
+    }
 //-------------------------------------------
 //  Extend
 //-------------------------------------------
     inline BigInteger *read_bigInt(){
+        if (eof_flag) return new BigInteger(0);
         int sign = read_char() - 1;
         unsigned int array_len = (unsigned int) read_int();
         unsigned long *array = (unsigned long *) malloc(array_len * sizeof(unsigned long));
@@ -223,6 +254,7 @@ public:
         return bigInt;
     }
     inline int read_n_byte_int(unsigned char byte_num){
+        if (eof_flag) return 0;
         switch(byte_num){
         case 1:{int val = read_int(1); return (val >     127 ? val -      256 : val); }
         case 2:{int val = read_int(2); return (val >   32767 ? val -    65536 : val); }
@@ -235,6 +267,7 @@ public:
         return -1;
     }
     inline unsigned int read_bits(unsigned char bit_num){
+        if (eof_flag) return 0;
         unsigned char fourBytes[4] = {0};
         unsigned int current_idx = 0;
         while(bit_num >= 8){

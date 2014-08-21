@@ -1,7 +1,9 @@
 
 #ifndef ___FlexibleFile_cpp__
 #define ___FlexibleFile_cpp__
-
+#define FILE_MODE_ERR 0
+#define FILE_MODE_RAW 1
+#define FILE_MODE_BZ2 2
 #include "BzipManager.cpp"
 
 class FlexibleFile{
@@ -13,9 +15,9 @@ public:
 //---------------------------------------------
 //  ACCESS
 //---------------------------------------------
-    FlexibleFile(            ) : current_file(0){ }
-    FlexibleFile(  FILE *file) : current_file(0){ setFile(file); }
-    FlexibleFile(BZFILE *file) : current_file(0){ setFile(file); }
+    FlexibleFile(            ) : current_file(FILE_MODE_ERR){ }
+    FlexibleFile(  FILE *file) : current_file(FILE_MODE_ERR){ setFile(file); }
+    FlexibleFile(BZFILE *file) : current_file(FILE_MODE_ERR){ setFile(file); }
     ~FlexibleFile(){
         close();
     }
@@ -23,26 +25,26 @@ public:
     inline FlexibleFile& operator =(BZFILE * const file){ setFile(file); return *this; }
     inline void close(){
         switch(current_file){
-        case  0:{                   return;}
-        case  1:{ closeFile(file1);  break;}
-        case  2:{ closeFile(file2);  break;}
+        case  FILE_MODE_ERR:{                   return;}
+        case  FILE_MODE_RAW:{ closeFile(file1);  break;}
+        case  FILE_MODE_BZ2:{ closeFile(file2);  break;}
         default:{ Perror("Unown type"); }
         }
         //printf("%d\n", current_file);
-        current_file = 0;
+        current_file = FILE_MODE_ERR;
     }
     inline size_t write(void *buffer, size_t size, size_t count){
         switch(current_file){
-        case  1:{ return fwrite(buffer, size, count, file1);        }
-        case  2:{ return BZ2_bzwrite(file2, buffer, size * count);  }
+        case  FILE_MODE_RAW:{ return fwrite(buffer, size, count, file1);        }
+        case  FILE_MODE_BZ2:{ return BZ2_bzwrite(file2, buffer, size * count);  }
         default:{ return Perror("Invalid  write"); }
         }
     }
     inline size_t read(void *buffer, size_t size, size_t count){
         switch(current_file){
-        case  1:{ return fread(buffer, size, count, file1);        }
-        case  2:{ return BZ2_bzread(file2, buffer, size * count);  }
-        default:{ return Perror("Invalid  read"); }
+        case  FILE_MODE_RAW:{ return fread(buffer, size, count, file1);        }
+        case  FILE_MODE_BZ2:{ return BZ2_bzread(file2, buffer, size * count);  }
+        default:{ return Perror("Invalid read"); }
         }
     }
 private:
@@ -58,7 +60,7 @@ private:
         close();
         if (file == NULL) return;
         file1 = file;
-        current_file = 1;
+        current_file = FILE_MODE_RAW;
     }
     inline void closeFile(FILE * const file){
         if(file != stdout) fclose(file);
@@ -70,8 +72,7 @@ private:
         close();
         if (file == NULL) return;
         file2 = file;
-        current_file = 2;
-        BzipManager::loadBz2Library();
+        current_file = FILE_MODE_BZ2;
     }
     inline void closeFile(BZFILE * const file){
         BZ2_bzclose(file);
