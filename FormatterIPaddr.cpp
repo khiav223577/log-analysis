@@ -12,9 +12,15 @@ public:
 //-------------------------------------------------------------------------
     class VirtualCreator : public super::VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
         char *trans_format(const char *_format){
+            PERROR(strlen(_format) != 1, printf("Only support one char delimiter"););
+            char *format = (char *) malloc(2);
+            format[0] = _format[0];
+            format[1] = '\0';
+            return format;
+            /*
             char *format = (char *) malloc(18);
-            sprintf(format, "%%3d.%%3d.%%3d.%%3d%%n");
-            return format; //Ex: format = "%3d.%3d.%3d.%3d%n"
+            sprintf(format, "%%3d%c%%3d%c%%3d%c%%3d%%n", _format[0], _format[0], _format[0]);
+            return format; //Ex: format = "%3d.%3d.%3d.%3d%n"*/
         }
 	};
     FormatterIPaddr(const char *_format) : super(_format, new VirtualCreator()){
@@ -61,11 +67,26 @@ public:
 //-------------------------------------------------------------------------
     inline unsigned int retrieve(const char **input, const char *format){ //EX: input = 140.109.23.120
         int scanfLen = 0;
-        int a = -1,b = -1,c = -1,d = -1;
-        sscanf(*input, format, &a, &b, &c, &d, &scanfLen);
-        PERROR(a == -1 || b == -1 || c == -1 || d == -1, printf("retrieve IP failed. input = %s", *input););
+        //int a = -1,b = -1,c = -1,d = -1;
+        int a = read_a_int(input); *input += 1; //TODO check format?
+        int b = read_a_int(input); *input += 1;
+        int c = read_a_int(input); *input += 1;
+        int d = read_a_int(input);
+        //sscanf(*input, format, &a, &b, &c, &d, &scanfLen);
+        //PERROR(a == -1 || b == -1 || c == -1 || d == -1, printf("retrieve IP failed. input = %s", *input););
         *input += scanfLen;
         return (a << 24) | (b << 16) | (c << 8) | (d << 0);
+    }
+    inline unsigned int read_a_int(const char **input){
+        unsigned int output = 0;
+        const char *inputStream = *input;
+        PERROR(!isdigit(*inputStream), printf("retrieve IP failed. input = %s", *input););
+        while(isdigit(*inputStream)){
+            output = output * 10 + (*inputStream - '0');
+            inputStream += 1;
+        }
+        *input = inputStream;
+        return output;
     }
 };
 

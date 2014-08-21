@@ -51,7 +51,7 @@ public:
             case 1:{ node = new FormatterDate   (StringValuePtr(format));                 break;} //Date
             case 2:{ node = new FormatterString (StringValuePtr(format), FIX2INT(extra)); break;} //String
             case 3:{ node = new FormatterInteger(StringValuePtr(format));                 break;} //Int
-            case 4:{ node = new FormatterIPaddr (NULL);                                   break;} //IPv4
+            case 4:{ node = new FormatterIPaddr (StringValuePtr(format));                 break;} //IPv4
             case 5:{ node = new FormatterDiscard(StringValuePtr(format));                 break;} //DROP
             case 6:{ node = new FormatterDebug  (StringValuePtr(format));                 break;} //#DEBUG
             case 7: case 8:{ //#if, #elsif

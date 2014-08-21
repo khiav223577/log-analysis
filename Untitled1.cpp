@@ -1,4 +1,5 @@
-//#define DEBUG 25
+//#define DEBUG 5
+//#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 #include<stdio.h>
 #include<iostream>
@@ -58,10 +59,10 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
         evalu_discard.show("Discard");
     #endif
 }
-#define GROUP_FORMATTER_DATA2
+#include <typeinfo>
 inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     #ifdef GROUP_FORMATTER_DATA
-        char *output_path2 = (char *) malloc((strlen(output_path) + 1 + 11) * sizeof(char));
+        char *output_path2 = (char *) malloc((strlen(output_path) + 1 + 64) * sizeof(char));
     #else
         OutputManager *outputer = new OutputManager(output_path);
     #endif
@@ -69,7 +70,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     FormatList &global_formatList = ruby_interface->global_formatList;
     for(int i = 0, size = global_formatList.size(); i < size; ++i){
         #ifdef GROUP_FORMATTER_DATA
-            sprintf(output_path2, "%s_%d", output_path, i);
+            sprintf(output_path2, "%s_%d_%s", output_path, i, typeid(*(global_formatList[i])).name());
             global_formatList[i]->outputer = new OutputManager(output_path2);
         #else
             global_formatList[i]->outputer = outputer;
@@ -96,7 +97,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         CopyFilesManager *copy_file = new CopyFilesManager(output_path);
         for(int i = 0, size = global_formatList.size(); i < size; ++i){ //merge all files
             delete global_formatList[i]->outputer;
-            sprintf(output_path2, "%s_%d", output_path, i);
+            sprintf(output_path2, "%s_%d_%s", output_path, i, typeid(*(global_formatList[i])).name());
             copy_file->copy(output_path2, true);
         }
         free(output_path2);
