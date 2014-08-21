@@ -25,16 +25,18 @@ inline void FormatterIFStatement::load_config2(FILE *file){
 inline void FormatterInteger::load_config2(FILE *file){
     char type[7];
     fscanf(file, "%6s", type);
-    if (type[0] == 'I'){ //fprintf(file, "Int %d", Size4FlagAt1);
-        sizeManager1.load(file);
+    if (type[0] == 'I'){ //fprintf(file, "Int");
+
     }else{ //fprintf(file, "BigInt %d", BigIntFlagAt1);
         fscanf(file, " %d", &BigIntFlagAt1);
     }
     //record_min.save(file);
     //record_max.save(file);
-    //fprintf(file, " %d", Size4FlagAt2);
+    //sizeManager1.save(file);
+    //sizeManager2.save(file);
     record_min = FlexibleInt::load(file);
     record_max = FlexibleInt::load(file);
+    sizeManager1.load(file);
     sizeManager2.load(file);
     //if (increasingFuncFlag == true){
     //   fprintf(file, " T");

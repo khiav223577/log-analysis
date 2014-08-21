@@ -51,7 +51,7 @@ protected:
 //------------------------------------------------------------
 public:
     inline KEY_TYPE decompress(unsigned int input){
-        PERROR(hashKeys.size() <= input, printf("[%d <= %d]", hashKeys.size(), input));
+        PERROR(hashKeys.size() <= input, printf("[%d <= %d] ", hashKeys.size(), input); show_keys(hashKeys););
         return hashKeys[input];
     }
 //------------------------------------------------------------
@@ -65,6 +65,12 @@ protected:
     inline void free_memory(char *ele){
         RMap<MAP_TYPE>::FreeClearMap_1(hashTable);
     }
+//------------------------------------------------------------
+//  show keys
+//------------------------------------------------------------
+public:
+    inline void show_keys(std::vector<char *      > keys){ printf("hashKeys[0] = %s\n", hashKeys[0]); }
+    inline void show_keys(std::vector<unsigned int> keys){ printf("hashKeys[0] = %u\n", hashKeys[0]); }
 //------------------------------------------------------------
 //  save
 //------------------------------------------------------------

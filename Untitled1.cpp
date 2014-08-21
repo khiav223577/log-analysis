@@ -52,6 +52,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
             puts("");
             if (line_count == DEBUG) break;
         #endif
+        if (line_count == 10000000) break;
         if (line_count % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(line_count); }
         //if (line_count > 10000) break;
     }
@@ -142,15 +143,15 @@ int main(int argc, char **argv){
     return 0;
     */
     const char *ConfigPath = "data/input.config";
-    //const char *InputPath  = "D:/test/iisfw.log.89";
-    //const char *OutputPath = "D:/test/iisfw.log.89.output";
-    const char *InputPath  = "data/input_large";
-    const char *OutputPath = "data/output_min";
+    const char *InputPath  = "D:/test/iisfw.log.89"; const char *OutputPath = "D:/test/iisfw.log.89.output";
+    //const char *InputPath  = "data/input_large"; const char *OutputPath = "data/output_min";
+    const int start_pass = 3;
     ruby = new RubyInterpreter();
-    puts("#==========================================================");
-    puts("#  First Pass");
-    puts("#==========================================================");
-    {
+    switch(start_pass){
+    case 1:{
+        puts("#==========================================================");
+        puts("#  First Pass");
+        puts("#==========================================================");
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, false);
         //return 0;
@@ -168,11 +169,11 @@ int main(int argc, char **argv){
         free(output_config);
         delete formatter;
         delete ruby_interface;
-    }
-    puts("#==========================================================");
-    puts("#  Second Pass");
-    puts("#==========================================================");
-    {
+        }
+    case 2:{
+        puts("#==========================================================");
+        puts("#  Second Pass");
+        puts("#==========================================================");
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         char *input_path    = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
@@ -190,14 +191,14 @@ int main(int argc, char **argv){
         free(output_config);
         delete formatter;
         delete ruby_interface;
-    }
-    #ifdef GROUP_FORMATTER_DATA
-        return 0;
-    #endif
-    puts("#==========================================================");
-    puts("#  Third Pass");
-    puts("#==========================================================");
-    {
+        #ifdef GROUP_FORMATTER_DATA
+            return 0;
+        #endif
+        }
+    case 3:{
+        puts("#==========================================================");
+        puts("#  Third Pass");
+        puts("#==========================================================");
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         char *input_path    = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
@@ -215,12 +216,12 @@ int main(int argc, char **argv){
         free(output_config);
         delete formatter;
         delete ruby_interface;
+        }
     }
+
     delete ruby;
     //test_InputFormatter();
     //test_FormatterDate();
-
-
 
 /*
     MapChar(int) BlahBlah;

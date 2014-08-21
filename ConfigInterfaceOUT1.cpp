@@ -16,12 +16,12 @@ inline void FormatterIFStatement::save_config1(FILE *file){ //TODO
 inline void FormatterInteger::save_config1(FILE *file){
     if (BigIntFlagAt1 == -1){ //Int
         fprintf(file, "Int");
-        sizeManager1.save(file);
     }else{  //BigInt
         fprintf(file, "BigInt %d", BigIntFlagAt1);
     }
     record_min.save(file);
     record_max.save(file);
+    sizeManager1.save(file);
     fprintf(file, " %c\n", (increasingFuncFlag ? 'T' : 'F'));
 };
 inline void FormatterIPaddr::save_config1(FILE *file){
