@@ -48,8 +48,8 @@ public:
 	BigInteger(const BigUnsigned &x, Sign s);
 
 	// Nonnegative constructor from a BigUnsigned
-	BigInteger(const BigUnsigned &x) : mag(x) {
-		sign = mag.isZero() ? zero : positive;
+	BigInteger(const BigUnsigned &x) : mag(x){
+	    sign = mag.isZero() ? zero : positive;
 	}
 
 	// Constructors from primitive integer types

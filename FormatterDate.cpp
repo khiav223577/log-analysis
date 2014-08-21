@@ -39,12 +39,18 @@ private:
     unsigned char byte_num;
 public:
     int execute1(const char **inputStream){
+        #ifdef EVALUATE_TIME
+            evalu_date.start();
+        #endif
         int date = retrieve(inputStream, format);
         int output = delta_encoding.encode(date); //delta encoding
         if (Size4FlagAt == -1 && (output > 127 || output < -128)) Size4FlagAt = executeCounter;
         outputer->write(output, (Size4FlagAt == -1 ? 1 : 4));
         executeCounter += 1;
         debug(date);
+        #ifdef EVALUATE_TIME
+            evalu_date.stop();
+        #endif
         return 0;
     }
     int execute2(){

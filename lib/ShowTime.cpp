@@ -38,7 +38,26 @@ public:
         Prev_time = tmp;
     }
 };
-
+class EvaluateTime{
+private:
+    int Start_time, Count_time;
+public:
+    inline EvaluateTime(){
+        reset();
+    }
+    inline void start(){
+        Start_time = GetTickCount();
+    }
+    inline void stop(){
+        Count_time += GetTickCount() - Start_time;
+    }
+    inline void show(const char *str1){
+        printf("%-10s: %5dms\n", str1, Count_time);
+    }
+    inline void reset(){
+        Count_time = 0;
+    }
+};
 
 
 #endif

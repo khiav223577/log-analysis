@@ -61,6 +61,9 @@ private:
     unsigned char byte_num, bit_num;
 public:
     int execute1(const char **inputStream){
+        #ifdef EVALUATE_TIME
+            evalu_string.start();
+        #endif
         char *str = retrieve(inputStream, format);
         free(prev_result);
         prev_result = str;
@@ -69,6 +72,9 @@ public:
         outputer->write(output, (Size4FlagAt == -1 ? 1 : 4));
         executeCounter += 1;
         debug();
+        #ifdef EVALUATE_TIME
+            evalu_string.stop();
+        #endif
         return 0;
     }
     int execute2(){

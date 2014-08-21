@@ -8,8 +8,7 @@ HEADER std::string FUNCNAME(const char *inputStream){\
     std::string output("");\
     int scanfLen;\
     char buffer[BUFFERLEN + 1];\
-    sscanf(inputStream, " %n", &scanfLen);\
-    inputStream += scanfLen;\
+    while (*inputStream == ' ' || *inputStream == '\t') inputStream += 1;\
     while(*inputStream != '\0'){\
         int flag = sscanf(inputStream, " %" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
         if (scanfLen == 0 || flag == 0) break;\

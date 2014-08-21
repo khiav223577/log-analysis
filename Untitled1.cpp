@@ -1,8 +1,17 @@
-//#define DEBUG 25
+//#define DEBUG 5
+#define EVALUATE_TIME
 #include<stdio.h>
 #include<iostream>
 #include "windows.cpp"
+//---------------------------------------------------
 #include "lib/ShowTime.cpp"
+#ifdef EVALUATE_TIME
+    EvaluateTime evalu_int;
+    EvaluateTime evalu_string;
+    EvaluateTime evalu_date;
+    EvaluateTime evalu_ip;
+    EvaluateTime evalu_discard;
+#endif
 #include "FormatterController.cpp"
 //#include "RMap.cpp"
 //#include "testing.cpp"
@@ -12,6 +21,7 @@
 RubyInterpreter *ruby;
 ConfigInterfaceIN1 *ruby_interface;
 InputFormatter *formatter;
+//---------------------------------------------------
 ShowTime showtime;
 #define SHOW_LINE_COUNT(COUNT) printf("%6d", (COUNT)); showtime.show("","");
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
@@ -40,6 +50,13 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
     ruby_interface->save_config1(line_count, output_config);
     fclose(file);
     delete outputer;
+    #ifdef EVALUATE_TIME
+        evalu_int.show("Int");
+        evalu_string.show("String");
+        evalu_date.show("Date");
+        evalu_ip.show("IP");
+        evalu_discard.show("Discard");
+    #endif
 }
 inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     OutputManager *outputer = new OutputManager(output_path);
@@ -49,7 +66,6 @@ inline void second_pass(const char *input_path, const char *output_path, const c
          global_formatList[i]->outputer = outputer;
          global_formatList[i]->inputer = inputer;
     }
-
     int line_count = ruby_interface->load_config1(input_config);
     SHOW_LINE_COUNT(0);
     for(int i = 1; i <= line_count; ++i){

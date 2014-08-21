@@ -61,6 +61,9 @@ private:
     DeltaEncoding<FlexibleInt> delta_encoding;
 public:
     int execute1(const char **inputStream){
+        #ifdef EVALUATE_TIME
+            evalu_int.start();
+        #endif
         FlexibleInt prev_int_sav = prev_int;
         if (BigIntFlagAt1 == -1){
             int value = retrieve(inputStream, format);
@@ -70,14 +73,14 @@ public:
         if (BigIntFlagAt1 != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
         if (initialized){
             if (BigIntFlagAt1 == -1){ //just for speed up. (reduce exec-time from 0.8s to 0.08s for 100k lines of data)
-                if (prev_int.getValue() < record_min.getValue())  record_min.setValue(prev_int.getValue());
-                if (prev_int.getValue() > record_max.getValue())  record_max.setValue(prev_int.getValue());
+                if      (prev_int.getValue() > record_max.getValue())  record_max.setValue(prev_int.getValue());
+                else if (prev_int.getValue() < record_min.getValue())  record_min.setValue(prev_int.getValue());
+                if (increasingFuncFlag && prev_int.getValue() < prev_int_sav.getValue()) increasingFuncFlag = false;
             }else{
-                if (prev_int < record_min) record_min = prev_int;
-                if (prev_int > record_max) record_max = prev_int;
+                if      (prev_int > record_max) record_max = prev_int;
+                else if (prev_int < record_min) record_min = prev_int;
+                if (increasingFuncFlag && prev_int < prev_int_sav) increasingFuncFlag = false;
             }
-            if (increasingFuncFlag && (prev_int - prev_int_sav) < 0) increasingFuncFlag = false;
-
         }else{
             initialized = true;
             record_min = prev_int;
@@ -86,12 +89,14 @@ public:
         if (prev_int.isBigInt()){
             outputer->write(prev_int.getValuePtr());
         }else{
-            if (Size4FlagAt1 == -1 && (prev_int > 127 || prev_int < -128)) Size4FlagAt1 = executeCounter;
+            if (Size4FlagAt1 == -1 && (prev_int.getValue() > 127 || prev_int.getValue() < -128)) Size4FlagAt1 = executeCounter;
             outputer->write(prev_int.getValue(), (Size4FlagAt1 == -1 ? 1 : 4));
         }
-
         executeCounter += 1;
         debug();
+        #ifdef EVALUATE_TIME
+            evalu_int.stop();
+        #endif
         return 0;
     }
     int execute2(){
@@ -113,16 +118,15 @@ public:
             if (output.isBigInt()){
                 outputer->write(output.getValuePtr());
             }else{
-                if (Size4FlagAt2 == -1 && output > 255) Size4FlagAt2 = executeCounter;
+                if (Size4FlagAt2 == -1 && output.getValue() > 255) Size4FlagAt2 = executeCounter;
                 outputer->write(output.getValue(), (Size4FlagAt2 == -1 ? 1 : 4));
             }
         }else if (record_range.isBigInt() == false){
             FlexibleInt output = (prev_int - record_min);
             bool success = output.try_to_cast_to_int();
             PERROR(success == false, printf("Unable to cast BigInt to int");); //should always be able to.
-            int value = output.getValue();
-            if (Size4FlagAt2 == -1 && value > 255) Size4FlagAt2 = executeCounter;
-            outputer->write(value, (Size4FlagAt2 == -1 ? 1 : 4));
+            if (Size4FlagAt2 == -1 && output.getValue() > 255) Size4FlagAt2 = executeCounter;
+            outputer->write(output.getValue(), (Size4FlagAt2 == -1 ? 1 : 4));
         }else{
             if (prev_int.isBigInt()){
                 outputer->write(prev_int.getValuePtr());
@@ -175,7 +179,7 @@ public:
         SuccessFlag = false;
         const char *inputPtr = *input;
         int scanfLen = 0, result;
-        if (*inputPtr == ' ' || *inputPtr == '\t') inputPtr += 1; //use for speed up. (reduce exec-time from 0.25s to 0.05s for 100k lines of data)
+        while (*inputPtr == ' ' || *inputPtr == '\t') inputPtr += 1; //use for speed up. (reduce exec-time from 0.25s to 0.05s for 100k lines of data)
         //sscanf(inputPtr, "%*[ \f\n\r\t\v]%n", &scanfLen);   //remove white-space characters
         //inputPtr += scanfLen;
         sscanf(inputPtr, format, &result, &scanfLen);       //read integer.

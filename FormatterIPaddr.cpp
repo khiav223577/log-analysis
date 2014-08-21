@@ -29,9 +29,15 @@ public:
 //  execute
 //--------------------------------------
     int execute1(const char **inputStream){
+        #ifdef EVALUATE_TIME
+            evalu_ip.start();
+        #endif
         unsigned int result = retrieve(inputStream, format);
         outputer->write((int) result);
         debug(result);
+        #ifdef EVALUATE_TIME
+            evalu_ip.stop();
+        #endif
         return 0;
     }
     int execute2(){
