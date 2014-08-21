@@ -82,10 +82,12 @@ public:
 	const BigUnsigned &getMagnitude() const { return mag; }
 
 	// Some accessors that go through to the magnitude
-	unsigned int getLength() const { return mag.getLength(); }
-	unsigned int getCapacity() const { return mag.getCapacity(); }
-	Blk getBlock(unsigned int i) const { return mag.getBlock(i); }
-	bool isZero() const { return sign == zero; } // A bit special
+	inline unsigned int getLength() const { return mag.getLength(); }
+	inline unsigned int getCapacity() const { return mag.getCapacity(); }
+	inline Blk* getBuffer() const { return mag.getBuffer();}
+	inline unsigned int getBufferLen() const { return mag.getBufferLen();}
+	inline Blk getBlock(unsigned int i) const { return mag.getBlock(i); }
+	inline bool isZero() const { return sign == zero; } // A bit special
 
 	// COMPARISONS
 

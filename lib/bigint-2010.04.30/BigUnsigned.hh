@@ -87,12 +87,14 @@ public:
 
 	/* Returns the requested block, or 0 if it is beyond the length (as if
 	 * the number had 0s infinitely to the left). */
-	Blk getBlock(unsigned int i) const { return i >= curr_len ? 0 : buffer[i]; }
+    inline Blk* getBuffer() const { return buffer;}
+    inline unsigned int getBufferLen() const { return curr_len;}
+	inline Blk getBlock(unsigned int i) const { return i >= curr_len ? 0 : buffer[i]; }
 	/* Sets the requested block.  The number grows or shrinks as necessary. */
 	void setBlock(unsigned int i, Blk newBlock);
 
 	// The number is zero if and only if the canonical length is zero.
-	bool isZero() const { return NumberlikeArray<Blk>::isEmpty(); }
+	inline bool isZero() const { return NumberlikeArray<Blk>::isEmpty(); }
 
 	/* Returns the length of the number in bits, i.e., zero if the number
 	 * is zero and otherwise one more than the largest value of bi for
@@ -100,9 +102,7 @@ public:
 	unsigned int bitLength() const;
 	/* Get the state of bit bi, which has value 2^bi.  Bits beyond the
 	 * number's length are considered to be 0. */
-	bool getBit(unsigned int bi) const {
-		return (getBlock(bi / N) & (Blk(1) << (bi % N))) != 0;
-	}
+	inline bool getBit(unsigned int bi) const { return (getBlock(bi / N) & (Blk(1) << (bi % N))) != 0; }
 	/* Sets the state of bit bi to newBit.  The number grows or shrinks as
 	 * necessary. */
 	void setBit(unsigned int bi, bool newBit);
@@ -113,16 +113,12 @@ public:
 	CmpRes compareTo(const BigUnsigned &x) const;
 
 	// Ordinary comparison operators
-	bool operator ==(const BigUnsigned &x) const {
-		return NumberlikeArray<Blk>::operator ==(x);
-	}
-	bool operator !=(const BigUnsigned &x) const {
-		return NumberlikeArray<Blk>::operator !=(x);
-	}
-	bool operator < (const BigUnsigned &x) const { return compareTo(x) == less   ; }
-	bool operator <=(const BigUnsigned &x) const { return compareTo(x) != greater; }
-	bool operator >=(const BigUnsigned &x) const { return compareTo(x) != less   ; }
-	bool operator > (const BigUnsigned &x) const { return compareTo(x) == greater; }
+	inline bool operator ==(const BigUnsigned &x) const { return NumberlikeArray<Blk>::operator ==(x); }
+	inline bool operator !=(const BigUnsigned &x) const { return NumberlikeArray<Blk>::operator !=(x); }
+	inline bool operator < (const BigUnsigned &x) const { return compareTo(x) == less   ; }
+	inline bool operator <=(const BigUnsigned &x) const { return compareTo(x) != greater; }
+	inline bool operator >=(const BigUnsigned &x) const { return compareTo(x) != less   ; }
+	inline bool operator > (const BigUnsigned &x) const { return compareTo(x) == greater; }
 
 	/*
 	 * BigUnsigned and BigInteger both provide three kinds of operators.

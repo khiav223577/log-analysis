@@ -31,7 +31,9 @@ public:
         }
 	};
 	FlexibleInt prev_int;
-    FormatterInteger(const char *_format) : super(_format, new VirtualCreator()), BigIntFlag(false){
+    FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
+        BigIntFlagAt = -1;
+        execute1Counter = 0;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
@@ -43,16 +45,17 @@ public:
 //  execute
 //--------------------------------------
 private:
-    bool SuccessFlag, BigIntFlag;
+    int execute1Counter, BigIntFlagAt;
+    bool SuccessFlag;
     FlexibleInt record_min, record_max;
 public:
     int execute1(OutputManager *outputer, const char **inputStream){
-        if (BigIntFlag == false){
+        if (BigIntFlagAt == -1){
             int value = retrieve(inputStream, format);
             if (SuccessFlag) prev_int = FlexibleInt(value);
-            else BigIntFlag = true;
+            else BigIntFlagAt = execute1Counter;
         }
-        if (BigIntFlag == true) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
+        if (BigIntFlagAt != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
         SetColor2(); prev_int.output(); SetColor(7);//DEBUG
         if (initialized){
             if (prev_int < record_min) record_min = prev_int;
@@ -62,7 +65,8 @@ public:
             record_min = prev_int;
             record_max = prev_int;
         }
-        outputer->write(prev_int.getValue()); // TODO output BigInt. bigIntegerToString
+        outputer->write(prev_int);
+        execute1Counter += 1;
         return 0;
     }
 //-------------------------------------------------------------------------

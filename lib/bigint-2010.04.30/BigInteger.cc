@@ -32,7 +32,7 @@ BigInteger::BigInteger(const Blk *b, unsigned int blen, Sign s) : mag(b, blen) {
 }
 
 BigInteger::BigInteger(const BigUnsigned &x, Sign s) : mag(x) {
-	switch (s) {
+	switch(s){
 	case zero:
 		if (!mag.isZero()) throw "BigInteger::BigInteger(const BigUnsigned &, Sign): Cannot use a sign of zero with a nonzero magnitude";
 		sign = zero;
