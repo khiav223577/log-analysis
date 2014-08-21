@@ -46,6 +46,16 @@ if !$IN_C_CODE
 			String[,] string5
 		#end
 	}
+	a = %{
+		String[,] IP_Protocol
+		String[,] Action
+		Char formatTest{
+		    :input  => false, //consume
+		    :input  => false, //consume
+		    :output => false, //store
+		    :output => false, //store
+		}
+	}
 	$config = Config_Parser.new
 	$config.parse(a)
 	
@@ -62,11 +72,8 @@ def register_hash(keys)
 	keys.each_with_index{|key, idx| $hash[key] = idx}
 end
 def return_string
-	data = $result_buffer.shift #[Type, format, vocabulary, extra]
+	data = $result_buffer.shift #[Type, format, vocabulary, hash]
 	return nil if data == nil
-	case data[0]
-	when "String" ; data[3] = ($config.setting_max_size["String"] || 511)
-	end
 	data[0] = ($hash[data[0]] || 0) #0 is invalid
 	return data
 end

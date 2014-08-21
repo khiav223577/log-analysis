@@ -18,11 +18,11 @@ class Config_Parser
 			buffer << ["EXIT_BLOCK"]
 			nested_symbols.pop.each{|key, value| global_symbols[key] = value } 
 		}
+		input.gsub!(/({[^}]*})/){|hash| hash.gsub(/(\/\/.*)\n/, "").delete("\t \n") } #let hash in one line.
 		for line in input.split("\n")
 			line_count += 1
-			line.sub!(/^\s*/,"")
 			line.sub!(/((?:"(?:\\"|[^"])*"|.)*?)\s*\/\/.*$/,'\1') #match "//" that are not in a string
-			line.sub!(/\s*$/,"")
+			line.strip! #removes leading and trailing whitespaces
 			#p line and next #debug show lines
 			case
 			when line =~ /^\s*$/ ; next
@@ -54,9 +54,11 @@ class Config_Parser
 				local_symbols = nested_symbols[-1]
 				buffer << [$1]
 			else
+				hash = {}
 				case
 				when line =~ /^(Date)\[(.*)\] \s*(\w+)/
 				when line =~ /^(String)\[(.*)\] \s*(\w+)/
+					hash[:max_size] = (@setting_max_size["String"] || 511)
 				when line =~ /^(Char)() \s*(\w+)/
 				when line =~ /^(Int)\[([0-9]+)\] \s*(\w+)/
 				when line =~ /^(IPv4)\[(.*)\] \s*(\w+)/
@@ -69,9 +71,7 @@ class Config_Parser
 					local_symbols[$3] = global_symbols[$3]
 					global_symbols[$3] = [buffer_item_counter, local_symbols[:buffer_start]]
 				end
-				data = [$1,$2.extract_escape_symbol]
-				data << $3 if $3
-				buffer << data #[Type, format, vocabulary, extra]
+				buffer << [$1,$2.extract_escape_symbol, $3, hash] #[Type, format, vocabulary, hash] 
 				buffer_item_counter += 1
 				if (drop_after = @setting_drop_after[$1])
 					buffer << ["DROP", drop_after]

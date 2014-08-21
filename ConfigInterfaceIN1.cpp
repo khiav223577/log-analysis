@@ -37,11 +37,12 @@ public:
         IFList ifList;
         int skip_base = 0;
         FormatterController *node;
-        VALUE array, type, format, extra;
+        VALUE array, type, format, hash;
         while((array  = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0)) != Qnil){
-            type   = rb_ary_entry(array,0); //[type, format, variable_name, extra]
+            type   = rb_ary_entry(array,0); //[type, format, variable_name, hash]
             format = rb_ary_entry(array,1);
-            extra  = rb_ary_entry(array,3);
+            hash   = rb_ary_entry(array,3);
+
             if (type == Qnil){
                 puts("Unown type in CreateFormatter");
                 continue;
@@ -71,9 +72,15 @@ public:
             case  5:{ //EXIT_BLOCK
                 return;
                 break;}
+            //------------------------------
+            //  Formatter
+            //------------------------------
             case  6:{ node = new FormatterDebug  (StringValuePtr(format));                 break;} //#DEBUG
             case  7:{ node = new FormatterDate   (StringValuePtr(format));                 break;} //Date
-            case  8:{ node = new FormatterString (StringValuePtr(format), FIX2INT(extra)); break;} //String
+            case  8:{ //String
+                int max_size = FIX2INT(rb_hash(hash, "max_size"));
+                node = new FormatterString(StringValuePtr(format), max_size);
+                break;}
             case  9:{ node = new FormatterInteger(StringValuePtr(format));                 break;} //Int
             case 10:{ node = new FormatterIPaddr (StringValuePtr(format));                 break;} //IPv4
             case 11:{ node = new FormatterDiscard(StringValuePtr(format));                 break;} //DROP

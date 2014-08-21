@@ -64,8 +64,17 @@ public:
         rb_load_protect(rb_str_new2(path), 0, &error_status);
         error_handling();
     }
+//--------------------------------------------------------
+//  Utility
+//--------------------------------------------------------
+    static inline VALUE get_rb_symbol(const char *string){
+        return ID2SYM(rb_intern(string));
+    }
+    static inline VALUE access_hash(VALUE hash, const char *string){
+        return rb_hash_aref(hash, get_rb_symbol(string));
+    }
 };
-
+#define rb_hash(hash, string) RubyInterpreter::access_hash(hash, string)
 
 
 #endif
