@@ -42,7 +42,9 @@ public:
     }
 public:
     virtual void save_config1(FILE *file);
+    virtual void save_config2(FILE *file);
     virtual void load_config1(FILE *file);
+    virtual void load_config2(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------
@@ -60,13 +62,17 @@ public:
         debug();
         return 0;
     }
-    int execute2(InputManager *inputer){
+    int execute2(OutputManager *outputer, InputManager *inputer){
         unsigned int data;
         unsigned char byte_num = 4;
         if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
         data = (unsigned int) inputer->read_int(byte_num);
         prev_result = decompress(data);
         executeCounter += 1;
+        debug();
+        return 0;
+    }
+    int execute3(InputManager *inputer){
         debug();
         return 0;
     }

@@ -22,7 +22,9 @@ public:
     }
 public:
     virtual void save_config1(FILE *file);
+    virtual void save_config2(FILE *file);
     virtual void load_config1(FILE *file);
+    virtual void load_config2(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------
@@ -30,7 +32,10 @@ public:
         retrieve(inputStream, format);
         return 0;
     }
-    int execute2(InputManager *inputer){
+    int execute2(OutputManager *outputer, InputManager *inputer){
+        return 0;
+    }
+    int execute3(InputManager *inputer){
         return 0;
     }
 //-------------------------------------------------------------------------

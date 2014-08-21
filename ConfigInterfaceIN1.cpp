@@ -126,11 +126,26 @@ public:
         for(int i = 0; i < size; ++i) global_formatList[i]->save_config1(file);
         fclose(file);
     }
+    void save_config2(int line_count, const char *filename){
+        FILE *file = fopen2(filename, "w");
+        fprintf(file, "%d\n", line_count);
+        int size = global_formatList.size();
+        for(int i = 0; i < size; ++i) global_formatList[i]->save_config2(file);
+        fclose(file);
+    }
     int load_config1(const char *filename){
         FILE *file = fopen2(filename, "r");
         int line_count, size = global_formatList.size();
         fscanf(file, "%d\n", &line_count);
         for(int i = 0; i < size; ++i) global_formatList[i]->load_config1(file);
+        fclose(file);
+        return line_count;
+    }
+    int load_config2(const char *filename){
+        FILE *file = fopen2(filename, "r");
+        int line_count, size = global_formatList.size();
+        fscanf(file, "%d\n", &line_count);
+        for(int i = 0; i < size; ++i) global_formatList[i]->load_config2(file);
         fclose(file);
         return line_count;
     }

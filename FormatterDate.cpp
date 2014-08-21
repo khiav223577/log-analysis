@@ -26,7 +26,9 @@ public:
     }
 public:
     virtual void save_config1(FILE *file);
+    virtual void save_config2(FILE *file);
     virtual void load_config1(FILE *file);
+    virtual void load_config2(FILE *file);
     DeltaEncoding delta_encoding;
 //--------------------------------------
 //  execute
@@ -43,12 +45,15 @@ public:
         debug(date);
         return 0;
     }
-    int execute2(InputManager *inputer){
+    int execute2(OutputManager *outputer, InputManager *inputer){
         unsigned char byte_num = 4;
         if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
         int date = delta_encoding.decode(inputer->read_n_byte_int(byte_num)); //delta encoding
         executeCounter += 1;
         debug(date);
+        return 0;
+    }
+    int execute3(InputManager *inputer){
         return 0;
     }
     inline void debug(int date){
