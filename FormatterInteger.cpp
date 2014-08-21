@@ -83,7 +83,7 @@ public:
             unsigned char byte_num = 4;
             if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
             prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
-            outputer->write_n_byte_int(prev_int.getValue(), (byte_num == 1 ? 1 : 4));
+            outputer->write_n_byte_int(prev_int.getValue(), byte_num);
         }else{
             prev_int = FlexibleInt(inputer->read_bigInt());
             outputer->write(prev_int.getValuePtr());

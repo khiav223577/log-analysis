@@ -164,7 +164,8 @@ public:
         unsigned int buffer_len = (unsigned int) read_int();
         unsigned long *buffer = (unsigned long *) malloc(buffer_len * sizeof(unsigned long));
         fread(buffer, sizeof(unsigned long), buffer_len, file);
-        BigInteger *bigInt = new BigInteger(buffer, buffer_len, BigInteger::Sign(sign));        free(buffer);
+        BigInteger *bigInt = new BigInteger(buffer, buffer_len, BigInteger::Sign(sign));
+        free(buffer);
         return bigInt;
     }
     inline int read_n_byte_int(unsigned char byte_num){

@@ -67,7 +67,7 @@ public:
         unsigned char byte_num = 4;
         if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
         output = (unsigned int) inputer->read_int(byte_num);
-        outputer->write(output, (Size4FlagAt == -1 ? 1 : 4));
+        outputer->write(output, byte_num);
         prev_result = decompress(output);
         executeCounter += 1;
         debug();
