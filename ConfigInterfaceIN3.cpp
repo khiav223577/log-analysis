@@ -35,12 +35,19 @@ inline void FormatterInteger::load_config2(FILE *file){
     record_max = FlexibleInt::load(file);
     fscanf(file, " %d", &Size4FlagAt2);
     //if (increasingFuncFlag == true){
-    //   fprintf(file, " T\n");
-    //}else fprintf(file, " F\n");
+    //   fprintf(file, " T");
+    //   delta_encoding.get_first_value().save();
+    //}else fprintf(file, " F");
     char tmp1;
-    fscanf(file, " %c\n", &tmp1);
+    fscanf(file, " %c", &tmp1);
     PERROR(tmp1 != 'T' && tmp1 != 'F', printf("syntax error"););
     increasingFuncFlag = (tmp1 == 'T' ? true : false);
+    if (increasingFuncFlag) delta_encoding.set_first_value(FlexibleInt::load(file));
+    fscanf(file, "\n");
+
+
+
+
 
     record_range = (record_max - record_min);
     record_range.try_to_cast_to_int();

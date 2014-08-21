@@ -21,8 +21,10 @@ inline void FormatterInteger::save_config2(FILE *file){
     record_max.save(file);
     fprintf(file, " %d", Size4FlagAt2);
     if (increasingFuncFlag == true){
-       fprintf(file, " T\n");
-    }else fprintf(file, " F\n");
+       fprintf(file, " T");
+       delta_encoding.get_first_value().save(file);
+    }else fprintf(file, " F");
+    fprintf(file, "\n");
 };
 inline void FormatterIPaddr::save_config2(FILE *file){
     fprintf(file, "IPv4\n");

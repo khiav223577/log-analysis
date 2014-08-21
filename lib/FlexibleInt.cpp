@@ -21,12 +21,11 @@ public:
     inline FlexibleInt(BigInteger *_valuePtr) : bigInt_flag(true){
         setValuePtr(_valuePtr);
     }
+    inline FlexibleInt(const FlexibleInt &x) : bigInt_flag(false){
+        this->set(x);
+    }
     ~FlexibleInt(){
-        if (isBigInt()){
-            //std::cout << *(getValuePtr()) << std::endl;
-            delete inner_data.valuePtr;
-            inner_data.valuePtr = NULL;
-        }
+        clearBigInt();
         /* testing
         FlexibleInt a(new BigInteger(1)), b(new BigInteger(3));
         a = b + b + FlexibleInt(new BigInteger(12));
@@ -46,6 +45,13 @@ public:
 //----------------------------------------------
 //  ACCESS
 //----------------------------------------------
+    inline void clearBigInt(){
+        if (bigInt_flag == false) return;
+        bigInt_flag = false;
+        //std::cout << *(getValuePtr()) << std::endl;
+        delete inner_data.valuePtr;
+        inner_data.valuePtr = NULL;
+    }
     inline void   setBigInt()               { bigInt_flag = true;         }
     inline void setValuePtr(BigInteger *ptr){ inner_data.valuePtr = ptr;  }
     inline void    setValue(int _value)     { inner_data.value = _value;  }
@@ -61,7 +67,7 @@ public:
         if (!isBigInt()) return true;
         try{
             int result = getValuePtr()->toInt(); //may cause exception
-            bigInt_flag = false;
+            clearBigInt();
             setValue(result);
             return true;
         }catch (const char* message){
@@ -69,35 +75,56 @@ public:
         }
     }
 //----------------------------------------------
-//  Operator
+//  Operator Core
 //----------------------------------------------
-    inline FlexibleInt operator +(const FlexibleInt &x) const {
-        FlexibleInt ans;
-        if (isBigInt() || x.isBigInt()){
-            ans.setBigInt();
-            ans.setValuePtr(new BigInteger(GETVALUE(*this) + GETVALUE(x)));
-        }else{
-            ans.setValue(getValue() + x.getValue());
-        }
-        return ans;
-    }
-    inline FlexibleInt operator -(const FlexibleInt &x) const {
-        FlexibleInt ans;
-        if (isBigInt() || x.isBigInt()){
-            ans.setBigInt();
-            ans.setValuePtr(new BigInteger(GETVALUE(*this) - GETVALUE(x)));
-        }else{
-            ans.setValue(getValue() - x.getValue());
-        }
-        return ans;
-    }
-    inline FlexibleInt& operator =(const FlexibleInt &x){
-        if (x.isBigInt()) setBigInt();
-        if (isBigInt()){
+    inline void set(const FlexibleInt &x){
+        if (x.isBigInt()){
+            setBigInt();
             setValuePtr(new BigInteger(GETVALUE(x)));
         }else{
+            clearBigInt();
             setValue(x.getValue());
         }
+    }
+    inline void set_by_add(const FlexibleInt &x, const FlexibleInt &y){
+        if (x.isBigInt() || y.isBigInt()){
+            setBigInt();
+            setValuePtr(new BigInteger(GETVALUE(x) + GETVALUE(y)));
+        }else{
+            setValue(x.getValue() + y.getValue());
+        }
+    }
+    inline void set_by_sub(const FlexibleInt &x, const FlexibleInt &y){
+        if (x.isBigInt() || y.isBigInt()){
+            setBigInt();
+            setValuePtr(new BigInteger(GETVALUE(x) - GETVALUE(y)));
+        }else{
+            setValue(x.getValue() - y.getValue());
+        }
+    }
+//----------------------------------------------
+//  Operators
+//----------------------------------------------
+    inline FlexibleInt operator +(const FlexibleInt &x) const{
+        FlexibleInt ans;
+        ans.set_by_add(*this, x);
+        return ans;
+    }
+    inline FlexibleInt operator -(const FlexibleInt &x) const{
+        FlexibleInt ans;
+        ans.set_by_sub(*this, x);
+        return ans;
+    }
+    inline FlexibleInt& operator +=(const FlexibleInt &x){
+        this->set_by_add(*this, x);
+        return *this;
+    }
+    inline FlexibleInt& operator -=(const FlexibleInt &x){
+        this->set_by_sub(*this, x);
+        return *this;
+    }
+    inline FlexibleInt& operator =(const FlexibleInt &x){
+        this->set(x);
         return *this;
     }
     inline bool operator ==(const FlexibleInt &x) const { return GETVALUE(*this) == GETVALUE(x); }

@@ -38,7 +38,7 @@ public:
         Size4FlagAt2 = -1;
         executeCounter = 0;
         byte_num = 1;
-        increasingFuncFlag = false; //TODO: true
+        increasingFuncFlag = true;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
@@ -100,7 +100,7 @@ public:
             FlexibleInt output = delta_encoding.encode(prev_int); //delta encoding
             if (BigIntFlagAt2 == -1){
                 output.try_to_cast_to_int();
-                if (output.isBigInt() == false) BigIntFlagAt2 = executeCounter;
+                if (output.isBigInt()) BigIntFlagAt2 = executeCounter;
             }
             if (output.isBigInt()){
                 outputer->write(output.getValuePtr());
@@ -130,7 +130,15 @@ public:
         if (SameFlag){
             prev_int = record_min;
         }else if (increasingFuncFlag == true){
-
+            bool isBigInt = (BigIntFlagAt2 != -1 && executeCounter >= BigIntFlagAt2);
+            FlexibleInt delta;
+            if (isBigInt){
+                delta = FlexibleInt(inputer->read_bigInt());
+            }else{
+                if (Size4FlagAt2 != -1 && executeCounter >= Size4FlagAt2) byte_num = 4;
+                delta = FlexibleInt(inputer->read_n_byte_int(byte_num));
+            }
+            prev_int = delta_encoding.decode(delta); //delta encoding
         }else if (record_range.isBigInt() == false){
             if (Size4FlagAt2 != -1 && executeCounter >= Size4FlagAt2) byte_num = 4;
             prev_int = record_min + FlexibleInt(inputer->read_n_byte_int(byte_num));

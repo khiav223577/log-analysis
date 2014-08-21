@@ -5,6 +5,7 @@
 #include<stdio.h>
 #define PERROR(E, CODE)\
     if ((E)){\
+        SetColor( 7); puts("\n");                    \
         SetColor(12); printf("ERROR: ");             \
         SetColor( 7); printf("(%s) at ", #E);        \
         SetColor(10); printf("%s ",__func__);        \
