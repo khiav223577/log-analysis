@@ -31,6 +31,7 @@ public:
     }
     ~FormatterString(){
         RMap<MapChar(int)>::FreeClearMap_1(hashTable);
+        free(prev_result);
     }
     char *get_prev_string(){ //Will be called by FormatterIFStatement.
         PERROR(prev_result == NULL, printf("Error: fails to get_prev_string() in FormatterString."););
@@ -44,6 +45,7 @@ public:
 //--------------------------------------
     int execute1(OutputManager *outputer, const char **inputStream){
         char *str = retrieve(inputStream, format);
+        free(prev_result);
         prev_result = str;
         outputer->write(compress(str));
         debug();
@@ -82,7 +84,10 @@ private:
     int hashValueCounter;
 public:
     inline unsigned int compress(char *input){
-        int value = RMap<MapChar(int)>::InsertKeyToMap(hashTable, input, hashValueCounter);
+        int mem_size = (strlen(input) + 1) * sizeof(char);
+        char *key = (char *) malloc(mem_size);
+        memcpy(key, input ,mem_size);
+        int value = RMap<MapChar(int)>::InsertKeyToMap(hashTable, key, hashValueCounter);
         if (value == hashValueCounter){
             hashKeys.push_back(input);
             hashValueCounter += 1; //str is a new key!
