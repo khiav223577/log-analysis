@@ -3,6 +3,7 @@
 #define ___FileIOManager_cpp__
 #define OUTPUT_MANAGER_BUFFER_SIZE 4096
 #define INPUT_MANAGER_BUFFER_SIZE 4096
+#define COPYFILES_MANAGER_BUFFER_SIZE 4096
 #define SIZE_OF_UINT sizeof(unsigned int)
 //DATA >>= (SIZE_OF_UINT << 3); will trigger compiler warning....
 #define CHECK_AND_WRITE_BLOCK(DATA, INDEX) \
@@ -253,6 +254,30 @@ public:
         return bytes_to_int_Little(fourBytes);
     }
 };
+
+class CopyFilesManager{
+private:
+    FILE *file;
+    unsigned char buffer[COPYFILES_MANAGER_BUFFER_SIZE];
+public:
+    CopyFilesManager(const char *filename){
+        file = fopen2(filename, "wb");
+    }
+    ~CopyFilesManager(){
+        fclose(file);
+    }
+    inline void copy(const char *filename, bool remove_flag = false){
+        FILE *input_file = fopen2(filename, "rb");
+        int number;
+        while((number = fread(buffer, sizeof(char), COPYFILES_MANAGER_BUFFER_SIZE, input_file)) > 0){
+            fwrite(buffer, sizeof(char), number, file);
+        }
+        fclose(input_file);
+        if (remove_flag) remove(filename);
+    }
+
+};
+
 
 #undef SIZE_OF_UINT
 #undef CHECK_AND_WRITE_BLOCK

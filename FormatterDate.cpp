@@ -21,7 +21,6 @@ public:
         }
 	};
     FormatterDate(const char *_format) : super(_format, new VirtualCreator()){
-        Size4FlagAt = -1;
         byte_num = 1;
         executeCounter = 0;
     }
@@ -35,7 +34,8 @@ public:
 //  execute
 //--------------------------------------
 private:
-    int executeCounter, Size4FlagAt;
+    SizeFlagManager sizeManager;
+    int executeCounter;
     unsigned char byte_num;
 public:
     int execute1(const char **inputStream){
@@ -44,8 +44,7 @@ public:
         #endif
         int date = retrieve(inputStream, format);
         int output = delta_encoding.encode(date); //delta encoding
-        if (Size4FlagAt == -1 && (output > 127 || output < -128)) Size4FlagAt = executeCounter;
-        outputer->write(output, (Size4FlagAt == -1 ? 1 : 4));
+        outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
         executeCounter += 1;
         debug(date);
         #ifdef EVALUATE_TIME
@@ -54,7 +53,7 @@ public:
         return 0;
     }
     int execute2(){
-        if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
+        byte_num = sizeManager.get_read_byte(executeCounter);
         int output = inputer->read_n_byte_int(byte_num);
         int date = delta_encoding.decode(output); //delta encoding
         outputer->write(output, byte_num);
@@ -63,7 +62,7 @@ public:
         return 0;
     }
     int execute3(){
-        if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
+        byte_num = sizeManager.get_read_byte(executeCounter);
         int output = inputer->read_n_byte_int(byte_num);
         int date = delta_encoding.decode(output); //delta encoding
         executeCounter += 1;

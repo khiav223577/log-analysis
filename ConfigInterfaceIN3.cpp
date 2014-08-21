@@ -10,7 +10,9 @@ inline void FormatterDate::load_config2(FILE *file){
     int first_value;
     char type[5];
     fscanf(file, "%4s", type);
-    fscanf(file, "%d %d\n", &first_value, &Size4FlagAt);
+    fscanf(file, "%d", &first_value);
+    sizeManager.load(file);
+    fscanf(file, "\n");
     delta_encoding.set_first_value(first_value);
 };
 inline void FormatterDebug::load_config2(FILE *file){};
@@ -24,7 +26,7 @@ inline void FormatterInteger::load_config2(FILE *file){
     char type[7];
     fscanf(file, "%6s", type);
     if (type[0] == 'I'){ //fprintf(file, "Int %d", Size4FlagAt1);
-        fscanf(file, " %d", &Size4FlagAt1);
+        sizeManager1.load(file);
     }else{ //fprintf(file, "BigInt %d", BigIntFlagAt1);
         fscanf(file, " %d", &BigIntFlagAt1);
     }
@@ -33,7 +35,7 @@ inline void FormatterInteger::load_config2(FILE *file){
     //fprintf(file, " %d", Size4FlagAt2);
     record_min = FlexibleInt::load(file);
     record_max = FlexibleInt::load(file);
-    fscanf(file, " %d", &Size4FlagAt2);
+    sizeManager2.load(file);
     //if (increasingFuncFlag == true){
     //   fprintf(file, " T");
     //   delta_encoding.get_first_value().save();
@@ -65,7 +67,9 @@ inline void FormatterString::load_config2(FILE *file){
     unsigned int bit_num_int;
     char type[7];
     fscanf(file, "%6s", type);
-    fscanf(file, "%d %d %u\n", &hashValueCounter, &Size4FlagAt, &bit_num_int);
+    fscanf(file, "%d %u", &hashValueCounter, &bit_num_int);
+    sizeManager.load(file);
+    fscanf(file, "\n");
     bit_num = bit_num_int;
     hashKeys = std::vector<char *>(hashValueCounter);
     for(int idx, i = 0; i < hashValueCounter; ++i){

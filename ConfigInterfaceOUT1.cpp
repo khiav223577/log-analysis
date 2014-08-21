@@ -4,7 +4,9 @@
 #define ___ConfigInterfaceOUT1_cpp__
 
 inline void FormatterDate::save_config1(FILE *file){
-    fprintf(file, "Date %d %d\n", delta_encoding.get_first_value(), Size4FlagAt);
+    fprintf(file, "Date %d", delta_encoding.get_first_value());
+    sizeManager.save(file);
+    fprintf(file, "\n");
 };
 inline void FormatterDebug::save_config1(FILE *file){};
 inline void FormatterDiscard::save_config1(FILE *file){};
@@ -13,7 +15,8 @@ inline void FormatterIFStatement::save_config1(FILE *file){ //TODO
 };
 inline void FormatterInteger::save_config1(FILE *file){
     if (BigIntFlagAt1 == -1){ //Int
-        fprintf(file, "Int %d", Size4FlagAt1);
+        fprintf(file, "Int");
+        sizeManager1.save(file);
     }else{  //BigInt
         fprintf(file, "BigInt %d", BigIntFlagAt1);
     }
@@ -25,7 +28,9 @@ inline void FormatterIPaddr::save_config1(FILE *file){
     fprintf(file, "IPv4\n");
 };
 inline void FormatterString::save_config1(FILE *file){
-    fprintf(file, "String %d %d\n", hashTable.size(), Size4FlagAt);
+    fprintf(file, "String %d", hashTable.size());
+    sizeManager.save(file);
+    fprintf(file, "\n");
     for(MapChar(int)::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
         fprintf(file, "%d %s\n", it->second, it->first);
     }

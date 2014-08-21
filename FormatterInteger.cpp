@@ -34,8 +34,6 @@ public:
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
         BigIntFlagAt1 = -1;
         BigIntFlagAt2 = -1;
-        Size4FlagAt1 = -1;
-        Size4FlagAt2 = -1;
         executeCounter = 0;
         byte_num = 1;
         increasingFuncFlag = true;
@@ -55,7 +53,9 @@ public:
 //--------------------------------------
 private:
     unsigned char byte_num;
-    int executeCounter, BigIntFlagAt1, BigIntFlagAt2, Size4FlagAt1, Size4FlagAt2;
+    SizeFlagManager sizeManager1;
+    SizeFlagManager sizeManager2;
+    int executeCounter, BigIntFlagAt1, BigIntFlagAt2;
     bool SuccessFlag, SameFlag, increasingFuncFlag;
     FlexibleInt record_min, record_max, record_range;
     DeltaEncoding<FlexibleInt> delta_encoding;
@@ -89,8 +89,7 @@ public:
         if (prev_int.isBigInt()){
             outputer->write(prev_int.getValuePtr());
         }else{
-            if (Size4FlagAt1 == -1 && (prev_int.getValue() > 127 || prev_int.getValue() < -128)) Size4FlagAt1 = executeCounter;
-            outputer->write(prev_int.getValue(), (Size4FlagAt1 == -1 ? 1 : 4));
+            outputer->write(prev_int.getValue(), sizeManager1.get_write_byte(prev_int.getValue(), executeCounter));
         }
         executeCounter += 1;
         debug();
@@ -104,7 +103,7 @@ public:
         if (isBigInt){
             prev_int = FlexibleInt(inputer->read_bigInt());
         }else{
-            if (Size4FlagAt1 != -1 && executeCounter >= Size4FlagAt1) byte_num = 4;
+            byte_num = sizeManager1.get_read_byte(executeCounter);
             prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
         }
         if (SameFlag){
@@ -118,15 +117,15 @@ public:
             if (output.isBigInt()){
                 outputer->write(output.getValuePtr());
             }else{
-                if (Size4FlagAt2 == -1 && output.getValue() > 255) Size4FlagAt2 = executeCounter;
-                outputer->write(output.getValue(), (Size4FlagAt2 == -1 ? 1 : 4));
+                unsigned int value = output.getValue();
+                outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
             }
         }else if (record_range.isBigInt() == false){
             FlexibleInt output = (prev_int - record_min);
             bool success = output.try_to_cast_to_int();
             PERROR(success == false, printf("Unable to cast BigInt to int");); //should always be able to.
-            if (Size4FlagAt2 == -1 && output.getValue() > 255) Size4FlagAt2 = executeCounter;
-            outputer->write(output.getValue(), (Size4FlagAt2 == -1 ? 1 : 4));
+            unsigned int value = output.getValue();
+            outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
         }else{
             if (prev_int.isBigInt()){
                 outputer->write(prev_int.getValuePtr());
@@ -147,19 +146,19 @@ public:
             if (isBigInt){
                 delta = FlexibleInt(inputer->read_bigInt());
             }else{
-                if (Size4FlagAt2 != -1 && executeCounter >= Size4FlagAt2) byte_num = 4;
+                byte_num = sizeManager2.get_read_byte(executeCounter);
                 delta = FlexibleInt(inputer->read_n_byte_int(byte_num));
             }
             prev_int = delta_encoding.decode(delta); //delta encoding
         }else if (record_range.isBigInt() == false){
-            if (Size4FlagAt2 != -1 && executeCounter >= Size4FlagAt2) byte_num = 4;
+            byte_num = sizeManager2.get_read_byte(executeCounter);
             prev_int = record_min + FlexibleInt(inputer->read_n_byte_int(byte_num));
         }else{
             bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
             if (isBigInt){
                 prev_int = FlexibleInt(inputer->read_bigInt());
             }else{
-                if (Size4FlagAt1 != -1 && executeCounter >= Size4FlagAt1) byte_num = 4;
+                byte_num = sizeManager1.get_read_byte(executeCounter);
                 prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
             }
         }

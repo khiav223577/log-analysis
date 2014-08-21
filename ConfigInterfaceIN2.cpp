@@ -10,7 +10,9 @@ inline void FormatterDate::load_config1(FILE *file){
     int first_value;
     char type[5];
     fscanf(file, "%4s", type);
-    fscanf(file, "%d %d\n", &first_value, &Size4FlagAt);
+    fscanf(file, "%d", &first_value);
+    sizeManager.load(file);
+    fscanf(file, "\n");
     delta_encoding.set_first_value(first_value);
 };
 inline void FormatterDebug::load_config1(FILE *file){};
@@ -24,7 +26,7 @@ inline void FormatterInteger::load_config1(FILE *file){
     char type[7];
     fscanf(file, "%6s", type);
     if (type[0] == 'I'){ //fprintf(file, "Int %d", Size4FlagAt1);
-        fscanf(file, " %d", &Size4FlagAt1);
+        sizeManager1.load(file);
     }else{ //fprintf(file, "BigInt %d", BigIntFlagAt1);
         fscanf(file, " %d", &BigIntFlagAt1);
     }
@@ -53,7 +55,9 @@ inline void FormatterString::load_config1(FILE *file){
     //for(MapChar(int)::iterator it = hashTable.begin(); it != hashTable.end(); ++it) fprintf(file, "%d %s\n", it->second, it->first);
     char type[7];
     fscanf(file, "%6s", type);
-    fscanf(file, "%d %d\n", &hashValueCounter, &Size4FlagAt);
+    fscanf(file, "%d", &hashValueCounter);
+    sizeManager.load(file);
+    fscanf(file, "\n");
     hashKeys = std::vector<char *>(hashValueCounter);
     for(int idx, i = 0; i < hashValueCounter; ++i){
         char *input = (char *) malloc((MaxLen + 1) * sizeof(char));
@@ -64,10 +68,10 @@ inline void FormatterString::load_config1(FILE *file){
     }
     if (hashValueCounter > 1){
         bit_num = 1;
-        int tmp = hashValueCounter;
+        int tmp = hashValueCounter - 1;
         while(tmp >>= 1, tmp != 0) bit_num += 1;
     }else bit_num = 0;
-    if (bit_num <= 8) Size4FlagAt = -1; //no need to use partial 1-byte compressor.
+    if (bit_num <= 8) sizeManager.setSize2FlagAt(-1); //no need to use partial 1-byte compressor.
 };
 
 
