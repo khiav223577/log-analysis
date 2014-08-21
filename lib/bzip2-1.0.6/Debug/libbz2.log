@@ -1,0 +1,29 @@
+﻿Build started 2014/7/11 上午 12:47:41.
+     1>Project "C:\Users\Win7\Desktop\bzip\bzip2-1.0.6\libbz2.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Touching ".\Debug\libbz2.unsuccessfulbuild".
+       ClCompile:
+         All outputs are up-to-date.
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Microsoft.CppBuild.targets(990,5): warning MSB8012: TargetPath(C:\Users\Win7\Desktop\bzip\bzip2-1.0.6\.\Debug\libbz2.dll) does not match the Linker's OutputFile property value (C:\Users\Win7\Desktop\bzip\bzip2-1.0.6\libbz2.dll). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"libbz2.dll" /INCREMENTAL:NO /NOLOGO odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /DEF:".\libbz2.def" /MANIFEST /ManifestFile:".\Debug\libbz2.dll.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /DEBUG /PDB:"C:\Users\Win7\Desktop\bzip\bzip2-1.0.6\Debug\libbz2.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\Debug\libbz2.lib" /MACHINE:X86 /DLL .\Debug\blocksort.obj
+         .\Debug\bzlib.obj
+         .\Debug\compress.obj
+         .\Debug\crctable.obj
+         .\Debug\decompress.obj
+         .\Debug\huffman.obj
+         .\Debug\randtable.obj
+     1>blocksort.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/INCREMENTAL:NO' specification
+     1>.\libbz2.def(2): warning LNK4017: DESCRIPTION statement not supported for the target platform; ignored
+            Creating library .\Debug\libbz2.lib and object .\Debug\libbz2.exp
+         libbz2.vcxproj -> C:\Users\Win7\Desktop\bzip\bzip2-1.0.6\.\Debug\libbz2.dll
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"libbz2.dll;#2" /manifest .\Debug\libbz2.dll.intermediate.manifest
+       FinalizeBuildStatus:
+         Deleting file ".\Debug\libbz2.unsuccessfulbuild".
+         Touching ".\Debug\libbz2.lastbuildstate".
+     1>Done Building Project "C:\Users\Win7\Desktop\bzip\bzip2-1.0.6\libbz2.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.33
