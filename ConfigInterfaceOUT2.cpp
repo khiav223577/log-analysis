@@ -23,7 +23,7 @@ inline void FormatterIPaddr::save_config2(FILE *file){
     fprintf(file, "IPv4\n");
 };
 inline void FormatterString::save_config2(FILE *file){
-    fprintf(file, "String %d %d\n", hashTable.size(), Size4FlagAt);
+    fprintf(file, "String %d %d %u\n", hashTable.size(), Size4FlagAt, bit_num);
     for(MapChar(int)::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
         fprintf(file, "%d %s\n", it->second, it->first);
     }

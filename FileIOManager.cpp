@@ -28,8 +28,8 @@ bool file_exists(const char *filename){
 class OutputManager{
 private:
     FILE *file;
-    unsigned char buffer[OUTPUT_MANAGER_BUFFER_SIZE];
-    int buffer_counter, bit_counter;
+    unsigned char buffer[OUTPUT_MANAGER_BUFFER_SIZE], bit_counter;
+    unsigned int buffer_counter;
 public:
     OutputManager(const char *filename){
         file = fopen2(filename, "wb");
@@ -124,7 +124,7 @@ public:
         case 4:{write4(value); break;}
         }
     }
-    inline void write_bits(unsigned int value, unsigned int bit_num){
+    inline void write_bits(unsigned int value, unsigned char bit_num){
         while(bit_num >= 8){
             write((unsigned char) value);
             value >>= 8;
@@ -151,8 +151,8 @@ public:
 class InputManager{
 private:
     FILE *file;
-    unsigned char buffer[INPUT_MANAGER_BUFFER_SIZE];
-    int buffer_counter, bit_counter;
+    unsigned char buffer[INPUT_MANAGER_BUFFER_SIZE], bit_counter;
+    unsigned int buffer_counter;
 public:
     InputManager(const char *filename){
         file = fopen2(filename, "rb");
@@ -236,7 +236,7 @@ public:
         PERROR((byte_num == 0 || byte_num > 4), printf("byte_num should be 1,2,3,4."););
         return -1;
     }
-    inline unsigned int read_bits(unsigned int bit_num){
+    inline unsigned int read_bits(unsigned char bit_num){
         unsigned char fourBytes[4] = {0};
         unsigned int current_idx = 0;
         while(bit_num >= 8){
@@ -251,7 +251,8 @@ public:
             bit_counter -= 8;
             plus_buffer_counter();
         }else data = 0;
-        data |= ((buffer[buffer_counter] << (8 - bit_counter)) >> (8 - bit_num));
+        unsigned char tmp = (buffer[buffer_counter] << (8 - bit_counter));
+        data |= (tmp >> (8 - bit_num));
         fourBytes[current_idx] = data;
         return bytes_to_int_Little(fourBytes);
     }

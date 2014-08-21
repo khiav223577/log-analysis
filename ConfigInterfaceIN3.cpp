@@ -48,9 +48,11 @@ inline void FormatterIPaddr::load_config2(FILE *file){
 inline void FormatterString::load_config2(FILE *file){
     //fprintf(file, "String %d\n", hashTable.size());
     //for(MapChar(int)::iterator it = hashTable.begin(); it != hashTable.end(); ++it) fprintf(file, "%d %s\n", it->second, it->first);
+    unsigned int bit_num_int;
     char type[7];
     fscanf(file, "%6s", type);
-    fscanf(file, "%d %d\n", &hashValueCounter, &Size4FlagAt);
+    fscanf(file, "%d %d %u\n", &hashValueCounter, &Size4FlagAt, &bit_num_int);
+    bit_num = bit_num_int;
     hashKeys = std::vector<char *>(hashValueCounter);
     for(int idx, i = 0; i < hashValueCounter; ++i){
         char *input = (char *) malloc((MaxLen + 1) * sizeof(char));

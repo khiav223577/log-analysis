@@ -69,15 +69,19 @@ public:
         if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
         prev_result = decompress(output);
-
-        outputer->write(output, byte_num);
+        if (bit_num == 0); //do nothing
+        else if ((byte_num << 3) < bit_num) outputer->write(output, byte_num);
+        else outputer->write_bits(output, bit_num);
         executeCounter += 1;
         debug();
         return 0;
     }
     int execute3(InputManager *inputer){
         if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
-        unsigned int output = (unsigned int) inputer->read_int(byte_num);
+        unsigned int output;
+        if (bit_num == 0) output = 0;
+        else if ((byte_num << 3) < bit_num) output = (unsigned int) inputer->read_int(byte_num);
+        else output = inputer->read_bits(bit_num);
         prev_result = decompress(output);
 
         executeCounter += 1;
