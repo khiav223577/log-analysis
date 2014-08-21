@@ -42,7 +42,7 @@ public:
         int date = retrieve(inputStream, format);
         int output = delta_encoding.encode(date); //delta encoding
         if (Size4FlagAt == -1 && (output > 127 || output < -128)) Size4FlagAt = executeCounter;
-        outputer->write_n_byte_int(output, (Size4FlagAt == -1 ? 1 : 4));
+        outputer->write(output, (Size4FlagAt == -1 ? 1 : 4));
         executeCounter += 1;
         debug(date);
         return 0;
@@ -51,7 +51,7 @@ public:
         if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
         int output = inputer->read_n_byte_int(byte_num);
         int date = delta_encoding.decode(output); //delta encoding
-        outputer->write_n_byte_int(output, byte_num);
+        outputer->write(output, byte_num);
         executeCounter += 1;
         debug(date);
         return 0;

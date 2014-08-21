@@ -116,14 +116,6 @@ public:
         write(buffer_len);
         for(unsigned int i = 0; i < buffer_len; ++i) write(buffer[i]);
     }
-    inline void write_n_byte_int(int value, unsigned char byte_num){
-        switch(byte_num){
-        case 1:{write1(value); break;}
-        case 2:{write2(value); break;}
-        case 3:{write3(value); break;}
-        case 4:{write4(value); break;}
-        }
-    }
     inline void write_bits(unsigned int value, unsigned char bit_num){
         while(bit_num >= 8){
             write((unsigned char) value);

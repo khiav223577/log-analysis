@@ -73,7 +73,7 @@ public:
         }
         if (BigIntFlagAt == -1){
             if (Size4FlagAt1 == -1 && (prev_int > 127 || prev_int < -128)) Size4FlagAt1 = executeCounter;
-            outputer->write_n_byte_int(prev_int.getValue(), (Size4FlagAt1 == -1 ? 1 : 4));
+            outputer->write(prev_int.getValue(), (Size4FlagAt1 == -1 ? 1 : 4));
         }else{
             outputer->write(prev_int.getValuePtr());
         }
@@ -97,12 +97,12 @@ public:
             PERROR(success == false, printf("Unable to cast BigInt to int"););
             int output = tmp.getValue();
             if (Size4FlagAt2 == -1 && output > 255) Size4FlagAt2 = executeCounter;
-            outputer->write_n_byte_int(output, (Size4FlagAt2 == -1 ? 1 : 4));
+            outputer->write(output, (Size4FlagAt2 == -1 ? 1 : 4));
         }else{
             if (isBigInt){
                 outputer->write(prev_int.getValuePtr());
             }else{
-                outputer->write_n_byte_int(prev_int.getValue(), byte_num);
+                outputer->write(prev_int.getValue(), byte_num);
             }
         }
         executeCounter += 1;
