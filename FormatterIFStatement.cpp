@@ -68,21 +68,25 @@ public:
         return skip;
     }
     inline bool check_condition(){
-        if (boolOperator == '|'){
+        switch(boolOperator){
+        case '|':{
             if (lExpr->check_condition() == true ) return true;
             if (rExpr->check_condition() == true ) return true;
-            return false;
-        }else if (boolOperator == '&'){
+            return false;}
+        case '&':{
             if (lExpr->check_condition() == false) return false;
             if (rExpr->check_condition() == false) return false;
-            return true;
+            return true;}
+        case 'T':  case 'F':{
+            char *prev_result = compareTarget->get_prev_result();
+            if (prev_result == NULL) return false;
+            int cmp_result = strcmp(format, prev_result);
+            return (boolOperator == 'T') ? (cmp_result == 0) : (cmp_result != 0);
+            Perror(boolOperator);}
+        default:{
+            Perror(boolOperator);
+            return false;}
         }
-        char *prev_result = compareTarget->get_prev_result();
-        if (prev_result == NULL) return false;
-        if (boolOperator == 'T') return (strcmp(format, prev_result) == 0);
-        if (boolOperator == 'F') return (strcmp(format, prev_result) != 0);
-        Perror(boolOperator);
-        return false;
     }
 };
 

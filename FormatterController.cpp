@@ -9,19 +9,18 @@ public:
 	public:
 		virtual char *trans_format(const char *_format)=0;
 	};
-	char *format, *prev_result;
+	char *format;
     virtual int execute(const char ** inputStream)=0;
     FormatterController(const char *_format, VirtualCreator *v){
-        prev_result = NULL;
         format = v->trans_format(_format);
         delete v;
     }
     virtual ~FormatterController(){
-        free(prev_result);
         free(format);
     }
     virtual char *get_prev_result(){ //Will be called by FormatterIFStatement.
-        return prev_result;
+        printf("Error: fails to get_prev_result()");
+        exit(1);
     }
 };
 

@@ -1,0 +1,23 @@
+#MAX_SIZE[511] String
+String[ ] Type
+#if Type == "allow" or Type == "deny"
+	Int[10] Domain1
+	Int[10] Domain2
+	Int[10] Domain3
+	#if Type == "deny"
+		String[@] Serial
+		Int[10] Config_Version
+	#else
+		IPv4[.] Source_address
+	#end
+	Int[10] Domain4
+#elsif Type == "hello"
+	String[-] Serial01
+	String[ ] Serial02
+#else
+	String[~] Serial1
+	String[~] Serial2
+	String[ ] Serial3
+#end
+String[,] Serial4
+String[,] Serial5

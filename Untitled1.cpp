@@ -12,7 +12,6 @@
 #include "FormatterController.cpp"
 #include "RMap.cpp"
 
-
 class InputFormatter{
 public:
     FormatList formatList;
@@ -40,13 +39,21 @@ FILE *fopen2(const char *filename, const char *mode){
     }
     return f;
 }
-#include "testing.cpp"
 
+#include "testing.cpp"
 int main(){
 
     ConfigRubyInterface ruby_interface;
-    InputFormatter *formatter = ruby_interface.CreateFormatter();
-    formatter->execute("Dec  3 04:00:01 iisfw 1,2013/12/03 04:00:01,0011C101825,TRAFFIC,end,1,2013/12/03 04:00:00,140.109.23.120,140.109.254.5,0.0.0.0,0.0.0.0");
+    InputFormatter *formatter = ruby_interface.CreateFormatter("test_config2");
+    char buffer[MAX_LOG_SIZE];
+    FILE *file = fopen2("test_input2","r");
+    int i = 0;
+    while(fgets(buffer, MAX_LOG_SIZE, file) != NULL){
+        printf("%02d: ", ++i);
+        formatter->execute(buffer);
+        puts("");
+    }
+    fclose(file);
     delete formatter;
 
     //test_InputFormatter();
@@ -81,6 +88,7 @@ return 0;
     FILE *f1 = fopen2("config","r");
     char config[MAX_CONFIG_SIZE];
     fclose(f1);*/
+    /*
     const char *filename = "test";
     char buffer[MAX_LOG_SIZE];
     FILE *f2 = fopen2(filename,"r");
@@ -91,7 +99,7 @@ return 0;
 
     }
     fclose(f2);
-    printf("%d",'\n');
+    printf("%d",'\n');*/
     return 0;
 }
 

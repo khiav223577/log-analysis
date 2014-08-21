@@ -34,7 +34,7 @@ class Config_Parser
 			case
 			when line =~ /^\s*$/ ; next
 			when line =~ /\/\//
-			when line =~ /^#(MAX_SIZE)\[([0-9]*)\] \s*(\w+)/
+			when line =~ /^#(MAX_SIZE)\[([0-9]+)\] \s*(\w+)/
 				@setting_max_size[$3] = ($2 == "" ? 511 : $2.to_i)
 			when line =~ /^#(DROP_AFTER)\[(.*)\] \s*(\w+)/
 				@setting_drop_after[$3] = ($2 == "" ? nil : $2)
@@ -62,7 +62,7 @@ class Config_Parser
 				case
 				when line =~ /^(Date)\[(.*)\] \s*(\w+)/
 				when line =~ /^(String)\[(.*)\] \s*(\w+)/
-				when line =~ /^(Int)\[([0-9]*)\] \s*(\w+)/
+				when line =~ /^(Int)\[([0-9]+)\] \s*(\w+)/
 				when line =~ /^(IPv4)\[(.*)\] \s*(\w+)/
 				when line =~ /^(DROP)\[(.*)\]/
 				else
@@ -83,7 +83,7 @@ class Config_Parser
 		#p @setting_max_size
 		#p global_symbols
 		#p nested_symbols
-		p buffer, buffer.size
+		#p buffer, buffer.size
 		return buffer
 	end
 end

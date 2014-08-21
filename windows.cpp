@@ -29,6 +29,11 @@
     }
 #endif
 
+void SetColor2(){
+    static int i = 2;
+    SetColor(i);
+    i = (i == 8 ? 2 : i + 1);
+}
 
 
 

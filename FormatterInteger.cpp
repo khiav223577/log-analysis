@@ -19,9 +19,12 @@ public:
             format[2] = '%';
             format[3] = 'n';
             format[4] = '\0';
-            if (_format[0] == '8' && _format[1] == '\0'                     ) format[1] = 'o';  //"%o%n"
-            if (_format[0] == '1' && _format[1] == '0' && _format[2] == '\0') format[1] = 'd';  //"%d%n"
-            if (_format[0] == '1' && _format[1] == '6' && _format[2] == '\0') format[1] = 'x';  //"%x%n"
+            switch(atoi(_format)){
+            case  8:{ format[1] = 'o'; break;} //"%o%n"
+            case 10:{ format[1] = 'd'; break;} //"%d%n"
+            case 16:{ format[1] = 'x'; break;} //"%x%n"
+            default:{ printf("Unknown Int format: %s (must be 8 or 10 or 16)",_format); exit(1);}
+            }
             return format; //Ex: format = "%d%n"
         }
 	};
@@ -36,9 +39,10 @@ public:
     inline int execute(const char ** inputStream){
         int num = FormatterInteger::retrieve(inputStream, format);
         if (!SuccessFlag){ //TODO overflow
+            puts("overflow");
             exit(1);
         }
-        printf("[%d]\n",num);
+        SetColor2(); printf("[%d] ",num); SetColor(7);//DEBUG
         return 0;
     }
 //-------------------------------------------------------------------------
@@ -72,9 +76,9 @@ public:
         case 'x':{ if (scanfLen <=  7) SuccessFlag = true; break;}
         }
         if (SuccessFlag == false){
-            static char format2[3] = "%d";                  //compare input's and result's number by "strcmp"
+            static char format2[3] = "%d";                      //compare input's and result's number by "strcmp"
             format2[1] = n_decimal;
-            char *buffer = (char *) malloc(20 * sizeof(char));
+            char *buffer = (char *) malloc(20 * sizeof(char));  //20 is enough for max number length in that we have checked overflow by length.
             sprintf(buffer, format2, (result < 0 ? -result : result));
             for(int i = 0; i < scanfLen; ++i){ if (inputPtr[i] != buffer[i]) return -1;}
             free(buffer);

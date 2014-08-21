@@ -61,8 +61,8 @@ public:
     inline static void show(int second){RDate d(second); d.show(); }
     inline int toDay(){    return toDay(year, month, day); }
     inline int toSecond(){ return toSecond(year, month, day, hour, minute, second); }
-    inline void getShow(char *str){ sprintf(str,"%d/%02d/%02d %02d:%02d:%02d"  ,year,month,day,hour,minute,second);}
-    inline void show(){              printf(    "%d/%02d/%02d %02d:%02d:%02d\n",year,month,day,hour,minute,second);}
+    inline void getShow(char *str){ sprintf(str,"%d/%02d/%02d %02d:%02d:%02d ",year,month,day,hour,minute,second);}
+    inline void show(){              printf(    "%d/%02d/%02d %02d:%02d:%02d ",year,month,day,hour,minute,second);}
 //-----------------------------------------
 
 

@@ -22,8 +22,18 @@ public:
             return format; //Ex: format = "%25[^,]%n"
         }
 	};
+	char *prev_result;
 	const int MaxLen;
     FormatterString(const char *_format, int maxlen) : super(_format, new VirtualCreator(maxlen)), MaxLen(maxlen){
+        prev_result = NULL;
+    }
+    ~FormatterString(){
+        free(prev_result);
+    }
+    char *get_prev_result(){ //Will be called by FormatterIFStatement.
+        if (prev_result != NULL) return prev_result;
+        printf("Error: fails to get_prev_result() in FormatterString.");
+        exit(1);
     }
 public:
 //--------------------------------------
@@ -31,7 +41,7 @@ public:
 //--------------------------------------
     inline int execute(const char ** inputStream){
         char *str = retrieve(inputStream, format);
-        printf("[%s]\n",str); //DEBUG
+        SetColor2(); printf("%s ",str); SetColor(7);//DEBUG
         free(prev_result);
         prev_result = str;
         return 0;

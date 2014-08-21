@@ -15,14 +15,14 @@ public:
 //-------------------------------------------------------------------------
 //  CreateFormatter
 //-------------------------------------------------------------------------
-    InputFormatter* CreateFormatter(){
+    InputFormatter* CreateFormatter(const char *filename){
         InputFormatter *formatter = new InputFormatter();
         RubyInterpreter ruby;
         ruby.execute_code("$IN_C_CODE = true");
         ruby.execute_file("./test.rb");
         const char *types[11] = {"INVALID", "Date", "String", "Int", "IPv4", "DROP", "#if", "#elsif", "#else", "#end", "EXIT_BLOCK"};
         for (int i = 0; i < 11; ++i) rb_funcall(rb_gv_get("$!"), rb_intern("register_hash"),  2, rb_str_new2(types[i]), INT2FIX(i));
-        rb_funcall(rb_gv_get("$!"), rb_intern("read_config"),  1, rb_str_new2("test_config"));
+        rb_funcall(rb_gv_get("$!"), rb_intern("read_config"),  1, rb_str_new2(filename));
 
         inner_retrieve_format(&formatter->formatList);
         return formatter;
@@ -85,18 +85,18 @@ public:
     FormatterIFStatement* parse_bool_statement(VALUE format){ //format = [[XXX],[XXX],OP,...] #postfix
         long len = RARRAY_LEN(format);
         FormatStack *stack = NULL;
-        puts("=================================");
-        printf("%d",(int)len);
+//puts("=================================");
+//printf("%d",(int)len);
         for (int i = 0; i < len; ++i){
             VALUE element = rb_ary_entry(format,i);
             switch (TYPE(element)) {
-            case T_FIXNUM:{ //'|', '&'
-                printf("[%c]\n",FIX2INT(element));
+            case T_FIXNUM:{ //element = '|' or '&'
+//printf("[%c]\n",FIX2INT(element));
                 FormatterIFStatement *rExpr = FormatStack::pop(&stack);
                 FormatterIFStatement *lExpr = FormatStack::pop(&stack);
                 FormatStack::push(&stack, new FormatterIFStatement(FIX2INT(element), rExpr, lExpr));
                 break;}
-            case T_ARRAY:{  //[idx, "==","string"]
+            case T_ARRAY:{  //[idx, "==", "string"]
                 VALUE a0 = rb_ary_entry(element,0);
                 VALUE a1 = rb_ary_entry(element,1);
                 VALUE a2 = rb_ary_entry(element,2);
@@ -113,7 +113,7 @@ public:
         }
         FormatterIFStatement *result = FormatStack::pop(&stack);
         FormatStack::clear(&stack);
-        puts("=================================");
+//puts("=================================");
         return result;
     }
 };
