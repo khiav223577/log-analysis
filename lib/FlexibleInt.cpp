@@ -18,7 +18,7 @@ public:
     inline FlexibleInt(int _value) : bigInt_flag(false){
         setValue(_value);
     }
-    inline FlexibleInt(BigInteger *_valuePtr) : bigInt_flag(true){
+    inline FlexibleInt(BigInteger *_valuePtr) : bigInt_flag(false){
         setValuePtr(_valuePtr);
     }
     inline FlexibleInt(const FlexibleInt &x) : bigInt_flag(false){
@@ -43,7 +43,7 @@ public:
         */
     }
 //----------------------------------------------
-//  ACCESS
+//  CORE
 //----------------------------------------------
     inline void clearBigInt(){
         if (bigInt_flag == false) return;
@@ -52,10 +52,18 @@ public:
         delete inner_data.valuePtr;
         inner_data.valuePtr = NULL;
     }
-    inline void   setBigInt()               { bigInt_flag = true;         }
-    inline void setValuePtr(BigInteger *ptr){ inner_data.valuePtr = ptr;  }
-    inline void    setValue(int _value)     { inner_data.value = _value;  }
-
+    inline void setValuePtr(BigInteger *ptr){
+        if (bigInt_flag) clearBigInt();
+        inner_data.valuePtr = ptr;
+        bigInt_flag = true;
+    }
+    inline void setValue(int _value){
+        if (bigInt_flag) clearBigInt();
+        inner_data.value = _value;
+    }
+//----------------------------------------------
+//  ACCESS
+//----------------------------------------------
     inline bool            isBigInt() const { return bigInt_flag;         }
     inline BigInteger*  getValuePtr() const { return inner_data.valuePtr; }
     inline int             getValue() const { return inner_data.value;    }
@@ -67,7 +75,6 @@ public:
         if (!isBigInt()) return true;
         try{
             int result = getValuePtr()->toInt(); //may cause exception
-            clearBigInt();
             setValue(result);
             return true;
         }catch (const char* message){
@@ -79,16 +86,13 @@ public:
 //----------------------------------------------
     inline void set(const FlexibleInt &x){
         if (x.isBigInt()){
-            setBigInt();
             setValuePtr(new BigInteger(GETVALUE(x)));
         }else{
-            clearBigInt();
             setValue(x.getValue());
         }
     }
     inline void set_by_add(const FlexibleInt &x, const FlexibleInt &y){
         if (x.isBigInt() || y.isBigInt()){
-            setBigInt();
             setValuePtr(new BigInteger(GETVALUE(x) + GETVALUE(y)));
         }else{
             setValue(x.getValue() + y.getValue());
@@ -96,7 +100,6 @@ public:
     }
     inline void set_by_sub(const FlexibleInt &x, const FlexibleInt &y){
         if (x.isBigInt() || y.isBigInt()){
-            setBigInt();
             setValuePtr(new BigInteger(GETVALUE(x) - GETVALUE(y)));
         }else{
             setValue(x.getValue() - y.getValue());
