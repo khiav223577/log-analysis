@@ -8,6 +8,8 @@ inline std::string FUNCNAME(const char *inputStream){\
     std::string output("");\
     int scanfLen;\
     char buffer[BUFFERLEN + 1];\
+    sscanf(inputStream, " %n", &scanfLen);\
+    inputStream += scanfLen;\
     while(*inputStream != '\0'){\
         int flag = sscanf(inputStream, " %" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
         if (scanfLen == 0 || flag == 0) break;\
@@ -21,8 +23,9 @@ inline std::string FUNCNAME(FILE *file){\
     std::string output("");\
     int scanfLen;\
     char buffer[BUFFERLEN + 1];\
+    fscanf(file," ");\
     while(1){\
-        int flag = fscanf(file, " %" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
+        int flag = fscanf(file, "%" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
         if (scanfLen == 0 || flag == 0) break;\
         output += buffer;\
     }\
@@ -32,8 +35,9 @@ inline std::string FUNCNAME(){\
     std::string output("");\
     int scanfLen;\
     char buffer[BUFFERLEN + 1];\
+    scanf(" ");\
     while(1){\
-        int flag = scanf(" %" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
+        int flag = scanf("%" #BUFFERLEN FORMAT "%n",buffer,&scanfLen);\
         if (scanfLen == 0 || flag == 0) break;\
         output += buffer;\
     }\
