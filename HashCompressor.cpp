@@ -32,7 +32,10 @@ public:
         int mem_size = (strlen(input) + 1) * sizeof(char);
         char *key = (char *) malloc(mem_size);
         memcpy(key, input, mem_size);
-        return inner_compress(key);
+        unsigned int preCounter = hashValueCounter;
+        unsigned int value = inner_compress(key);
+        if (preCounter == hashValueCounter) free(key);
+        return value;
     }
 protected:
     inline unsigned int inner_compress(KEY_TYPE input){
