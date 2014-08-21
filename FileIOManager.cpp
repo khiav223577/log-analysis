@@ -2,6 +2,7 @@
 #ifndef ___FileIOManager_cpp__
 #define ___FileIOManager_cpp__
 #define OUTPUT_MANAGER_BUFFER_SIZE 4096
+#define INPUT_MANAGER_BUFFER_SIZE 4096
 #define SIZE_OF_UINT sizeof(unsigned int)
 //DATA >>= (SIZE_OF_UINT << 3); will trigger compiler warning....
 #define CHECK_AND_WRITE_BLOCK(DATA, INDEX) \
@@ -12,6 +13,7 @@
     }
 #include<stdio.h>
 #include<stdlib.h>
+#include<memory.h>
 #include "FlexibleInt.cpp"
 #include <ruby.h> // it defines F_OK
 FILE *fopen2(const char *filename, const char *mode){
@@ -33,6 +35,7 @@ public:
         file = fopen2(filename, "wb");
         buffer_counter = 0;
         bit_counter = 0;
+        memset(buffer, 0, sizeof(buffer));
     }
     ~OutputManager(){
         flush();
@@ -41,6 +44,15 @@ public:
 //-------------------------------------------
 //  Core
 //-------------------------------------------
+    inline void plus_buffer_counter(){
+        buffer_counter += 1;
+        if (buffer_counter == OUTPUT_MANAGER_BUFFER_SIZE) flush();
+    }
+    inline void flush(){
+        fwrite(buffer, sizeof(char), buffer_counter, file);
+        buffer_counter = 0;
+        memset(buffer, 0, sizeof(buffer));
+    }
     inline void write( int data){ write((unsigned  int) data); }
     inline void write(char data){ write((unsigned char) data); }
     inline void write(long data){ write((unsigned long) data); }
@@ -94,14 +106,6 @@ public:
         CHECK_AND_WRITE_BLOCK(data, 7);
         CHECK_AND_WRITE_BLOCK(data, 8);
     }
-    inline void plus_buffer_counter(){
-        buffer_counter += 1;
-        if (buffer_counter == OUTPUT_MANAGER_BUFFER_SIZE) flush();
-    }
-    inline void flush(){
-        fwrite(buffer, sizeof(char), buffer_counter, file);
-        buffer_counter = 0;
-    }
 //-------------------------------------------
 //  Extend
 //-------------------------------------------
@@ -137,13 +141,24 @@ public:
     }
 };
 
+
+
+//==========================================================================================
+
+
+
+
 class InputManager{
 private:
     FILE *file;
-public:
+    unsigned char buffer[INPUT_MANAGER_BUFFER_SIZE];
+    int buffer_counter, bit_counter;
 public:
     InputManager(const char *filename){
         file = fopen2(filename, "rb");
+        buffer_counter = 0;
+        bit_counter = 0;
+        load_data();
     }
     ~InputManager(){
         fclose(file);
@@ -160,19 +175,40 @@ public:
 //-------------------------------------------
 //  Core
 //-------------------------------------------
+    inline void plus_buffer_counter(){
+        buffer_counter += 1;
+        if (buffer_counter == OUTPUT_MANAGER_BUFFER_SIZE) load_data();
+    }
+    inline void load_data(){
+        fread(buffer, sizeof(char), INPUT_MANAGER_BUFFER_SIZE, file);
+        buffer_counter = 0;
+    }
     inline unsigned char read_char(){
-        unsigned char data;
-        fread(&data, sizeof(data), 1, file);
-        return data;
+        if (bit_counter == 0){
+            unsigned char data = buffer[buffer_counter];
+            plus_buffer_counter();
+            return data;
+        }else{
+            unsigned char data = (buffer[buffer_counter] >> bit_counter);
+            plus_buffer_counter();
+            data |= (buffer[buffer_counter] << (8 - bit_counter));
+            return data;
+        }
     }
     inline int read_int(){
         unsigned char fourBytes[4];
-        fread(fourBytes, sizeof(fourBytes), 1, file);
+        fourBytes[0] = read_char();
+        fourBytes[1] = read_char();
+        fourBytes[2] = read_char();
+        fourBytes[3] = read_char();
         return bytes_to_int_Little(fourBytes);
     }
     inline int read_int(unsigned char byte_num){
-        unsigned char fourBytes[4] = {0};
-        fread(fourBytes, sizeof(char), byte_num, file);
+        unsigned char fourBytes[4];
+        fourBytes[0] = (byte_num > 0 ? read_char() : 0);
+        fourBytes[1] = (byte_num > 1 ? read_char() : 0);
+        fourBytes[2] = (byte_num > 2 ? read_char() : 0);
+        fourBytes[3] = (byte_num > 3 ? read_char() : 0);
         return bytes_to_int_Little(fourBytes);
     }
     inline long read_long(){
@@ -183,11 +219,11 @@ public:
 //-------------------------------------------
     inline BigInteger *read_bigInt(){
         int sign = read_char() - 1;
-        unsigned int buffer_len = (unsigned int) read_int();
-        unsigned long *buffer = (unsigned long *) malloc(buffer_len * sizeof(unsigned long));
-        fread(buffer, sizeof(unsigned long), buffer_len, file);
-        BigInteger *bigInt = new BigInteger(buffer, buffer_len, BigInteger::Sign(sign));
-        free(buffer);
+        unsigned int array_len = (unsigned int) read_int();
+        unsigned long *array = (unsigned long *) malloc(array_len * sizeof(unsigned long));
+        for(unsigned int i = 0; i < array_len; ++i) array[i] = read_long();
+        BigInteger *bigInt = new BigInteger(array, array_len, BigInteger::Sign(sign));
+        free(array);
         return bigInt;
     }
     inline int read_n_byte_int(unsigned char byte_num){
@@ -200,8 +236,28 @@ public:
         PERROR((byte_num == 0 || byte_num > 4), printf("byte_num should be 1,2,3,4."););
         return -1;
     }
+    inline unsigned int read_bits(unsigned int bit_num){
+        unsigned char fourBytes[4] = {0};
+        unsigned int current_idx = 0;
+        while(bit_num >= 8){
+            fourBytes[current_idx] = read_char();
+            current_idx += 1;
+            bit_num -= 8;
+        }
+        if (bit_num == 0) return bytes_to_int_Little(fourBytes);
+        unsigned char data = (buffer[buffer_counter] >> bit_counter);
+        bit_counter += bit_num;
+        if (bit_counter >= 8){
+            bit_counter -= 8;
+            plus_buffer_counter();
+        }else data = 0;
+        data |= ((buffer[buffer_counter] << (8 - bit_counter)) >> (8 - bit_num));
+        fourBytes[current_idx] = data;
+        return bytes_to_int_Little(fourBytes);
+    }
 };
 
 #undef CHECK_AND_WRITE_BLOCK
 #undef OUTPUT_MANAGER_BUFFER_SIZE
 #endif
+
