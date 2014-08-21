@@ -17,7 +17,7 @@ BigInteger stringToBigInteger(const std::string &s);
 
 // Creates a BigInteger from data such as `char's; read below for details.
 template <class T>
-BigInteger dataToBigInteger(const T* data, BigInteger::Index length, BigInteger::Sign sign);
+BigInteger dataToBigInteger(const T* data, unsigned int length, BigInteger::Sign sign);
 
 // Outputs x to os, obeying the flags `dec', `hex', `bin', and `showbase'.
 std::ostream &operator <<(std::ostream &os, const BigUnsigned &x);
@@ -42,7 +42,7 @@ std::ostream &operator <<(std::ostream &os, const BigInteger &x);
  * the result contain the desired binary data.
  */
 template <class T>
-BigInteger dataToBigInteger(const T* data, BigInteger::Index length, BigInteger::Sign sign) {
+BigInteger dataToBigInteger(const T* data, unsigned int length, BigInteger::Sign sign) {
 	// really ceiling(numBytes / sizeof(BigInteger::Blk))
 	unsigned int pieceSizeInBits = 8 * sizeof(T);
 	unsigned int piecesPerBlock = sizeof(BigInteger::Blk) / sizeof(T);
@@ -51,7 +51,7 @@ BigInteger dataToBigInteger(const T* data, BigInteger::Index length, BigInteger:
 	// Allocate our block array
 	BigInteger::Blk *blocks = new BigInteger::Blk[numBlocks];
 
-	BigInteger::Index blockNum, pieceNum, pieceNumHere;
+	unsigned int blockNum, pieceNum, pieceNumHere;
 
 	// Convert
 	for (blockNum = 0, pieceNum = 0; blockNum < numBlocks; blockNum++) {

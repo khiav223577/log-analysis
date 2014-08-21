@@ -14,7 +14,6 @@ class BigInteger {
 
 public:
 	typedef BigUnsigned::Blk Blk;
-	typedef BigUnsigned::Index Index;
 	typedef BigUnsigned::CmpRes CmpRes;
 	static const CmpRes
 		less    = BigUnsigned::less   ,
@@ -38,10 +37,10 @@ public:
 	void operator=(const BigInteger &x);
 
 	// Constructor that copies from a given array of blocks with a sign.
-	BigInteger(const Blk *b, Index blen, Sign s);
+	BigInteger(const Blk *b, unsigned int blen, Sign s);
 
 	// Nonnegative constructor that copies from a given array of blocks.
-	BigInteger(const Blk *b, Index blen) : mag(b, blen) {
+	BigInteger(const Blk *b, unsigned int blen) : mag(b, blen) {
 		sign = mag.isZero() ? zero : positive;
 	}
 
@@ -83,9 +82,9 @@ public:
 	const BigUnsigned &getMagnitude() const { return mag; }
 
 	// Some accessors that go through to the magnitude
-	Index getLength() const { return mag.getLength(); }
-	Index getCapacity() const { return mag.getCapacity(); }
-	Blk getBlock(Index i) const { return mag.getBlock(i); }
+	unsigned int getLength() const { return mag.getLength(); }
+	unsigned int getCapacity() const { return mag.getCapacity(); }
+	Blk getBlock(unsigned int i) const { return mag.getBlock(i); }
 	bool isZero() const { return sign == zero; } // A bit special
 
 	// COMPARISONS

@@ -6,7 +6,7 @@
 #define PERROR(E, CODE)\
     if ((E)){\
         SetColor(12); printf("ERROR: ");             \
-        SetColor( 7); printf("(%s) at ", #E);  \
+        SetColor( 7); printf("(%s) at ", #E);        \
         SetColor(10); printf("%s ",__func__);        \
         SetColor(14); printf("%d ", __LINE__);       \
         SetColor( 7); printf("in %s\n",__FILE__);    \

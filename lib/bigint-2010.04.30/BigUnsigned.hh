@@ -19,17 +19,15 @@ public:
 	// BigUnsigneds are built with a Blk type of unsigned long.
 	typedef unsigned long Blk;
 
-	typedef NumberlikeArray<Blk>::Index Index;
 	NumberlikeArray<Blk>::N;
 
 protected:
 	// Creates a BigUnsigned with a capacity; for internal use.
-	BigUnsigned(int, Index c) : NumberlikeArray<Blk>(0, c) {}
+	BigUnsigned(int, unsigned int c) : NumberlikeArray<Blk>(0, c) {}
 
 	// Decreases len to eliminate any leading zero blocks.
-	void zapLeadingZeros() { 
-		while (len > 0 && blk[len - 1] == 0)
-			len--;
+	void zapLeadingZeros() {
+		while (curr_len > 0 && blk[curr_len - 1] == 0) --curr_len;
 	}
 
 public:
@@ -45,14 +43,14 @@ public:
 	}
 
 	// Constructor that copies from a given array of blocks.
-	BigUnsigned(const Blk *b, Index blen) : NumberlikeArray<Blk>(b, blen) {
+	BigUnsigned(const Blk *b, unsigned int blen) : NumberlikeArray<Blk>(b, blen) {
 		// Eliminate any leading zeros we may have been passed.
 		zapLeadingZeros();
 	}
 
 	// Destructor.  NumberlikeArray does the delete for us.
 	~BigUnsigned() {}
-	
+
 	// Constructors from primitive integer types
 	BigUnsigned(unsigned long  x);
 	BigUnsigned(         long  x);
@@ -89,9 +87,9 @@ public:
 
 	/* Returns the requested block, or 0 if it is beyond the length (as if
 	 * the number had 0s infinitely to the left). */
-	Blk getBlock(Index i) const { return i >= len ? 0 : blk[i]; }
+	Blk getBlock(unsigned int i) const { return i >= curr_len ? 0 : blk[i]; }
 	/* Sets the requested block.  The number grows or shrinks as necessary. */
-	void setBlock(Index i, Blk newBlock);
+	void setBlock(unsigned int i, Blk newBlock);
 
 	// The number is zero if and only if the canonical length is zero.
 	bool isZero() const { return NumberlikeArray<Blk>::isEmpty(); }
@@ -99,15 +97,15 @@ public:
 	/* Returns the length of the number in bits, i.e., zero if the number
 	 * is zero and otherwise one more than the largest value of bi for
 	 * which getBit(bi) returns true. */
-	Index bitLength() const;
+	unsigned int bitLength() const;
 	/* Get the state of bit bi, which has value 2^bi.  Bits beyond the
 	 * number's length are considered to be 0. */
-	bool getBit(Index bi) const {
+	bool getBit(unsigned int bi) const {
 		return (getBlock(bi / N) & (Blk(1) << (bi % N))) != 0;
 	}
 	/* Sets the state of bit bi to newBit.  The number grows or shrinks as
 	 * necessary. */
-	void setBit(Index bi, bool newBit);
+	void setBit(unsigned int bi, bool newBit);
 
 	// COMPARISONS
 
@@ -157,7 +155,7 @@ public:
 	 * object in which to store the quotient.  NOTE: If you are wondering
 	 * why these don't return a value, you probably mean to use the
 	 * overloaded return-by-value operators instead.
-	 * 
+	 *
 	 * Examples:
 	 *     BigInteger a(43), b(7), c, d;
 	 *
@@ -169,7 +167,7 @@ public:
 	 *
 	 *     // ``Aliased'' calls now do the right thing using a temporary
 	 *     // copy, but see note on `divideWithRemainder'.
-	 *     a.add(a, b); 
+	 *     a.add(a, b);
 	 */
 
 	// COPY-LESS OPERATIONS
@@ -232,8 +230,7 @@ public:
 	void operator --(int);
 
 	// Helper function that needs access to BigUnsigned internals
-	friend Blk getShiftedBlock(const BigUnsigned &num, Index x,
-			unsigned int y);
+	friend Blk getShiftedBlock(const BigUnsigned &num, unsigned int x, unsigned int y);
 
 	// See BigInteger.cc.
 	template <class X>
@@ -358,9 +355,9 @@ void BigUnsigned::initFromPrimitive(X x) {
 		; // NumberlikeArray already initialized us to zero.
 	else {
 		// Create a single block.  blk is NULL; no need to delete it.
-		cap = 1;
+		capacity = 1;
 		blk = new Blk[1];
-		len = 1;
+		curr_len = 1;
 		blk[0] = Blk(x);
 	}
 }
@@ -385,10 +382,10 @@ void BigUnsigned::initFromSignedPrimitive(X x) {
  * clearer, which is the library's stated goal. */
 template <class X>
 X BigUnsigned::convertToPrimitive() const {
-	if (len == 0)
+	if (curr_len == 0)
 		// The number is zero; return zero.
 		return 0;
-	else if (len == 1) {
+	else if (curr_len == 1) {
 		// The single block might fit in an X.  Try the conversion.
 		X x = X(blk[0]);
 		// Make sure the result accurately represents the block.

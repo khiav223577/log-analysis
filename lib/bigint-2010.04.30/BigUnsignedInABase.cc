@@ -4,16 +4,15 @@
 
 #include "BigUnsignedInABase.hh"
 
-BigUnsignedInABase::BigUnsignedInABase(const Digit *d, Index l, Base base)
-	: NumberlikeArray<Digit>(d, l), base(base) {
+BigUnsignedInABase::BigUnsignedInABase(const Digit *d, unsigned int l, Base base) : NumberlikeArray<Digit>(d, l), base(base) {
 	// Check the base
 	if (base < 2)
-		throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, Index, Base): The base must be at least 2";
+		throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, unsigned int, Base): The base must be at least 2";
 
 	// Validate the digits.
-	for (Index i = 0; i < l; i++)
+	for (unsigned int i = 0; i < l; i++)
 		if (blk[i] >= base)
-			throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, Index, Base): A digit is too large for the specified base";
+			throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, unsigned int, Base): A digit is too large for the specified base";
 
 	// Eliminate any leading zeros we may have been passed.
 	zapLeadingZeros();
@@ -43,11 +42,11 @@ BigUnsignedInABase::BigUnsignedInABase(const BigUnsigned &x, Base base) {
 	int maxBitLenOfX = x.getLength() * BigUnsigned::N;
 	int minBitsPerDigit = bitLen(base) - 1;
 	int maxDigitLenOfX = ceilingDiv(maxBitLenOfX, minBitsPerDigit);
-	len = maxDigitLenOfX; // Another change to comply with `staying in bounds'.
-	allocate(len); // Get the space
+	curr_len = maxDigitLenOfX; // Another change to comply with `staying in bounds'.
+	allocate(curr_len); // Get the space
 
 	BigUnsigned x2(x), buBase(base);
-	Index digitNum = 0;
+	unsigned int digitNum = 0;
 
 	while (!x2.isZero()) {
 		// Get last digit.  This is like `lastDigit = x2 % buBase, x2 /= buBase'.
@@ -60,12 +59,12 @@ BigUnsignedInABase::BigUnsignedInABase(const BigUnsigned &x, Base base) {
 	}
 
 	// Save the actual length.
-	len = digitNum;
+	curr_len = digitNum;
 }
 
 BigUnsignedInABase::operator BigUnsigned() const {
 	BigUnsigned ans(0), buBase(base), temp;
-	Index digitNum = len;
+	unsigned int digitNum = curr_len;
 	while (digitNum > 0) {
 		digitNum--;
 		temp.multiply(ans, buBase);
@@ -82,14 +81,14 @@ BigUnsignedInABase::BigUnsignedInABase(const std::string &s, Base base) {
 	// This pattern is seldom seen in C++, but the analogous ``this.'' is common in Java.
 	this->base = base;
 
-	// `s.length()' is a `size_t', while `len' is a `NumberlikeArray::Index',
+	// `s.length()' is a `size_t', while `curr_len' is a `NumberlikeArray::Index',
 	// also known as an `unsigned int'.  Some compilers warn without this cast.
-	len = Index(s.length());
-	allocate(len);
+	curr_len = (unsigned int) s.length();
+	allocate(curr_len);
 
-	Index digitNum, symbolNumInString;
-	for (digitNum = 0; digitNum < len; digitNum++) {
-		symbolNumInString = len - 1 - digitNum;
+	unsigned int digitNum, symbolNumInString;
+	for (digitNum = 0; digitNum < curr_len; digitNum++) {
+		symbolNumInString = curr_len - 1 - digitNum;
 		char theSymbol = s[symbolNumInString];
 		if (theSymbol >= '0' && theSymbol <= '9')
 			blk[digitNum] = theSymbol - '0';
@@ -101,7 +100,7 @@ BigUnsignedInABase::BigUnsignedInABase(const std::string &s, Base base) {
 			throw "BigUnsignedInABase(std::string, Base): Bad symbol in input.  Only 0-9, A-Z, a-z are accepted.";
 
 		if (blk[digitNum] >= base)
-			throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, Index, Base): A digit is too large for the specified base";
+			throw "BigUnsignedInABase::BigUnsignedInABase(const Digit *, unsigned int, Base): A digit is too large for the specified base";
 	}
 	zapLeadingZeros();
 }
@@ -109,14 +108,14 @@ BigUnsignedInABase::BigUnsignedInABase(const std::string &s, Base base) {
 BigUnsignedInABase::operator std::string() const {
 	if (base > 36)
 		throw "BigUnsignedInABase ==> std::string: The default string conversion routines use the symbol set 0-9, A-Z and therefore support only up to base 36.  You tried a conversion with a base over 36; write your own string conversion routine.";
-	if (len == 0)
+	if (curr_len == 0)
 		return std::string("0");
 	// Some compilers don't have push_back, so use a char * buffer instead.
-	char *s = new char[len + 1];
-	s[len] = '\0';
-	Index digitNum, symbolNumInString;
-	for (symbolNumInString = 0; symbolNumInString < len; symbolNumInString++) {
-		digitNum = len - 1 - symbolNumInString;
+	char *s = new char[curr_len + 1];
+	s[curr_len] = '\0';
+	unsigned int digitNum, symbolNumInString;
+	for (symbolNumInString = 0; symbolNumInString < curr_len; symbolNumInString++) {
+		digitNum = curr_len - 1 - symbolNumInString;
 		Digit theDigit = blk[digitNum];
 		if (theDigit < 10)
 			s[symbolNumInString] = char('0' + theDigit);

@@ -8,6 +8,7 @@
 
 
 int main() {
+
 	/* The library throws `const char *' error messages when things go
 	 * wrong.  It's a good idea to catch them using a `try' block like this
 	 * one.  Your C++ compiler might need a command-line option to compile

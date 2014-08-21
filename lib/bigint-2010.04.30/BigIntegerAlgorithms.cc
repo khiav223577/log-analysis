@@ -57,7 +57,7 @@ BigUnsigned modinv(const BigInteger &x, const BigUnsigned &n) {
 BigUnsigned modexp(const BigInteger &base, const BigUnsigned &exponent,
 		const BigUnsigned &modulus) {
 	BigUnsigned ans = 1, base2 = (base % modulus).getMagnitude();
-	BigUnsigned::Index i = exponent.bitLength();
+	unsigned int i = exponent.bitLength();
 	// For each bit of the exponent, most to least significant...
 	while (i > 0) {
 		i--;

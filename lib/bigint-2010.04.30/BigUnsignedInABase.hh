@@ -42,12 +42,11 @@ protected:
 	Base base;
 
 	// Creates a BigUnsignedInABase with a capacity; for internal use.
-	BigUnsignedInABase(int, Index c) : NumberlikeArray<Digit>(0, c) {}
+	BigUnsignedInABase(int, unsigned int c) : NumberlikeArray<Digit>(0, c) {}
 
 	// Decreases len to eliminate any leading zero digits.
-	void zapLeadingZeros() { 
-		while (len > 0 && blk[len - 1] == 0)
-			len--;
+	void zapLeadingZeros() {
+		while (curr_len > 0 && blk[curr_len - 1] == 0) curr_len -= 1;
 	}
 
 public:
@@ -64,7 +63,7 @@ public:
 	}
 
 	// Constructor that copies from a given array of digits.
-	BigUnsignedInABase(const Digit *d, Index l, Base base);
+	BigUnsignedInABase(const Digit *d, unsigned int l, Base base);
 
 	// Destructor.  NumberlikeArray does the delete for us.
 	~BigUnsignedInABase() {}
@@ -105,13 +104,13 @@ public:
 
 	/* Returns the requested digit, or 0 if it is beyond the length (as if
 	 * the number had 0s infinitely to the left). */
-	Digit getDigit(Index i) const { return i >= len ? 0 : blk[i]; }
+	Digit getDigit(unsigned int i) const { return i >= curr_len ? 0 : blk[i]; }
 
 	// The number is zero if and only if the canonical length is zero.
 	bool isZero() const { return NumberlikeArray<Digit>::isEmpty(); }
 
 	/* Equality test.  For the purposes of this test, two BigUnsignedInABase
-	 * values must have the same base to be equal. */ 
+	 * values must have the same base to be equal. */
 	bool operator ==(const BigUnsignedInABase &x) const {
 		return base == x.base && NumberlikeArray<Digit>::operator ==(x);
 	}
