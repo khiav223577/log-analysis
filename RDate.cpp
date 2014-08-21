@@ -3,7 +3,7 @@
 
 #ifndef ___RDate_cpp__
 #define ___RDate_cpp__
-#include<stdio.h>
+#include <stdio.h>
 class RDate{
 public:
     int year, month, day, hour, minute, second;
@@ -58,6 +58,7 @@ public:
         return toDay(year, month, day) * 86400 + hour * 3600 + minute * 60 + second;
     }
 //-----------------------------------------
+    inline static void show(int second){RDate d(second); d.show(); }
     inline int toDay(){    return toDay(year, month, day); }
     inline int toSecond(){ return toSecond(year, month, day, hour, minute, second); }
     inline void getShow(char *str){ sprintf(str,"%d/%02d/%02d %02d:%02d:%02d"  ,year,month,day,hour,minute,second);}

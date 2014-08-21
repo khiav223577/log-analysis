@@ -1,7 +1,6 @@
 
 #ifndef ___FormatterDate_cpp__
 #define ___FormatterDate_cpp__
-
 #include<ctype.h>
 #include<string.h>
 #include<stdlib.h>
@@ -10,7 +9,18 @@
 #define DEBUG_SHOW
 class FormatterDate{
 public:
-    static int retrieve(const char ** input, const char *format){
+//-------------------------------------------------------------------------
+//  transform config-format to appropriate format. (for speed up)
+//-------------------------------------------------------------------------
+    static char *trans_format(const char *_format){
+        char *format = (char *) malloc((strlen(_format) + 1) * sizeof(char));
+        strcpy(format, _format);
+        return format;
+    }
+//-------------------------------------------------------------------------
+//  retrieve data from input according the format.
+//-------------------------------------------------------------------------
+    static int retrieve(const char **input, const char *format){
         const char *inputPtr = *input;
         RDate date;
         int scanfLen,counter = 0; //longest common char
@@ -132,7 +142,7 @@ public:
             char tmp1[999],tmp2[999];
             date.getShow(tmp1);
             test.getShow(tmp2);
-            if (strcmp(tmp1,tmp2) != 0 || strcmp(tmp2,*input) != 0){
+            if (strcmp(tmp1,tmp2) != 0){// || strcmp(tmp2,*input) != 0
                 printf("%s\n",*input);
                 printf("%s\n",tmp1);
                 printf("%s\n",tmp2);

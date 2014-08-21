@@ -8,57 +8,32 @@
 #define MAX_CONFIG_SIZE 1024
 #define MAX_LOG_SIZE 8192
 #include "windows.cpp"
-#include "FormatterDate.cpp"
-#include "FormatterString.cpp"
+#include "FormatterController.cpp"
 #include "RMap.cpp"
 #include <vector>
+
 class InputFormatter{
 public:
-    #define FormatList std::vector<FormatType*>
-    class FormatType{
-    public:
-        enum TYPE{
-            DATE,STRING,
-        };
-        int type;
-        const char *format;
-        FormatType(int _type, const char *_format) : type(_type), format(_format){}
-        void execute(){
-            switch(type){
-            case DATE:{
-                printf("1");
-                break;}
-            case STRING:{
- printf("2");
-                break;}
-            }
-        }
-    };
+#define FormatList std::vector<FormatterController*>
     FormatList formatList;
-    const char *input;
+    const char *inputStream;
     InputFormatter(){
-        formatList.push_back(new FormatType(FormatType::DATE,"MMM d HH:mm:ss"));
-        formatList.push_back(new FormatType(FormatType::STRING," "));
+        formatList.push_back(new FormatterController(FormatterController::DATE,"MMM d HH:mm:ss "));
+        formatList.push_back(new FormatterController(FormatterController::STRING," "));
     }
     ~InputFormatter(){
         for(FormatList::iterator iter = formatList.begin(); iter != formatList.end(); ++iter) delete *iter;
         formatList.clear();
     }
 //--------------------------------------
-//  retrieve
+//  execute
 //--------------------------------------
     void execute(const char *_input){
-        input = _input;
-        for(int i = 0, size = formatList.size(); i < size; ++i) formatList[i]->execute();
-    }
-    int retrieveDate(const char *format){
-        return FormatterDate::retrieve(&input,format);
-    }
-    char *retrieveString(const char *format){
-        return FormatterString<MAX_STRING_SIZE>::retrieve(&input,format);
+        inputStream = _input;
+        for(int i = 0, size = formatList.size(); i < size; ++i) formatList[i]->execute(&inputStream);
     }
 
-    #undef FormatList
+#undef FormatList
 };
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename,mode);
@@ -73,7 +48,27 @@ void SetColor2(){
     SetColor(i);
     i = (i == 8 ? 2 : i + 1);
 }
+void test_date_formatter(){
+    InputFormatter formatter;
+    srand(time(NULL));
+    for(int i = 0; i < 1000; ++i){
+        int year = 2000 - rand() % 61 + 30;
+        int month = rand() % 12 + 1;
+        int dates[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+        if (RDate::is_leapyear(year)) dates[1] = 29;
+        int day = rand() % dates[month - 1] + 1;
+        int hour = rand() % 24;
+        int min = rand() % 60;
+        int sec = rand() % 60;
+        char data[999];
+        const char *inputStream = data;
+        sprintf(data,"%d/%02d/%02d %02d:%02d:%02d",year,month,day,hour,min,sec);
+        SetColor2();FormatterDate::retrieve(&inputStream,"yyyy/MM/dd HH:mm:ss");
+    }
+    SetColor(7);
+}
 int main(){
+
 /*
     MapChar(int) BlahBlah;
     char key[] = "123";
@@ -89,30 +84,7 @@ int main(){
     InputFormatter formatter2;
     formatter2.execute("Dec  3 04:00:01 iisfw");
 return 0;
-//-----------------------------------------------------
-//  Test Date Formatter
-//-----------------------------------------------------
-    InputFormatter formatter;
-    srand(time(NULL));
-    for(int i = 0; i < 1000; ++i){
-        int year = 2000 - rand() % 61 + 30;
-        int month = rand() % 12 + 1;
-        int dates[] = {31,28,31,30,31,30,31,31,30,31,30,31};
-        if (RDate::is_leapyear(year)) dates[1] = 29;
-        int day = rand() % dates[month - 1] + 1;
-        int hour = rand() % 24;
-        int min = rand() % 60;
-        int sec = rand() % 60;
-        char tmp[999];
-        sprintf(tmp,"%d/%02d/%02d %02d:%02d:%02d",year,month,day,hour,min,sec);
-        SetColor2();formatter.input = tmp;formatter.retrieveDate("yyyy/MM/dd HH:mm:ss");
-        //SetColor2();formatter.readDate("1991/02/05 09:21:32", "yyyy/MM/dd HH:mm:ss");
-        //SetColor2();formatter.readDate("1987Dec  3 04:00:01", "yyyyMMM d HH:mm:ss");
-
-    }
-    SetColor(7);
-
-
+    test_date_formatter();
 return 0;
     /*
     char string[] = "a string,of ,,tokens";
