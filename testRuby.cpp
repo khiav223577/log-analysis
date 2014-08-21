@@ -63,19 +63,18 @@ public:
         rb_load_protect(rb_str_new2(path), 0, &error_status);
         error_handling();
     }
-
 };
 int main(int argc, char **argv){
     RubyInterpreter ruby;
     ruby.execute_code("$IN_C_CODE = true");
     ruby.execute_file("./test.rb");
-
+return 0;
     rb_funcall(rb_gv_get("$!"), rb_intern("read_config"),  1, rb_str_new2("config"));
-    VALUE rbError = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0);
+    VALUE result = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0);
 
-    VALUE test1 = rb_ary_entry(rbError,0);
+    VALUE test1 = rb_ary_entry(result,0);
     printf("%s\n",StringValuePtr(test1));
-    VALUE test2 = rb_ary_entry(rbError,1);
+    VALUE test2 = rb_ary_entry(result,1);
     printf("%s\n",StringValuePtr(test2));
 /*
     VALUE rbError = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0);
@@ -84,5 +83,6 @@ int main(int argc, char **argv){
     printf("%s\n",StringValuePtr(rbError));
     rbError = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0);
     printf("%s\n",StringValuePtr(rbError));*/
+    system("pause");
     return 1;
 }

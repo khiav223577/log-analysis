@@ -33,12 +33,13 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    void execute(const char ** inputStream){
+    int execute(const char ** inputStream){
         int num = FormatterInteger::retrieve(inputStream, format);
         if (!SuccessFlag){ //TODO overflow
             exit(1);
         }
         printf("[%d]\n",num);
+        return 0;
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.

@@ -45,7 +45,7 @@ public:
 //--------------------------------------
     void execute(const char *_input){
         inputStream = _input;
-        for(int i = 0, size = formatList.size(); i < size; ++i) formatList[i]->execute(&inputStream);
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(&inputStream);
     }
 };
 FILE *fopen2(const char *filename, const char *mode){

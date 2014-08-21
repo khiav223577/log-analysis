@@ -27,11 +27,12 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    void execute(const char ** inputStream){
+    int execute(const char ** inputStream){
         char *str = retrieve(inputStream, format);
         printf("[%s]\n",str); //DEBUG
         free(prev_result);
         prev_result = str;
+        return 0;
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.

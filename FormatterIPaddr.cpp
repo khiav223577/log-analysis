@@ -26,17 +26,22 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    void execute(const char ** inputStream){
+    int execute(const char ** inputStream){
         unsigned int resule = retrieve(inputStream, format);
         printf("%d.%d.%d.%d\n",(resule >> 24) & 255,(resule >> 16) & 255,(resule >> 8) & 255,(resule >> 0) & 255);
+        return 0;
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
     unsigned int retrieve(const char **input, const char *format){ //EX: input = 140.109.23.120
         int scanfLen = 0;
-        int a,b,c,d;
+        int a = -1,b = -1,c = -1,d = -1;
         sscanf(*input, format, &a, &b, &c, &d, &scanfLen);
+        if (a == -1 || b == -1 || c == -1 || d == -1){
+            printf("retrieve IP failed. input = %s", *input);
+            exit(1);
+        }
         *input += scanfLen;
         return (a << 24) | (b << 16) | (c << 8) | (d << 0);
     }

@@ -26,8 +26,9 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    void execute(const char ** inputStream){
+    int execute(const char ** inputStream){
         retrieve(inputStream, format);
+        return 0;
     }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.

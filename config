@@ -3,22 +3,22 @@
 Date[MMM d HH:mm:ss ] time1
 String[ ] string1
 Int[10] Domain
-#DROP[,]
+DROP[,]
 Date[yyyy/MM/dd HH:mm:ss,] Receive_Time
 String[,] Serial
 String[,] Type
 String[,] Threat_OR_Content_Type
 Int[10] Config_Version
-#DROP[,]
+DROP[,]
 Date[yyyy/MM/dd HH:mm:ss,] Generate_Time
 IPv4[.] Source_address
-#DROP[,]
+DROP[,]
 IPv4[.] Destination_address
-#DROP[,]
+DROP[,]
 IPv4[.] NAT_Source_IP
-#DROP[,]
+DROP[,]
 IPv4[.] NAT_Destination_IP
-#DROP[,]
+DROP[,]
 String[,] Rule
 String[,] Source_User
 String[,] Destination_User
@@ -31,49 +31,49 @@ String[,] Outbound_Interface
 String[,] Log_Action
 Date[yyyy/MM/dd HH:mm:ss,] Time_Logged
 Int[10] Session_ID
-#DROP[,]
+DROP[,]
 Int[10] Repeat_Count
-#DROP[,]
+DROP[,]
 Int[10] Source_Port
-#DROP[,]
+DROP[,]
 Int[10] Destination_Port
-#DROP[,]
+DROP[,]
 Int[10] NAT_Source_Port
-#DROP[,]
+DROP[,]
 Int[10] NAT_Destination_Port
-#DROP[,]
+DROP[,]
 Int[16] Flags
-#DROP[,]
+DROP[,]
 String[,] IP_Protocol
 String[,] Action
 
 #if Action == "allow" or Action == "deny"
 	Int[10] Bytes
-	#DROP[,]
+	DROP[,]
 	Int[10] Bytes_Sent
-	#DROP[,]
+	DROP[,]
 	Int[10] Bytes_Received
-	#DROP[,]
+	DROP[,]
 	Int[10] Packets
-	#DROP[,]
+	DROP[,]
 	Date[yyyy/MM/dd HH:mm:ss,] Start_Time
 	Int[10] Elapsed_Time_sec
-	#DROP[,]
+	DROP[,]
 	String[,] Category
 	Int[10] Padding
-	#DROP[,]
+	DROP[,]
 	Int[10] seqno
-	#DROP[,]
+	DROP[,]
 	Int[16] actionflags
-	#DROP[,]
+	DROP[,]
 	String[,] Source_Country
 	String[,] Destination_Country
 	Int[10] cpadding
-	#DROP[,]
+	DROP[,]
 	Int[10] pkts_sent
-	#DROP[,]
+	DROP[,]
 	Int[10] pkts_received
-	#DROP[,]
+	DROP[,]
 #elsif Action == "alert"
 	String[,] string2
 	String[,] string3
@@ -81,9 +81,9 @@ String[,] Action
 	String[,] string5
 	String[,] direction
 	Int[10] int2
-	#DROP[,]	
+	DROP[,]	
 	Int[16] actionflags
-	#DROP[,]
+	DROP[,]
 	String[,] Source_Country
 	String[,] Destination_Country
 	Int[10] int3

@@ -10,7 +10,7 @@ public:
 		virtual char *trans_format(const char *_format)=0;
 	};
 	char *format, *prev_result;
-    virtual void execute(const char ** inputStream)=0;
+    virtual int execute(const char ** inputStream)=0;
     FormatterController(const char *_format, VirtualCreator *v){
         prev_result = NULL;
         format = v->trans_format(_format);
