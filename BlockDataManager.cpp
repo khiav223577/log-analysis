@@ -4,7 +4,6 @@
 #define ___BlockDataManager_cpp__
 #include<string.h>
 #include<stdlib.h>
-#include "FileIOManager.cpp"
 class BlockConfig{
 public:
     unsigned int line_count, block_size;
@@ -13,25 +12,24 @@ public:
         block_size = _block_size;
     }
 };
-
-class BlockOutputManager{
+template<typename XXXXX> class BlockIOManager{
 private:
     char *path;
     unsigned int path_baselen, line_count, current_block;
     const unsigned int block_size, file_mode;
-    OutputManager *outputer;
-    void (*onBlockChange)(OutputManager *);
+    XXXXX *manager;
+    void (*onBlockChange)(XXXXX *);
 private:
     inline void nextBlock(){ setBlockIndex(current_block + 1); }
     inline void setBlockIndex(unsigned int idx){
         current_block = idx;
         sprintf(path + path_baselen, "%d", current_block);
-        delete outputer;
-        onBlockChange(outputer = new OutputManager(path, file_mode));
+        delete manager;
+        onBlockChange(manager = new XXXXX(path, file_mode));
     }
 public:
-    BlockOutputManager(const char *_path, unsigned int bs, unsigned int fm, void (*callback)(OutputManager *)) :
-            line_count(0), block_size(bs), file_mode(fm), outputer(NULL), onBlockChange(callback){
+    BlockIOManager(const char *_path, unsigned int bs, unsigned int fm, void (*callback)(XXXXX *)) :
+            line_count(0), block_size(bs), file_mode(fm), manager(NULL), onBlockChange(callback){
         static const int max_number_len = 11; //10 billion
         const int len = strlen(_path);
         path_baselen = len + 5; //strlen(_path + ".part")
@@ -40,13 +38,13 @@ public:
         strcpy(path + len, ".part");
         setBlockIndex(0);
     }
-    ~BlockOutputManager(){
-        delete outputer;
+    ~BlockIOManager(){
+        delete manager;
     }
-    inline OutputManager *  getOutputManager(){ return outputer; }
-    inline unsigned int         getLineCount(){ return line_count; }
-    inline void                     nextLine(){ if (++line_count % block_size == 0) nextBlock(); }
-    inline BlockConfig *   createBlockConfig(){ return new BlockConfig(line_count, block_size); }
+    inline XXXXX *       getIOManager(){ return manager; }
+    inline unsigned int  getLineCount(){ return line_count; }
+    inline void              nextLine(){ if (++line_count % block_size == 0) nextBlock(); }
+    inline BlockConfig * createConfig(){ return new BlockConfig(line_count, block_size); }
 };
 
 #endif

@@ -54,7 +54,7 @@ inline void setInOutputer(InputManager *inputer, OutputManager *outputer){
 //  first_pass
 //------------------------------------------------------------
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config, unsigned int block_size){
-    BlockOutputManager *blockoutputer = new BlockOutputManager(output_path, block_size, FILE_MODE_RAW, &setOutputer);
+    BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer);
     InputManager *inputer = new InputManager(input_path, INPUT_MODE);
     unsigned int line_count = 0;
     char buffer[MAX_LOG_SIZE];
@@ -75,7 +75,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
         //if (line_count > 1000000) break;
     }
     if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
-    BlockConfig *config = blockoutputer->createBlockConfig();
+    BlockConfig *config = blockoutputer->createConfig();
     ruby_interface->save_config1(output_config, config);
     delete config;
     delete inputer;
@@ -88,44 +88,43 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
         evalu_ip.show("IP");
         evalu_discard.show("Discard");
     #endif
-    exit(1);
 }
 //------------------------------------------------------------
 //  second_pass
 //------------------------------------------------------------
 inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
-    InputManager *inputer = new InputManager(input_path, FILE_MODE_RAW);
+    BlockConfig *config = ruby_interface->load_config1(input_config);
+    unsigned int line_count = config->line_count;
+    unsigned int block_size = config->block_size;
+    BlockIOManager<InputManager > *blockinputer  = new BlockIOManager<InputManager >(input_path , block_size, FILE_MODE_RAW, &setInputer );
+    BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer);
     #ifdef GROUP_FORMATTER_DATA
+        exit(123); //TODO block?
         char *output_path2 = (char *) malloc((strlen(output_path) + 1 + 64) * sizeof(char));
         FormatList &global_formatList = ruby_interface->global_formatList;
         for(int i = 0, size = global_formatList.size(); i < size; ++i){
             sprintf(output_path2, "%s_%d_%s", output_path, i, typeid(*(global_formatList[i])).name());
             global_formatList[i]->outputer = new OutputManager(output_path2, FILE_MODE_RAW);
         }
-    #else
-        OutputManager *outputer = new OutputManager(output_path, FILE_MODE_RAW);
-        setInOutputer(inputer, outputer);
     #endif
-    BlockConfig *config = ruby_interface->load_config1(input_config);
-    unsigned int line_count = config->line_count;
-    unsigned int block_size = config->block_size;
-    unsigned int current_block = 0;
     SHOW_LINE_COUNT(0);
     for(unsigned int i = 1; i <= line_count; ++i){
         #ifdef DEBUG
             printf("%02d: ", i);
         #endif
         formatter->execute2();
+        blockinputer->nextLine();
+        blockoutputer->nextLine();
         #ifdef DEBUG
             puts("");
         #endif
         if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(i); }
-        if (i % block_size == 0) current_block += 1;
     }
     if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
     ruby_interface->save_config2(output_config, config);
     delete config;
-    delete inputer;
+    delete blockinputer;
+    delete blockoutputer;
     #ifdef GROUP_FORMATTER_DATA
         CopyFilesManager *copy_file = new CopyFilesManager(output_path);
         for(int i = 0, size = global_formatList.size(); i < size; ++i){ //merge all files
@@ -134,35 +133,31 @@ inline void second_pass(const char *input_path, const char *output_path, const c
             copy_file->copy(output_path2, false);
         }
         free(output_path2);
-    #else
-        delete outputer;
     #endif
 }
 //------------------------------------------------------------
 //  third_pass
 //------------------------------------------------------------
 inline void third_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
-    InputManager *inputer = new InputManager(input_path, FILE_MODE_RAW);
-    setInOutputer(inputer, NULL);
     BlockConfig *config = ruby_interface->load_config2(input_config);
     unsigned int line_count = config->line_count;
     unsigned int block_size = config->block_size;
-    unsigned int current_block = 0;
+    BlockIOManager<InputManager > *blockinputer  = new BlockIOManager<InputManager >(input_path , block_size, FILE_MODE_RAW, &setInputer );
     SHOW_LINE_COUNT(0);
     for(unsigned int i = 1; i <= line_count; ++i){
         #ifdef DEBUG
             printf("%02d: ", i);
         #endif
         formatter->execute3();
+        blockinputer->nextLine();
         #ifdef DEBUG
             puts("");
         #endif
         if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(i); }
-        if (i % block_size == 0) current_block += 1;
     }
     if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
     delete config;
-    delete inputer;
+    delete blockinputer;
 }
 //------------------------------------------------------------
 //  main
@@ -202,7 +197,7 @@ int main(int argc, char **argv){
         sprintf( input_path  , "%s%s"      ,  InputPath, fileExtension);
         sprintf(output_path  , "%s.temp1"  , OutputPath);
         sprintf(output_config, "%s.config1", OutputPath);
-        first_pass(input_path, output_path, input_config, output_config, 30000);
+        first_pass(input_path, output_path, input_config, output_config, 20000);
         free(input_path);
         free(output_path);
         free(input_config);
