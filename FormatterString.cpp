@@ -29,6 +29,8 @@ public:
     FormatterString(const char *_format, int maxlen) : super(_format, new VirtualCreator(maxlen)), MaxLen(maxlen){
         prev_result = NULL;
         hashValueCounter = 0;
+        executeCounter = 0;
+        Size4FlagAt = -1;
     }
     ~FormatterString(){
         RMap<MapChar(int)>::FreeClearMap_1(hashTable);
@@ -44,17 +46,27 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
+private:
+    int executeCounter, Size4FlagAt;
+public:
     int execute1(OutputManager *outputer, const char **inputStream){
         char *str = retrieve(inputStream, format);
         free(prev_result);
         prev_result = str;
-        outputer->write(compress(str));
+        unsigned int output = compress(str);
+        if (Size4FlagAt == -1 && output > 255) Size4FlagAt = executeCounter;
+        outputer->write(output, (Size4FlagAt == -1 ? 1 : 4));
+        executeCounter += 1;
         debug();
         return 0;
     }
     int execute2(InputManager *inputer){
-        unsigned int data = (unsigned int) inputer->read_int();
+        unsigned int data;
+        unsigned char byte_num = 4;
+        if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
+        data = (unsigned int) inputer->read_int(byte_num);
         prev_result = decompress(data);
+        executeCounter += 1;
         debug();
         return 0;
     }

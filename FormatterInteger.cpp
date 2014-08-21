@@ -33,7 +33,8 @@ public:
 	FlexibleInt prev_int;
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
         BigIntFlagAt = -1;
-        execute1Counter = 0;
+        Size4FlagAt = -1;
+        executeCounter = 0;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
@@ -46,7 +47,7 @@ public:
 //  execute
 //--------------------------------------
 private:
-    int execute1Counter, BigIntFlagAt;
+    int executeCounter, BigIntFlagAt, Size4FlagAt;
     bool SuccessFlag;
     FlexibleInt record_min, record_max;
 public:
@@ -54,7 +55,7 @@ public:
         if (BigIntFlagAt == -1){
             int value = retrieve(inputStream, format);
             if (SuccessFlag) prev_int = FlexibleInt(value);
-            else BigIntFlagAt = execute1Counter;
+            else BigIntFlagAt = executeCounter;
         }
         if (BigIntFlagAt != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
         if (initialized){
@@ -65,15 +66,26 @@ public:
             record_min = prev_int;
             record_max = prev_int;
         }
-        outputer->write(prev_int);
-        execute1Counter += 1;
+        if (BigIntFlagAt == -1){
+            if (Size4FlagAt == -1 && (prev_int > 128 || prev_int < -127)) Size4FlagAt = executeCounter;
+            if (Size4FlagAt == -1) outputer->write(prev_int.getValue() + 127, 1);
+            else outputer->write(prev_int.getValue(), 4);
+        }else outputer->write(prev_int.getValuePtr());
+        executeCounter += 1;
         debug();
         return 0;
     }
     int execute2(InputManager *inputer){
-        bool is_BigInt = (BigIntFlagAt != -1 && execute1Counter >= BigIntFlagAt);
-        prev_int = (is_BigInt ? FlexibleInt(inputer->read_bigInt()) : FlexibleInt(inputer->read_int()));
-        execute1Counter += 1;
+        if (BigIntFlagAt == -1 || executeCounter < BigIntFlagAt){
+            if (Size4FlagAt == -1 || executeCounter < Size4FlagAt){
+                prev_int = FlexibleInt(inputer->read_int(1) - 127);
+            }else{
+                prev_int = FlexibleInt(inputer->read_int(4));
+            }
+        }else{
+            prev_int = FlexibleInt(inputer->read_bigInt());
+        }
+        executeCounter += 1;
         debug();
         return 0;
     }

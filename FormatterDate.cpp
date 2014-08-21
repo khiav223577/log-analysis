@@ -21,33 +21,23 @@ public:
         }
 	};
     FormatterDate(const char *_format) : super(_format, new VirtualCreator()){
-        first_date = -1;
     }
 public:
     virtual void save_config1(FILE *file);
     virtual void load_config1(FILE *file);
-    int first_date, current_date;
+    DeltaEncoding delta_encoding;
 //--------------------------------------
 //  execute
 //--------------------------------------
     int execute1(OutputManager *outputer, const char **inputStream){
-        int pre_current_date = current_date;
-        current_date = retrieve(inputStream, format);
-        if (first_date == -1){
-            first_date = current_date;
-        }else{
-            outputer->write(current_date - pre_current_date); //delta encoding
-        }
-        debug(current_date);
+        int date = retrieve(inputStream, format);
+        outputer->write(delta_encoding.encode(date)); //delta encoding
+        debug(date);
         return 0;
     }
     int execute2(InputManager *inputer){
-        if (first_date == -1){
-            first_date = current_date;
-        }else{
-            current_date += inputer->read_int();
-        }
-        debug(current_date);
+        int date = delta_encoding.decode(inputer->read_int()); //delta encoding
+        debug(date);
         return 0;
     }
     inline void debug(int date){

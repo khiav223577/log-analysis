@@ -5,6 +5,7 @@
 #include<stdlib.h>
 #include<vector>
 #include "FileIOManager.cpp"
+#include "lib/DeltaEncoding.cpp"
 
 class FormatterController{
 public:

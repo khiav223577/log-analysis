@@ -53,6 +53,29 @@ public:
         write((unsigned char) (data >> 16));
         write((unsigned char) (data >> 24));
     }
+    inline void write1(unsigned int data){
+        write((unsigned char) (data >>  0)); //little endian
+    }
+    inline void write2(unsigned int data){
+        write((unsigned char) (data >>  0)); //little endian
+        write((unsigned char) (data >>  8));
+    }
+    inline void write3(unsigned int data){
+        write((unsigned char) (data >>  0)); //little endian
+        write((unsigned char) (data >>  8));
+        write((unsigned char) (data >> 16));
+    }
+    inline void write4(unsigned int data){
+        write(data);
+    }
+    inline void write(unsigned int data, unsigned char byte_num){
+        switch(byte_num){
+        case 1:{write1(data); break;}
+        case 2:{write2(data); break;}
+        case 3:{write3(data); break;}
+        case 4:{write4(data); break;}
+        }
+    }
     inline void write(unsigned long data){
         CHECK_AND_WRITE_BLOCK(data, 0);
         CHECK_AND_WRITE_BLOCK(data, 1); //for the compatibility when "long" is not 4-bytes.
@@ -75,12 +98,7 @@ public:
 //-------------------------------------------
 //  Extend
 //-------------------------------------------
-    inline void write(FlexibleInt &data){
-        if (data.isBigInt() == false){
-            write(data.getValue());
-            return;
-        }
-        BigInteger *bigInt = data.getValuePtr();
+    inline void write(BigInteger *bigInt){
         unsigned long *buffer = bigInt->getBuffer();
         unsigned int buffer_len = bigInt->getBufferLen();
         write((unsigned char) (bigInt->getSign() + 1)); //0, 1, 2
@@ -120,6 +138,11 @@ public:
     inline int read_int(){
         unsigned char fourBytes[4];
         fread(fourBytes, sizeof(fourBytes), 1, file);
+        return bytes_to_int_Little(fourBytes);
+    }
+    inline int read_int(unsigned char byte_num){
+        unsigned char fourBytes[4] = {0};
+        fread(fourBytes, sizeof(char), byte_num, file);
         return bytes_to_int_Little(fourBytes);
     }
     inline long read_long(){

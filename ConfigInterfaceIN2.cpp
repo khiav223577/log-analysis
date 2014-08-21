@@ -7,9 +7,11 @@
 
 inline void FormatterDate::load_config1(FILE *file){
     //fprintf(file, "Date %d\n", first_date);
+    int first_value;
     char type[5];
     fscanf(file, "%4s", type);
-    fscanf(file, "%d\n", &current_date);
+    fscanf(file, "%d\n", &first_value);
+    delta_encoding.set_first_value(first_value);
 };
 inline void FormatterDebug::load_config1(FILE *file){};
 inline void FormatterDiscard::load_config1(FILE *file){};
@@ -24,7 +26,7 @@ inline void FormatterInteger::load_config1(FILE *file){
     if (type[0] == 'I'){
         //fprintf(file, "Int %d %d\n", record_min.getValue(), record_max.getValue());
         int min, max;
-        fscanf(file, "%d %d\n", &min, &max);
+        fscanf(file, "%d %d %d\n", &min, &max, &Size4FlagAt);
         record_min = FlexibleInt(min);
         record_max = FlexibleInt(max);
     }else{
@@ -48,7 +50,7 @@ inline void FormatterString::load_config1(FILE *file){
     //for(MapChar(int)::iterator it = hashTable.begin(); it != hashTable.end(); ++it) fprintf(file, "%d %s\n", it->second, it->first);
     char type[7];
     fscanf(file, "%6s", type);
-    fscanf(file, "%d\n", &hashValueCounter);
+    fscanf(file, "%d %d\n", &hashValueCounter, &Size4FlagAt);
     hashKeys = std::vector<char *>(hashValueCounter);
     for(int idx, i = 0; i < hashValueCounter; ++i){
         char *input = (char *) malloc((MaxLen + 1) * sizeof(char));
