@@ -16,6 +16,7 @@
 #include<stdlib.h>
 #include<memory.h>
 #include "lib/FlexibleInt.cpp"
+#include "lib/FlexibleFile.cpp"
 #include <ruby.h> // it defines F_OK
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename,mode);
@@ -30,7 +31,7 @@ bool file_exists(const char *filename){
 
 class OutputManager{
 private:
-    FILE *file;
+    FlexibleFile file;
     unsigned char buffer[OUTPUT_MANAGER_BUFFER_SIZE], bit_counter;
     unsigned int buffer_counter;
 public:
@@ -42,7 +43,7 @@ public:
     }
     ~OutputManager(){
         flush();
-        fclose(file);
+        file.close();
     }
 //-------------------------------------------
 //  Core
@@ -52,7 +53,7 @@ public:
         if (buffer_counter == OUTPUT_MANAGER_BUFFER_SIZE) flush();
     }
     inline void flush(){
-        fwrite(buffer, sizeof(char), buffer_counter, file);
+        file.write(buffer, sizeof(char), buffer_counter);
         buffer_counter = 0;
         memset(buffer, 0, sizeof(buffer));
     }
@@ -145,7 +146,7 @@ public:
 
 class InputManager{
 private:
-    FILE *file;
+    FlexibleFile file;
     unsigned char buffer[INPUT_MANAGER_BUFFER_SIZE], bit_counter;
     unsigned int buffer_counter;
 public:
@@ -156,7 +157,7 @@ public:
         load_data();
     }
     ~InputManager(){
-        fclose(file);
+        file.close();
     }
 //-------------------------------------------
 //  Utils
@@ -175,7 +176,7 @@ public:
         if (buffer_counter == OUTPUT_MANAGER_BUFFER_SIZE) load_data();
     }
     inline void load_data(){
-        fread(buffer, sizeof(char), INPUT_MANAGER_BUFFER_SIZE, file);
+        file.read(buffer, sizeof(char), INPUT_MANAGER_BUFFER_SIZE);
         buffer_counter = 0;
     }
     inline unsigned char read_char(){

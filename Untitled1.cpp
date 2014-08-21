@@ -236,9 +236,9 @@ int main(int argc, char **argv){
     printf("%s => %d\n","123", BlahBlah["123"]);
     return 0;
 */
-system("pause");
-
-return 0;
+    system("pause");
+    BzipManager::freeBz2Library();
+    return 0;
     /*
     char string[] = "a string,of ,,tokens";
     char *token = strtok(string,"o")
