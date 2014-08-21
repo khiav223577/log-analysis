@@ -39,7 +39,7 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    inline int execute(const char ** inputStream){
+    inline int execute(const char **inputStream){
         char *str = retrieve(inputStream, format);
         SetColor2(); printf("[%s] ",str); SetColor(7);//DEBUG
         free(prev_result);

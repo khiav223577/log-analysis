@@ -5,22 +5,28 @@ String[ ] Type
 	Int[10] Domain2
 	Int[10] Domain3
 	#if Type == "deny"
+		#DEBUG <<<Debug:(Type == deny)>>> 
 		String[@] Serial
 		Int[10] Config_Version
 	#else
+		#DEBUG <<<Debug:(Type == allow)>>> 
 		IPv4[.] Source_address
 	#end
 	Int[10] Domain4
 #elsif Type == "hello"
+	#DEBUG <<<Debug:(Type == hello)>>> 
 	String[-] Serial01
 	String[ ] Serial02
 #else
+	#DEBUG <<<Debug:(Type == ???)>>> 
 	String[~] Serial1
 	String[~] Serial2
 	String[ ] Serial3
 #end
 #if Type != "str1\"str2"
+	#DEBUG <<<Debug:(Type != str1"str2 )>>> 
 #else
+	#DEBUG <<<Debug:(Type == str1"str2 )>>> 
 #end
 
 String[,] Serial4

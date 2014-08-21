@@ -1,3 +1,17 @@
+class String
+	def extract_escape_symbol
+		return self.gsub(/\\(?:\\|n|r|t|"|')/){|t| #處理config中跳脫字元
+			case t
+			when '\r'   ; "\r"
+			when '\n'   ; "\n"
+			when '\t'   ; "\t"
+			when "\\\\" ; "\\"
+			when "\\\"" ; "\""
+			when "\\\'" ; "\'"
+			end
+		}
+	end
+end
 require './Boolean_parser.rb'
 require './Config_parser.rb'
 
@@ -38,12 +52,14 @@ if !$IN_C_CODE
 	exit
 end
 $config = Config_Parser.new
+
+
 def read_config(config_path)
 	$result_buffer = $config.parse(IO.read(config_path))
 end
 $hash = {}
-def register_hash(string, value)
-	$hash[string] = value
+def register_hash(keys)
+	keys.each_with_index{|key, idx| $hash[key] = idx}
 end
 def return_string
 	data = $result_buffer.shift #[Type, format, vocabulary, extra]

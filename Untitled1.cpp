@@ -48,6 +48,7 @@ int main(){
     FILE *file = fopen2("data/test_input2","r");
     int i = 0;
     while(fgets(buffer, MAX_LOG_SIZE, file) != NULL){
+        if (buffer[0] == '\0' || buffer[0] == '\n') continue;
         printf("%02d: ", ++i);
         formatter->execute(buffer);
         puts("");

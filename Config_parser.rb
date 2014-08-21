@@ -58,6 +58,7 @@ class Config_Parser
 				when line =~ /^(Int)\[([0-9]+)\] \s*(\w+)/
 				when line =~ /^(IPv4)\[(.*)\] \s*(\w+)/
 				when line =~ /^(DROP)\[(.*)\]/
+				when line =~ /^(#DEBUG) (.*)/
 				else ; perror.call("Syntax error") and next
 				end
 				if $3 != nil
@@ -65,7 +66,7 @@ class Config_Parser
 					local_symbols[$3] = global_symbols[$3]
 					global_symbols[$3] = [buffer.size, local_symbols[:buffer_start]]
 				end
-				data = [$1,extract_escape_symbol($2)]
+				data = [$1,$2.extract_escape_symbol]
 				data << $3 if $3
 				buffer << data #[Type, format, vocabulary, extra]
 				if (drop_after = @setting_drop_after[$1])
@@ -91,17 +92,5 @@ class Config_Parser
 			return @buffer_len
 		end
 		return buffer
-	end
-	def extract_escape_symbol(input)
-		return input.gsub(/\\(?:\\|n|r|t|"|')/){|t| #處理config中跳脫字元
-			case t
-			when '\r'   ; "\r"
-			when '\n'   ; "\n"
-			when '\t'   ; "\t"
-			when "\\\\" ; "\\"
-			when "\\\"" ; "\""
-			when "\\\'" ; "\'"
-			end
-		}
 	end
 end

@@ -35,7 +35,7 @@ public:
 //  execute
 //--------------------------------------
     virtual bool check_condition()=0;
-    inline int execute(const char ** inputStream){
+    inline int execute(const char **inputStream){
         if (check_condition() == false) return 0;
         for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(inputStream); //execute回傳要skip掉的指令數
         return skip;

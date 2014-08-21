@@ -25,9 +25,9 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    inline int execute(const char ** inputStream){
-        unsigned int resule = retrieve(inputStream, format);
-        printf("%d.%d.%d.%d ",(resule >> 24) & 255,(resule >> 16) & 255,(resule >> 8) & 255,(resule >> 0) & 255);
+    inline int execute(const char **inputStream){
+        unsigned int result = retrieve(inputStream, format);
+        printf("%d.%d.%d.%d ",(result >> 24) & 255,(result >> 16) & 255,(result >> 8) & 255,(result >> 0) & 255);
         return 0;
     }
 //-------------------------------------------------------------------------

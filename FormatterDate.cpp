@@ -27,7 +27,7 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute(const char ** inputStream){
+    int execute(const char **inputStream){
         int date = retrieve(inputStream, format);
         RDate::show(date); //DEBUG
         return 0;

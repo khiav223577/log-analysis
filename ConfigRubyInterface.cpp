@@ -20,18 +20,12 @@ public:
         RubyInterpreter ruby;
         ruby.execute_code("$IN_C_CODE = true");
         ruby.execute_file("./test.rb");
-        const char *types[11] = {"INVALID", "Date", "String", "Int", "IPv4", "DROP", "#if", "#elsif", "#else", "#end", "EXIT_BLOCK"};
-        for (int i = 0; i < 11; ++i) rb_funcall(rb_gv_get("$!"), rb_intern("register_hash"),  2, rb_str_new2(types[i]), INT2FIX(i));
+
+        rb_eval_string("register_hash(['INVALID', 'Date', 'String', 'Int', 'IPv4', 'DROP', '#DEBUG', '#if', '#elsif', '#else', '#end', 'EXIT_BLOCK'])");
         rb_funcall(rb_gv_get("$!"), rb_intern("read_config"),  1, rb_str_new2(filename));
 
         inner_retrieve_format(&formatter->formatList);
         return formatter;
-    /*
-        VALUE array = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0);
-        VALUE test1 = rb_ary_entry(array,0);
-        printf("%s\n",StringValuePtr(test1));
-        VALUE test2 = rb_ary_entry(array,1);
-        printf("%s\n",StringValuePtr(test2));*/
     }
 //-------------------------------------------------------------------------
 //  mapping Ruby data to C classes
@@ -56,24 +50,25 @@ public:
             case 3:{ node = new FormatterInteger(StringValuePtr(format));                 break;} //Int
             case 4:{ node = new FormatterIPaddr (NULL);                                   break;} //IPv4
             case 5:{ node = new FormatterDiscard(StringValuePtr(format));                 break;} //DROP
-            case 6: case 7:{ //#if, #elsif
+            case 6:{ node = new FormatterDebug  (StringValuePtr(format));                 break;} //#DEBUG
+            case 7: case 8:{ //#if, #elsif
                 FormatterIFStatement *ifnode = parse_bool_statement(format);
                 ifList.push_back(ifnode); //記錄elsif數量。(elsif也是一個node，每多一個elsif，skip要再加1)。
                 node = ifnode;
                 inner_retrieve_format(&ifnode->formatList);
                 break;}
-            case 8:{  //#else
+            case 9:{  //#else
                 int size = formatList->size();
                 inner_retrieve_format(formatList);
                 skip_base = formatList->size() - size;
                 continue;
                 break;}
-            case 9:{  //#end
+            case 10:{  //#end
                 for(IFList::reverse_iterator it = ifList.rbegin(); it != ifList.rend(); ++it) (*it)->skip = skip_base++;
                 ifList.clear(); //elsif, else也都是node，需要被skip。例如(if, elsif, else)的skip量分別為(skip+2, skip+1, skip+0)
                 continue;
                 break;}
-            case 10:{ //EXIT_BLOCK
+            case 11:{ //EXIT_BLOCK
                 return;
                 break;}
             }

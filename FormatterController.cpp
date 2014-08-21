@@ -1,6 +1,7 @@
 #ifndef ___FormatterController_cpp__
 #define ___FormatterController_cpp__
 #define FormatList std::vector<FormatterController*>
+#include<stdio.h>
 #include<stdlib.h>
 #include <vector>
 class FormatterController{
@@ -10,7 +11,7 @@ public:
 		virtual char *trans_format(const char *_format)=0;
 	};
 	char *format;
-    virtual int execute(const char ** inputStream)=0; //回傳要skip掉的指令數
+    virtual int execute(const char **inputStream)=0; //回傳要skip掉的指令數
     FormatterController(const char *_format, VirtualCreator *v){
         format = v->trans_format(_format);
         delete v;
@@ -33,6 +34,7 @@ public:
 #include "FormatterString.cpp"
 #include "FormatterInteger.cpp"
 #include "FormatterDiscard.cpp"
+#include "FormatterDebug.cpp"
 #include "FormatterIPaddr.cpp"
 #include "FormatterIFStatement.cpp"
 

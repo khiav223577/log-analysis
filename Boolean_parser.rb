@@ -24,11 +24,12 @@ class Boolean_parser
 	def output_expr(input)
 		op_buffer = [0]
 		input.scan(@@regular_expr){|s|
+			t6 = ($6.class == String ? $6.extract_escape_symbol : $6)
 			case 
 			when $1 ; prior = 1                     #or
 			when $2 ; prior = 2                     #and		
 			when $3 ; output_expr($3)               #()
-			when $4 ; @postfix_buffer << [$4,$5,$6] #symbol. Ex: [AAA, ==, "str"]
+			when $4 ; @postfix_buffer << [$4,$5,t6] #symbol. Ex: [AAA, ==, "str"]
 			else    ; return nil                    #syntax error
 			end
 			next if prior == nil
