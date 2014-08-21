@@ -4,6 +4,7 @@
 #include<ctype.h>
 #include<time.h>
 #include<vector>
+#include<iostream>
 
 
 #define MAX_CONFIG_SIZE 1024
@@ -32,11 +33,28 @@ public:
 };
 #include "ConfigInterfaceIN1.cpp"
 #include "testing.cpp"
+#include "FlexibleInt.cpp"
 int main(){
+    /*
+    if (1 >= BigInteger(1)){ return 1;}
+
+    FlexibleInt a(new BigInteger(1)), b(new BigInteger(3));
+    a = b + b + FlexibleInt(new BigInteger(12));
+    Sleep(500);
+    printf("!");
+
+    FlexibleInt c(new BigInteger(100)), d(new BigInteger(300));
+    FlexibleInt e = c + d;
+    Sleep(500);
+    printf("!");
+
+    FlexibleInt f = FlexibleInt(new BigInteger(2000));
+    Sleep(500);
+    printf("!");
+    return 0;*/
     const char *ConfigPath = "data/test_config2";
     const char *InputPath  = "data/test_input2";
     const char *OutputPath = "data/test_output2";
-
     ConfigInterfaceIN1 *ruby_interface = new ConfigInterfaceIN1();
     InputFormatter *formatter = ruby_interface->CreateFormatters(ConfigPath);
     OutputManager *outputer = new OutputManager(OutputPath);

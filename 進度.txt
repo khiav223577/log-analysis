@@ -33,4 +33,5 @@
 (O) 支援String[\n] //注意windows中\r\n的問題
 
 (O) 偵測Int overflow
-(X) 處理Int overflow
+(O) 處理Int overflow
+(X) 輸出BigInt

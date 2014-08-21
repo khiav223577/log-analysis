@@ -12,7 +12,7 @@
         fprintf(file, "IF\n");
     };
     inline void FormatterInteger::output_config1(FILE *file){
-        fprintf(file, "Int %d %d\n", record_min, record_max);
+        fprintf(file, "Int %d %d\n", record_min.getValue(), record_max.getValue()); //TODO output BigInt
     };
     inline void FormatterIPaddr::output_config1(FILE *file){
         fprintf(file, "IPv4\n");

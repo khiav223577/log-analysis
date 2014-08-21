@@ -94,14 +94,20 @@ public:
 	CmpRes compareTo(const BigInteger &x) const;
 
 	// Ordinary comparison operators
-	bool operator ==(const BigInteger &x) const {
-		return sign == x.sign && mag == x.mag;
-	}
-	bool operator !=(const BigInteger &x) const { return !operator ==(x); };
-	bool operator < (const BigInteger &x) const { return compareTo(x) == less   ; }
-	bool operator <=(const BigInteger &x) const { return compareTo(x) != greater; }
-	bool operator >=(const BigInteger &x) const { return compareTo(x) != less   ; }
-	bool operator > (const BigInteger &x) const { return compareTo(x) == greater; }
+	inline bool operator ==(const BigInteger &x) const { return sign == x.sign && mag == x.mag; }
+	inline bool operator !=(const BigInteger &x) const { return !operator ==(x); }
+	inline bool operator < (const BigInteger &x) const { return compareTo(x) == less   ; }
+	inline bool operator <=(const BigInteger &x) const { return compareTo(x) != greater; }
+	inline bool operator >=(const BigInteger &x) const { return compareTo(x) != less   ; }
+	inline bool operator > (const BigInteger &x) const { return compareTo(x) == greater; }
+	friend inline bool operator ==(const int a, const BigInteger &x){ return BigInteger(a) == x;}
+	friend inline bool operator !=(const int a, const BigInteger &x){ return BigInteger(a) != x;}
+	friend inline bool operator < (const int a, const BigInteger &x){ return BigInteger(a) <  x;}
+	friend inline bool operator <=(const int a, const BigInteger &x){ return BigInteger(a) <= x;}
+	friend inline bool operator > (const int a, const BigInteger &x){ return BigInteger(a) >  x;}
+	friend inline bool operator >=(const int a, const BigInteger &x){ return BigInteger(a) >= x;}
+
+
 
 	// OPERATORS -- See the discussion in BigUnsigned.hh.
 	void add     (const BigInteger &a, const BigInteger &b);
@@ -112,7 +118,7 @@ public:
 	 * are involved. */
 	void divideWithRemainder(const BigInteger &b, BigInteger &q);
 	void negate(const BigInteger &a);
-	
+
 	/* Bitwise operators are not provided for BigIntegers.  Use
 	 * getMagnitude to get the magnitude and operate on that instead. */
 
@@ -178,7 +184,7 @@ inline BigInteger BigInteger::operator -() const {
 
 /*
  * ASSIGNMENT OPERATORS
- * 
+ *
  * Now the responsibility for making a temporary copy if necessary
  * belongs to the put-here operations.  See Assignment Operators in
  * BigUnsigned.hh.

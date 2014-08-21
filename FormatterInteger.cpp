@@ -4,6 +4,8 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
+#include "FlexibleInt.cpp"
+
 class FormatterInteger : public FormatterController{
 public:
     typedef FormatterController super;
@@ -27,11 +29,11 @@ public:
             return format; //Ex: format = "%d%n"
         }
 	};
-	int prev_int;
-    FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
+	FlexibleInt prev_int;
+    FormatterInteger(const char *_format) : super(_format, new VirtualCreator()), BigIntFlag(false){
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
-        if (initialized) return prev_int;
+        if (initialized) return prev_int.getValue(); // TODO BigInt.
         printf("Error: fails to get_prev_int() in FormatterInteger.");
         exit(1);
     }
@@ -41,26 +43,27 @@ public:
 //  execute
 //--------------------------------------
 private:
-    bool SuccessFlag;
-    int record_min, record_max;
+    bool SuccessFlag, BigIntFlag;
+    FlexibleInt record_min, record_max;
 public:
     int execute1(OutputManager *outputer, const char **inputStream){
-        int num = FormatterInteger::retrieve(inputStream, format);
-        if (!SuccessFlag){ //TODO overflow
-            puts("overflow");
-            exit(1);
+        if (BigIntFlag == false){
+            int value = FormatterInteger::retrieve(inputStream, format);
+            if (SuccessFlag) prev_int = FlexibleInt(value);
+            else BigIntFlag = true;
         }
-        prev_int = num;
-        SetColor2(); printf("[%d] ",num); SetColor(7);//DEBUG
+        if (BigIntFlag == true) prev_int = FlexibleInt(new BigInteger(stringToBigInteger("1234567")));
+
+        SetColor2(); prev_int.output(); SetColor(7);//DEBUG
         if (initialized){
-            if (num < record_min) record_min = num;
-            if (num > record_max) record_max = num;
+            if (prev_int < record_min) record_min = prev_int;
+            if (prev_int > record_max) record_max = prev_int;
         }else{
             initialized = true;
-            record_min = num;
-            record_max = num;
+            record_min = prev_int;
+            record_max = prev_int;
         }
-        outputer->write(num);
+        outputer->write(prev_int.getValue()); // TODO output BigInt. bigIntegerToString
         return 0;
     }
 //-------------------------------------------------------------------------
