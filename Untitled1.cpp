@@ -52,7 +52,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
             puts("");
             if (line_count == DEBUG) break;
         #endif
-        if (line_count == 10000000) break;
+        //if (line_count == 10000000) break;
         if (line_count % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(line_count); }
         //if (line_count > 10000) break;
     }
@@ -143,9 +143,9 @@ int main(int argc, char **argv){
     return 0;
     */
     const char *ConfigPath = "data/input.config";
-    const char *InputPath  = "D:/test/iisfw.log.89"; const char *OutputPath = "D:/test/iisfw.log.89.output";
-    //const char *InputPath  = "data/input_large"; const char *OutputPath = "data/output_min";
-    const int start_pass = 3;
+    //const char *InputPath  = "D:/test/iisfw.log.89"; const char *OutputPath = "D:/test/iisfw.log.89.output";
+    const char *InputPath  = "data/input_large"; const char *OutputPath = "data/output_min";
+    const int start_pass = 1;
     ruby = new RubyInterpreter();
     switch(start_pass){
     case 1:{

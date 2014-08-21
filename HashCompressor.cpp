@@ -81,14 +81,10 @@ public:
     }
 protected:
     inline void inner_save(FILE *file, unsigned int unused){
-        for(typename MAP_TYPE::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
-            fprintf(file, "%x,%x\n", it->second, it->first);
-        }
+        for(unsigned int i = 0 ; i < hashValueCounter; ++i) fprintf(file, "%x\n", hashKeys[i]);
     }
     inline void inner_save(FILE *file, char *unused){
-        for(typename MAP_TYPE::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
-            fprintf(file, "%x,%s\n", it->second, it->first);
-        }
+        for(unsigned int i = 0 ; i < hashValueCounter; ++i) fprintf(file, ":%s\n", hashKeys[i]); //prevent empty line.
     }
 //------------------------------------------------------------
 //  load
@@ -101,16 +97,16 @@ public:
     }
 protected:
     inline void inner_load(FILE *file, unsigned int unused){
-        for(unsigned int idx, i = 0; i < hashValueCounter; ++i){
-            unsigned int input;
-            fscanf(file, "%x,%x\n", &idx, &input);
+        unsigned int input;
+        for(unsigned int idx = 0; idx < hashValueCounter; ++idx){
+            fscanf(file, "%x\n", &input);
             hashKeys[idx] = input;
             RMap<MAP_TYPE>::InsertKeyToMap(hashTable, input, idx);
         }
     }
     inline void inner_load(FILE *file, char *unused){
-        for(unsigned int idx, i = 0; i < hashValueCounter; ++i){
-            fscanf(file, "%x,", &idx);
+        for(unsigned int idx = 0; idx < hashValueCounter; ++idx){
+            fscanf(file, ":");
             const char *input_string = SafeScanf::readHashString(file).c_str();
             fscanf(file, "\n");
             int byte_size = (strlen(input_string) + 1) * sizeof(char);
