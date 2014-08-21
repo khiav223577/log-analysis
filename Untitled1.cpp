@@ -13,21 +13,28 @@ ConfigInterfaceIN1 *ruby_interface;
 InputFormatter *formatter;
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     OutputManager *outputer = new OutputManager(output_path);
-    FILE *file1 = fopen2(input_path,"r");
-    int i = 0;
+    FILE *file = fopen2(input_path,"r");
+    int line_count = 0;
     char buffer[MAX_LOG_SIZE];
-    while(fgets(buffer, sizeof(buffer), file1) != NULL){
+    while(fgets(buffer, sizeof(buffer), file) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
-        printf("%02d: ", ++i);
+        printf("%02d: ", ++line_count);
         formatter->execute1(outputer, buffer);
         puts("");
     }
-    ruby_interface->save_config1(output_config);
-    fclose(file1);
+    ruby_interface->save_config1(line_count, output_config);
+    fclose(file);
     delete outputer;
 }
 inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
-    ruby_interface->load_config1(input_config);
+    InputManager *inputer = new InputManager(input_path);
+    int line_count = ruby_interface->load_config1(input_config);
+    for(int i = 0; i < line_count; ++i){
+        printf("%02d: ", i);
+        formatter->execute2(inputer);
+        puts("");
+    }
+    delete inputer;
 }
 int main(int argc, char **argv){
 
@@ -59,6 +66,7 @@ int main(int argc, char **argv){
         delete formatter;
         delete ruby_interface;
     }
+    puts("==============================================");
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath);

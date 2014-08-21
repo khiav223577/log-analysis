@@ -30,6 +30,10 @@ public:
         printf("%s", format);
         return 0;
     }
+    int execute2(InputManager *inputer){
+        printf("%s", format);
+        return 0;
+    }
 };
 
 #endif

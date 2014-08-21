@@ -30,6 +30,9 @@ public:
         retrieve(inputStream, format);
         return 0;
     }
+    int execute2(InputManager *inputer){
+        return 0;
+    }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------

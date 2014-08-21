@@ -35,7 +35,7 @@ inline void FormatterInteger::load_config1(FILE *file){
         record_min = FlexibleInt(new BigInteger(BigUnsignedInABase(bigIntString1, 10)));
         record_max = FlexibleInt(new BigInteger(BigUnsignedInABase(bigIntString2, 10)));
     }
-
+    initialized = true;
 };
 inline void FormatterIPaddr::load_config1(FILE *file){
     //fprintf(file, "IPv4\n");
@@ -52,8 +52,8 @@ inline void FormatterString::load_config1(FILE *file){
     for(int idx, i = 0; i < hashValueCounter; ++i){
         char *input = (char *) malloc((MaxLen + 1) * sizeof(char));
         *input = '\0'; //prevent error when input is empty string
-        int test = fscanf(file, "%d%*1[ ]%[^\n]\n", &idx, input);
-        hashKeys[i] = input;
+        fscanf(file, "%d%*1[ ]%[^\n]\n", &idx, input);
+        hashKeys[idx] = input;
         RMap<MapChar(int)>::InsertKeyToMap(hashTable, input, idx);
     }
 };

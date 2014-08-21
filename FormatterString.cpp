@@ -44,10 +44,16 @@ public:
 //--------------------------------------
     int execute1(OutputManager *outputer, const char **inputStream){
         char *str = retrieve(inputStream, format);
-        SetColor2(); printf("[%s] ",str); SetColor(7);//DEBUG
         prev_result = str;
         outputer->write(compress(str));
+        SetColor2(); printf("[%s] ",prev_result); SetColor(7);//DEBUG
         //printf("~~~~~~[%s => %d]         ", str, value); //DEBUG
+        return 0;
+    }
+    int execute2(InputManager *inputer){
+        unsigned int data = (unsigned int) inputer->read_int();
+        prev_result = decompress(data);
+        SetColor2(); printf("[%s] ",prev_result); SetColor(7);//DEBUG
         return 0;
     }
 //-------------------------------------------------------------------------
@@ -71,7 +77,7 @@ private:
     std::vector<char *> hashKeys;
     int hashValueCounter;
 public:
-    inline int compress(char *input){
+    inline unsigned int compress(char *input){
         int value = RMap<MapChar(int)>::InsertKeyToMap(hashTable, input, hashValueCounter);
         if (value == hashValueCounter){
             hashKeys.push_back(input);
@@ -79,7 +85,7 @@ public:
         }
         return value;
     }
-    inline char *decompress(int input){
+    inline char *decompress(unsigned int input){
         return hashKeys[input];
     }
 };

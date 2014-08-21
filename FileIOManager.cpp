@@ -93,9 +93,44 @@ public:
         write(buffer_len);
         for(unsigned int i = 0; i < buffer_len; ++i) write(buffer[i]);
     }
-
 };
 
+class InputManager{
+private:
+    FILE *file;
+public:
+public:
+    InputManager(const char *filename){
+        file = fopen2(filename, "rb");
+    }
+    ~InputManager(){
+        fclose(file);
+    }
+//-------------------------------------------
+//  Core
+//-------------------------------------------
+    inline int read_int(){
+        int data;
+        fread(&data, sizeof(int), 1, file);
+        return data;
+    }
+    inline long read_long(){
+        long data;
+        fread(&data, sizeof(long), 1, file);
+        return data;
+    }
+//-------------------------------------------
+//  Extend
+//-------------------------------------------
+    inline BigInteger *read_bigInt(){
+        int sign = read_int() - 1;
+        unsigned int buffer_len = (unsigned int) read_int();
+        unsigned long *buffer = (unsigned long *) malloc(buffer_len * sizeof(unsigned long));
+        BigInteger *bigInt = new BigInteger(buffer, buffer_len, BigInteger::Sign(sign));
+        free(buffer);
+        return bigInt;
+    }
+};
 
 #undef CHECK_AND_WRITE_BLOCK
 #undef OUTPUT_MANAGER_BUFFER_SIZE

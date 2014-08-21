@@ -29,6 +29,7 @@ public:
         PERROR(true, printf("Error: fails to get_prev_int()"););
     }
     virtual int execute1(OutputManager *outputer, const char **inputStream)=0; //回傳要skip掉的指令數
+    virtual int execute2(InputManager *inputer)=0; //回傳要skip掉的指令數
     virtual void save_config1(FILE *file)=0;
     virtual void load_config1(FILE *file)=0;
 };
@@ -58,6 +59,9 @@ public:
     void execute1(OutputManager *outputer, const char *_input){
         inputStream = _input;
         for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(outputer, &inputStream); //execute回傳要skip掉的指令數
+    }
+    void execute2(InputManager *inputer){
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute2(inputer); //execute回傳要skip掉的指令數
     }
 };
 

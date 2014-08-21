@@ -34,4 +34,9 @@
 
 (O) 偵測Int overflow
 (O) 處理Int overflow
-(X) 輸出BigInt
+(O) 輸出BigInt
+(O) 建立config以便讀回(1st pass)輸出後的資料
+(O) 從config檔讀回(1st pass)資料
+
+(X) 用delta encoding壓縮
+(X) 動態長度編碼

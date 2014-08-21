@@ -32,6 +32,11 @@ public:
         outputer->write((int) result);
         return 0;
     }
+    int execute2(InputManager *inputer){
+        unsigned int result = (unsigned int) inputer->read_int();
+        printf("%d.%d.%d.%d ",(result >> 24) & 255,(result >> 16) & 255,(result >> 8) & 255,(result >> 0) & 255);
+        return 0;
+    }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------

@@ -35,6 +35,11 @@ public:
         outputer->write(date);
         return 0;
     }
+    int execute2(InputManager *inputer){
+        int date = inputer->read_int();
+        RDate::show(date); //DEBUG
+        return 0;
+    }
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
