@@ -14,6 +14,8 @@
 (O) #if語句支援比對 String 欄位
 (O) #if語句支援比對    Int 欄位
 (X) #if語句支援比對   IPv4 欄位
+(X) #if語句支援比對 Big Integer
+
 (O) 複雜的#if語句 //EX: #if (a == 1 && b == 2 || c == 3 && d == 3)
 (O) if語法支援用"and","or"分別代表"&&","||"。
 

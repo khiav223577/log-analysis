@@ -69,9 +69,15 @@ public:
         }
         if (BigIntFlagAt1 != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
         if (initialized){
-            if (prev_int < record_min) record_min = prev_int;
-            if (prev_int > record_max) record_max = prev_int;
+            if (BigIntFlagAt1 == -1){ //just for speed up. (reduce exec-time from 0.8s to 0.08s for 100k lines of data)
+                if (prev_int.getValue() < record_min.getValue())  record_min.setValue(prev_int.getValue());
+                if (prev_int.getValue() > record_max.getValue())  record_max.setValue(prev_int.getValue());
+            }else{
+                if (prev_int < record_min) record_min = prev_int;
+                if (prev_int > record_max) record_max = prev_int;
+            }
             if (increasingFuncFlag && (prev_int - prev_int_sav) < 0) increasingFuncFlag = false;
+
         }else{
             initialized = true;
             record_min = prev_int;
@@ -83,6 +89,7 @@ public:
             if (Size4FlagAt1 == -1 && (prev_int > 127 || prev_int < -128)) Size4FlagAt1 = executeCounter;
             outputer->write(prev_int.getValue(), (Size4FlagAt1 == -1 ? 1 : 4));
         }
+
         executeCounter += 1;
         debug();
         return 0;
@@ -168,8 +175,9 @@ public:
         SuccessFlag = false;
         const char *inputPtr = *input;
         int scanfLen = 0, result;
-        sscanf(inputPtr, "%*[ \f\n\r\t\v]%n", &scanfLen);   //remove white-space characters
-        inputPtr += scanfLen;
+        if (*inputPtr == ' ' || *inputPtr == '\t') inputPtr += 1; //use for speed up. (reduce exec-time from 0.25s to 0.05s for 100k lines of data)
+        //sscanf(inputPtr, "%*[ \f\n\r\t\v]%n", &scanfLen);   //remove white-space characters
+        //inputPtr += scanfLen;
         sscanf(inputPtr, format, &result, &scanfLen);       //read integer.
         if (scanfLen == 0) return -1;
         if (*inputPtr == '-'){      //check overflow by (+-) sign

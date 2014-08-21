@@ -19,13 +19,18 @@ public:
                                                                         maxlen < 1000000 ? 6 : maxlen < 10000000 ? 7 : maxlen < 100000000 ? 8 : maxlen < 1000000000 ? 9 : 10){
         }
         char *trans_format(const char *_format){
+            char *format = (char *) malloc((strlen(_format) + 1) * sizeof(char));
+            strcpy(format,  _format);
+            return format; //Ex: format = ", "
+            /*
             char *format = (char *) malloc((strlen(_format) + 1 + 7 + StringMaxLen) * sizeof(char));
             sprintf(format, "%%%d[^%s\n]%%n", MaxLen, _format);
-            return format; //Ex: format = "%25[^,]%n"
+            return format; //Ex: format = "%25[^,]%n"*/
         }
 	};
 	char *prev_result;
 	const int MaxLen;
+	int format_len;
     FormatterString(const char *_format, int maxlen) : super(_format, new VirtualCreator(maxlen)), MaxLen(maxlen){
         prev_result = NULL;
         hashValueCounter = 0;
@@ -33,6 +38,7 @@ public:
         Size4FlagAt = -1;
         byte_num = 1;
         bit_num = 32;
+        format_len = strlen(format);
     }
     ~FormatterString(){
         RMap<MapChar(int)>::FreeClearMap_1(hashTable);
@@ -97,11 +103,20 @@ public:
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
     inline char *retrieve(const char **input, const char *format){
+        /*
         int scanfLen = 0;
         char *buffer = (char *) malloc((MaxLen + 1) * sizeof(char));
         sscanf(*input, format, buffer, &scanfLen);
-        //sscanf(*input, "%511[^\n]%n", buffer, &scanfLen);
-        *input += scanfLen;
+        *input += scanfLen;*/
+        char *buffer = (char *) malloc((MaxLen + 1) * sizeof(char));
+        const char *inputStr = *input;
+        int scanfLen = 0;
+        for(scanfLen = 0; scanfLen < MaxLen; ++scanfLen){
+            for(int i = 0; i < format_len; ++i) if (*inputStr == format[i]) goto BREAK;
+            buffer[scanfLen] = *inputStr;
+            inputStr += 1;
+        } BREAK:
+        *input = inputStr;
         if (**input != '\0') *input += 1; //drop stop-word
         buffer[scanfLen] = '\0'; //avoid error when scanfLen == 0
         return buffer;

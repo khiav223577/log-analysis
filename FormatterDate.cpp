@@ -6,7 +6,7 @@
 #include<stdlib.h>
 #include "RDate.cpp"
 
-#define DEBUG_SHOW
+//#define DEBUG_SHOW
 class FormatterDate : public FormatterController{
 public:
     typedef FormatterController super;
@@ -82,22 +82,32 @@ public:
                 scanfLen = 0;
                 switch(prev){
                 case 'y':{
+                    /*
                     switch(counter){
                     case 2:{sscanf(inputPtr, "%02d%n",     &date.year,    &scanfLen); break;} //  year: 99(1999),00(2000),01(2001),...
                     case 4:{sscanf(inputPtr, "%4d%n",      &date.year,    &scanfLen); break;} //  year: 1970,1971,...,2013,2014
+                    }*/
+                    scanfLen = counter;
+                    int n1 = inputPtr[0] - '0';
+                    int n2 = inputPtr[1] - '0';
+                    date.year = n1 * 10 + n2;
+                    if (counter == 2){
+                        if (date.year < 70) date.year += 2000;
+                        else if (date.year <= 99) date.year += 1900;
+                    }else{ //counter == 4
+                        date.year = date.year * 10 + (inputPtr[2] - '0');
+                        date.year = date.year * 10 + (inputPtr[3] - '0');
                     }
-                    if (date.year < 70) date.year += 2000;
-                    else if (date.year <= 99) date.year += 1900;
                     break;}
                 case 'M':{
-                    char tmp[10];
-                    switch(counter){
-                    case 1:{sscanf(inputPtr, "%d%n",       &date.month,   &scanfLen); break;} // month: 1,2,...,11,12
-                    case 2:{sscanf(inputPtr, "%02d%n",     &date.month,   &scanfLen); break;} // month: 01,02,...,11,12
-                    case 3:{sscanf(inputPtr, "%3s%n",      tmp,           &scanfLen); break;} // month: Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec
-                    case 4:{sscanf(inputPtr, "%8s%n",      tmp,           &scanfLen); break;} // month: January,February,...,November,December
-                    }
-                    if (counter == 3 || counter == 4){
+                    if (counter <= 2){
+                        date.month = read_int2(inputPtr, counter, &scanfLen);
+                    }else{
+                        char tmp[10];
+                        switch(counter){
+                        case 3:{sscanf(inputPtr, "%3s%n",      tmp,           &scanfLen); break;} // month: Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec
+                        case 4:{sscanf(inputPtr, "%8s%n",      tmp,           &scanfLen); break;} // month: January,February,...,November,December
+                        }
                         date.month = 0;
                         tmp[0] = tolower(tmp[0]);
                         tmp[1] = tolower(tmp[1]);
@@ -136,18 +146,17 @@ public:
                     }
                     break;}
                 case 'd':{
-                    switch(counter){
-                    case 1:{sscanf(inputPtr, "%d%n",       &date.day,     &scanfLen); break;} //   day: 0,1,2,...,30,31
-                    case 2:{sscanf(inputPtr, "%02d%n",     &date.day,     &scanfLen); break;} //   day: 00,01,02,...,30,31
-                    case 3:{sscanf(inputPtr, "%*3s%n",     &scanfLen);                break;} //  week: Mon,Tue,Wed,Thu,Fri,Sat,Sun
-                    case 4:{sscanf(inputPtr, "%*8[^y]y%n", &scanfLen);                break;} //  week: Monday,Tuesday,...,Saturday,Sunday
+                    if (counter <= 2){
+                        date.day = read_int2(inputPtr, counter, &scanfLen);
+                    }else{
+                        switch(counter){
+                        case 3:{sscanf(inputPtr, "%*3s%n",     &scanfLen);                break;} //  week: Mon,Tue,Wed,Thu,Fri,Sat,Sun
+                        case 4:{sscanf(inputPtr, "%*8[^y]y%n", &scanfLen);                break;} //  week: Monday,Tuesday,...,Saturday,Sunday
+                        }
                     }
                     break;}
                 case 'h': case 'H':{
-                    switch(counter){
-                    case 1:{sscanf(inputPtr, "%d%n",       &date.hour,    &scanfLen); break;} //  hour: 0,1,2,...,22,23
-                    case 2:{sscanf(inputPtr, "%02d%n",     &date.hour,    &scanfLen); break;} //  hour: 00,01,02,...,22,23
-                    }
+                    date.hour = read_int2(inputPtr, counter, &scanfLen);
                     break;}
                 case 't':{
                     char tmp[3];
@@ -159,28 +168,26 @@ public:
                     if (tmp[0] == 'P') date.hour += 12;
                     break;}
                 case 'm':{
-                    switch(counter){
-                    case 1:{sscanf(inputPtr, "%d%n",       &date.minute,  &scanfLen); break;} //minute: 0,1,2,...,58,59
-                    case 2:{sscanf(inputPtr, "%02d%n",     &date.minute,  &scanfLen); break;} //minute: 00,01,02,...,58,59
-                    }
+                    date.minute = read_int2(inputPtr, counter, &scanfLen);
                     break;}
                 case 's':{
-                    switch(counter){
-                    case 1:{sscanf(inputPtr, "%d%n",       &date.second,  &scanfLen); break;} //second: 0,1,2,...,58,59
-                    case 2:{sscanf(inputPtr, "%02d%n",     &date.second,  &scanfLen); break;} //second: 00,01,02,...,58,59
-                    }
+                    date.second = read_int2(inputPtr, counter, &scanfLen);
                     break;}
                 default:{
+                    /*
                     static char tmp[] = "%*9[ ]%n";
                     tmp[2] = '0' + counter;
                     tmp[4] = prev;
                     sscanf(inputPtr, tmp, &scanfLen);
-                    if (scanfLen != counter){ printf("tmp = %s,scanfLen = %d\n",tmp,scanfLen); goto LABEL_ERROR;}
+                    if (scanfLen != counter){ printf("tmp = %s,scanfLen = %d\n",tmp,scanfLen); goto LABEL_ERROR;}*/
+                    //reduce exec-time from 0.8s to 0.1s for 100k lines of data
+                    for(int i = 0; i < counter; ++i) if (inputPtr[i] != prev) goto LABEL_ERROR;
+                    scanfLen = counter;
                     break;}
                 }
                 if (scanfLen == 0){
                     LABEL_ERROR:
-                    PERROR(true, printf("Unknown format in readDate:\nformat=%s, prev=[%%c:%c, %%d:%d], counter=%d\ninput=\"%s\"\n",format, prev, prev, counter,inputPtr););
+                    PERROR(scanfLen == 0, printf("Unknown format in readDate:\nformat=%s, prev=[%%c:%c, %%d:%d], counter=%d\ninput=\"%s\"\n",format, prev, prev, counter,inputPtr););
                 }
                 inputPtr += scanfLen;
                 counter = 1;
@@ -189,6 +196,7 @@ public:
             curr = *(++format);
         }
         #ifdef DEBUG_SHOW
+            //just for debuging. It'll increase exec-time from 1.2s to 1.8s for 100k lines of data
             RDate test = RDate(date.toSecond());
             char tmp1[999],tmp2[999];
             date.getShow(tmp1);
@@ -205,6 +213,20 @@ public:
         #endif
         *input = inputPtr;
         return date.toSecond();
+    }
+    inline int read_int2(const char *inputPtr, int counter, int *scanfLen){
+        //switch(counter){
+        //case 1:{sscanf(inputPtr, "%d%n",       &date.second,  &scanfLen); break;} //second: 0,1,2,...,58,59
+        //case 2:{sscanf(inputPtr, "%02d%n",     &date.second,  &scanfLen); break;} //second: 00,01,02,...,58,59
+        //}
+        int n1 = inputPtr[0] - '0';
+        int n2 = inputPtr[1] - '0';
+        int output = n1;
+        if (n2 >= 0 && n2 <= 9){
+            output = output * 10 + n2;
+            *scanfLen = 2;
+        }else *scanfLen = 1;
+        return output;
     }
 };
 
