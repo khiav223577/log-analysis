@@ -29,7 +29,8 @@ public:
         PERROR(true, printf("Error: fails to get_prev_int()"););
     }
     virtual int execute1(OutputManager *outputer, const char **inputStream)=0; //回傳要skip掉的指令數
-    virtual void output_config1(FILE *file)=0;
+    virtual void save_config1(FILE *file)=0;
+    virtual void load_config1(FILE *file)=0;
 };
 
 
@@ -40,8 +41,29 @@ public:
 #include "FormatterDebug.cpp"
 #include "FormatterIPaddr.cpp"
 #include "FormatterIFStatement.cpp"
-#include "ConfigInterfaceOUT1.cpp"
 
+class InputFormatter{
+public:
+    FormatList formatList;
+    const char *inputStream;
+    InputFormatter(){
+    }
+    ~InputFormatter(){
+        for(FormatList::iterator iter = formatList.begin(); iter != formatList.end(); ++iter) delete *iter;
+        formatList.clear();
+    }
+//--------------------------------------
+//  execute
+//--------------------------------------
+    void execute1(OutputManager *outputer, const char *_input){
+        inputStream = _input;
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(outputer, &inputStream); //execute回傳要skip掉的指令數
+    }
+};
+
+#include "ConfigInterfaceIN1.cpp"
+#include "ConfigInterfaceOUT1.cpp"
+#include "ConfigInterfaceIN2.cpp"
 
 #endif
 

@@ -40,7 +40,8 @@ public:
         return prev_int.getValue(); // TODO BigInt.
     }
 public:
-    virtual void output_config1(FILE *file);
+    virtual void save_config1(FILE *file);
+    virtual void load_config1(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------

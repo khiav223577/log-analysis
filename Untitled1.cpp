@@ -2,31 +2,10 @@
 #include<stdio.h>
 #include<iostream>
 #include "windows.cpp"
-
 #include "FormatterController.cpp"
 //#include "RMap.cpp"
-
-class InputFormatter{
-public:
-    FormatList formatList;
-    const char *inputStream;
-    InputFormatter(){
-    }
-    ~InputFormatter(){
-        for(FormatList::iterator iter = formatList.begin(); iter != formatList.end(); ++iter) delete *iter;
-        formatList.clear();
-    }
-//--------------------------------------
-//  execute
-//--------------------------------------
-    void execute1(OutputManager *outputer, const char *_input){
-        inputStream = _input;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(outputer, &inputStream); //execute回傳要skip掉的指令數
-    }
-};
-#include "ConfigInterfaceIN1.cpp"
-#include "testing.cpp"
-#include "FlexibleInt.cpp"
+//#include "testing.cpp"
+//#include "FlexibleInt.cpp"
 
 #define MAX_LOG_SIZE 8192
 RubyInterpreter *ruby;
@@ -43,7 +22,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
         formatter->execute1(outputer, buffer);
         puts("");
     }
-    ruby_interface->output_config(config_path);
+    ruby_interface->save_config1(config_path);
     fclose(file1);
     delete outputer;
 }
@@ -62,7 +41,6 @@ int main(int argc, char **argv){
     const char *InputPath  = "data/test_input2";
     const char *OutputPath = "data/test_output2";
     ruby = new RubyInterpreter();
-
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath);
@@ -95,7 +73,7 @@ int main(int argc, char **argv){
         delete formatter;
         delete ruby_interface;
     }
-
+    delete ruby;
     //test_InputFormatter();
     //test_FormatterDate();
 

@@ -30,7 +30,8 @@ public:
         PERROR(true, printf("Unknown operator in FormatterIFStatement: '%c'", op););
     }
 public:
-    virtual void output_config1(FILE *file);
+    virtual void save_config1(FILE *file);
+    virtual void load_config1(FILE *file);
 //--------------------------------------
 //  execute
 //--------------------------------------

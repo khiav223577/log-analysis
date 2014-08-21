@@ -118,10 +118,16 @@ public:
 //-------------------------------------------------------------------------
 //  config
 //-------------------------------------------------------------------------
-    void output_config(const char *filename){
+    void save_config1(const char *filename){
         FILE *file = fopen2(filename, "w");
         int size = global_formatList.size();
-        for(int i = 0; i < size; ++i) global_formatList[i]->output_config1(file);
+        for(int i = 0; i < size; ++i) global_formatList[i]->save_config1(file);
+        fclose(file);
+    }
+    void load_config1(const char *filename){
+        FILE *file = fopen2(filename, "r");
+        int size = global_formatList.size();
+        for(int i = 0; i < size; ++i) global_formatList[i]->load_config1(file);
         fclose(file);
     }
 };
