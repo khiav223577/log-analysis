@@ -33,8 +33,10 @@ public:
 	FlexibleInt prev_int;
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
         BigIntFlagAt = -1;
-        Size4FlagAt = -1;
+        Size4FlagAt1 = -1;
+        Size4FlagAt2 = -1;
         executeCounter = 0;
+        byte_num = 1;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
@@ -49,9 +51,10 @@ public:
 //  execute
 //--------------------------------------
 private:
-    int executeCounter, BigIntFlagAt, Size4FlagAt;
-    bool SuccessFlag;
-    FlexibleInt record_min, record_max;
+    unsigned char byte_num;
+    int executeCounter, BigIntFlagAt, Size4FlagAt1, Size4FlagAt2;
+    bool SuccessFlag, SameFlag;
+    FlexibleInt record_min, record_max, record_range;
 public:
     int execute1(OutputManager *outputer, const char **inputStream){
         if (BigIntFlagAt == -1){
@@ -69,8 +72,8 @@ public:
             record_max = prev_int;
         }
         if (BigIntFlagAt == -1){
-            if (Size4FlagAt == -1 && (prev_int > 127 || prev_int < -128)) Size4FlagAt = executeCounter;
-            outputer->write_n_byte_int(prev_int.getValue(), (Size4FlagAt == -1 ? 1 : 4));
+            if (Size4FlagAt1 == -1 && (prev_int > 127 || prev_int < -128)) Size4FlagAt1 = executeCounter;
+            outputer->write_n_byte_int(prev_int.getValue(), (Size4FlagAt1 == -1 ? 1 : 4));
         }else{
             outputer->write(prev_int.getValuePtr());
         }
@@ -79,26 +82,47 @@ public:
         return 0;
     }
     int execute2(OutputManager *outputer, InputManager *inputer){
-        if (BigIntFlagAt == -1 || executeCounter < BigIntFlagAt){
-            unsigned char byte_num = 4;
-            if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
-            prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
-            outputer->write_n_byte_int(prev_int.getValue(), byte_num);
-        }else{
+        bool isBigInt = (BigIntFlagAt != -1 && executeCounter >= BigIntFlagAt);
+        if (isBigInt){
             prev_int = FlexibleInt(inputer->read_bigInt());
-            outputer->write(prev_int.getValuePtr());
+        }else{
+            if (Size4FlagAt1 != -1 && executeCounter >= Size4FlagAt1) byte_num = 4;
+            prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
+        }
+        if (SameFlag){
+            //do nothing
+        }else if (record_range.isBigInt() == false){
+            FlexibleInt tmp = (prev_int - record_min);
+            bool success = tmp.try_to_cast_to_int();
+            PERROR(success == false, printf("Unable to cast BigInt to int"););
+            int output = tmp.getValue();
+            if (Size4FlagAt2 == -1 && output > 255) Size4FlagAt2 = executeCounter;
+            outputer->write_n_byte_int(output, (Size4FlagAt2 == -1 ? 1 : 4));
+        }else{
+            if (isBigInt){
+                outputer->write(prev_int.getValuePtr());
+            }else{
+                outputer->write_n_byte_int(prev_int.getValue(), byte_num);
+            }
         }
         executeCounter += 1;
         debug();
         return 0;
     }
     int execute3(InputManager *inputer){
-        if (BigIntFlagAt == -1 || executeCounter < BigIntFlagAt){
-            unsigned char byte_num = 4;
-            if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
-            prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
+        if (SameFlag){
+            prev_int = record_min;
+        }else if (record_range.isBigInt() == false){
+            if (Size4FlagAt2 != -1 && executeCounter >= Size4FlagAt2) byte_num = 4;
+            prev_int = record_min + FlexibleInt(inputer->read_n_byte_int(byte_num));
         }else{
-            prev_int = FlexibleInt(inputer->read_bigInt());
+            bool isBigInt = (BigIntFlagAt != -1 && executeCounter >= BigIntFlagAt);
+            if (isBigInt){
+                prev_int = FlexibleInt(inputer->read_bigInt());
+            }else{
+                if (Size4FlagAt1 != -1 && executeCounter >= Size4FlagAt1) byte_num = 4;
+                prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
+            }
         }
         executeCounter += 1;
         debug();

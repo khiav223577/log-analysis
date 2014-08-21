@@ -13,9 +13,9 @@ inline void FormatterIFStatement::save_config1(FILE *file){ //TODO
 };
 inline void FormatterInteger::save_config1(FILE *file){
     if (BigIntFlagAt == -1){ //Int
-        fprintf(file, "Int %d %d %d\n", record_min.getValue(), record_max.getValue(), Size4FlagAt);
+        fprintf(file, "Int %d %d %d\n", record_min.getValue(), record_max.getValue(), Size4FlagAt1);
     }else{  //BigInt
-        fprintf(file, "BigInt %d %s %s\n", BigIntFlagAt, record_min.getValuePtrAsStr().c_str(), record_max.getValuePtrAsStr().c_str());
+        fprintf(file, "BigInt %s %s %d\n", record_min.getValuePtrAsStr().c_str(), record_max.getValuePtrAsStr().c_str(), BigIntFlagAt);
     }
 
 };

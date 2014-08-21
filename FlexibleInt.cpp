@@ -52,9 +52,19 @@ public:
     inline BigInteger*  getValuePtr() const { return inner_data.valuePtr; }
     inline int             getValue() const { return inner_data.value;    }
     inline std::string getValuePtrAsStr() const { return bigIntegerToString(*inner_data.valuePtr); }
-
     inline void output() const{
         std::cout << GETVALUE(*this) << " ";
+    }
+    inline bool try_to_cast_to_int(){
+        if (!isBigInt()) return true;
+        try{
+            int result = getValuePtr()->toInt(); //may cause exception
+            bigInt_flag = false;
+            setValue(result);
+            return true;
+        }catch (const char* message){
+            return false; //fails
+        }
     }
 //----------------------------------------------
 //  Operator
@@ -73,7 +83,7 @@ public:
         FlexibleInt ans;
         if (isBigInt() || x.isBigInt()){
             ans.setBigInt();
-            ans.setValuePtr(new BigInteger(GETVALUE(*this) + GETVALUE(x)));
+            ans.setValuePtr(new BigInteger(GETVALUE(*this) - GETVALUE(x)));
         }else{
             ans.setValue(getValue() - x.getValue());
         }
