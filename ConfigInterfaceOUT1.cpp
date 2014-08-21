@@ -4,7 +4,7 @@
 #define ___ConfigInterfaceOUT1_cpp__
 
 inline void FormatterDate::save_config1(FILE *file){
-    fprintf(file, "Date\n");
+    fprintf(file, "Date %d\n", first_date);
 };
 inline void FormatterDebug::save_config1(FILE *file){};
 inline void FormatterDiscard::save_config1(FILE *file){};

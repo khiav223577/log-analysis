@@ -6,9 +6,10 @@
 #include "FormatterController.cpp"
 
 inline void FormatterDate::load_config1(FILE *file){
-    //fprintf(file, "Date\n");
-    char buffer[32];
-    fgets(buffer, sizeof(buffer), file);
+    //fprintf(file, "Date %d\n", first_date);
+    char type[5];
+    fscanf(file, "%4s", type);
+    fscanf(file, "%d\n", &current_date);
 };
 inline void FormatterDebug::load_config1(FILE *file){};
 inline void FormatterDiscard::load_config1(FILE *file){};

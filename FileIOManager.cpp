@@ -1,7 +1,7 @@
 
 #ifndef ___FileIOManager_cpp__
 #define ___FileIOManager_cpp__
-#define OUTPUT_MANAGER_BUFFER_SIZE 256
+#define OUTPUT_MANAGER_BUFFER_SIZE 4096
 #define SIZE_OF_UINT sizeof(unsigned int)
 //DATA >>= (SIZE_OF_UINT << 3); will trigger compiler warning....
 #define CHECK_AND_WRITE_BLOCK(DATA, INDEX) \
@@ -26,12 +26,12 @@ bool file_exists(const char *filename){
 class OutputManager{
 private:
     FILE *file;
-    unsigned int buffer[OUTPUT_MANAGER_BUFFER_SIZE], buffer_counter, char_counter;
+    unsigned char buffer[OUTPUT_MANAGER_BUFFER_SIZE];
+    int buffer_counter;
 public:
     OutputManager(const char *filename){
         file = fopen2(filename, "wb");
         buffer_counter = 0;
-        char_counter = 0;
     }
     ~OutputManager(){
         flush();
@@ -44,15 +44,14 @@ public:
     inline void write(char data){ write((unsigned char) data); }
     inline void write(long data){ write((unsigned long) data); }
     inline void write(unsigned char data){
-        unsigned int fourBytes = data;
-        buffer[buffer_counter] |= (fourBytes << (char_counter << 3)); //data << (0, 8, 16, or 24)
-        if (++char_counter != 4) return;
-        clear_char_counter();
-    }
-    inline void write(unsigned int data){
-        clear_char_counter();
         buffer[buffer_counter] = data;
         plus_buffer_counter();
+    }
+    inline void write(unsigned int data){
+        write((unsigned char) (data >>  0)); //little endian
+        write((unsigned char) (data >>  8));
+        write((unsigned char) (data >> 16));
+        write((unsigned char) (data >> 24));
     }
     inline void write(unsigned long data){
         CHECK_AND_WRITE_BLOCK(data, 0);
@@ -65,17 +64,12 @@ public:
         CHECK_AND_WRITE_BLOCK(data, 7);
         CHECK_AND_WRITE_BLOCK(data, 8);
     }
-    inline void clear_char_counter(){
-        if (char_counter == 0) return;
-        char_counter = 0;
-        plus_buffer_counter();
-    }
     inline void plus_buffer_counter(){
         buffer_counter += 1;
         if (buffer_counter == OUTPUT_MANAGER_BUFFER_SIZE) flush();
     }
     inline void flush(){
-        fwrite(buffer, sizeof(int), buffer_counter, file);
+        fwrite(buffer, sizeof(char), buffer_counter, file);
         buffer_counter = 0;
     }
 //-------------------------------------------
@@ -89,7 +83,7 @@ public:
         BigInteger *bigInt = data.getValuePtr();
         unsigned long *buffer = bigInt->getBuffer();
         unsigned int buffer_len = bigInt->getBufferLen();
-        write((unsigned int) (bigInt->getSign() + 1)); //0, 1, 2
+        write((unsigned char) (bigInt->getSign() + 1)); //0, 1, 2
         write(buffer_len);
         for(unsigned int i = 0; i < buffer_len; ++i) write(buffer[i]);
     }
@@ -107,23 +101,35 @@ public:
         fclose(file);
     }
 //-------------------------------------------
+//  Utils
+//-------------------------------------------
+    inline int bytes_to_int_Little(unsigned char fourBytes[4]){
+        return (fourBytes[0] <<  0) | (fourBytes[1] <<  8) | (fourBytes[2] << 16) | (fourBytes[3] << 24);
+    }
+    inline int bytes_to_int_Big(unsigned char fourBytes[4]){
+        return (fourBytes[0] << 24) | (fourBytes[1] << 16) | (fourBytes[2] <<  8) | (fourBytes[3] <<  0);
+    }
+//-------------------------------------------
 //  Core
 //-------------------------------------------
-    inline int read_int(){
-        int data;
-        fread(&data, sizeof(int), 1, file);
+    inline unsigned char read_char(){
+        unsigned char data;
+        fread(&data, sizeof(data), 1, file);
         return data;
     }
+    inline int read_int(){
+        unsigned char fourBytes[4];
+        fread(fourBytes, sizeof(fourBytes), 1, file);
+        return bytes_to_int_Little(fourBytes);
+    }
     inline long read_long(){
-        long data;
-        fread(&data, sizeof(long), 1, file);
-        return data;
+        return (long) read_int(); //TODO: What to do when "long" is not 4-bytes.
     }
 //-------------------------------------------
 //  Extend
 //-------------------------------------------
     inline BigInteger *read_bigInt(){
-        int sign = read_int() - 1;
+        int sign = read_char() - 1;
         unsigned int buffer_len = (unsigned int) read_int();
         unsigned long *buffer = (unsigned long *) malloc(buffer_len * sizeof(unsigned long));
         fread(buffer, sizeof(unsigned long), buffer_len, file);

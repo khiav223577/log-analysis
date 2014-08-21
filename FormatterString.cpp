@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<memory.h>
 #include "RMap.cpp"
 class FormatterString : public FormatterController{
 public:
@@ -86,7 +87,7 @@ public:
     inline unsigned int compress(char *input){
         int mem_size = (strlen(input) + 1) * sizeof(char);
         char *key = (char *) malloc(mem_size);
-        memcpy(key, input ,mem_size);
+        memcpy(key, input, mem_size);
         int value = RMap<MapChar(int)>::InsertKeyToMap(hashTable, key, hashValueCounter);
         if (value == hashValueCounter){
             hashKeys.push_back(input);

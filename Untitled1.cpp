@@ -1,4 +1,4 @@
-#define DEBUG1
+//#define DEBUG 5
 #include<stdio.h>
 #include<iostream>
 #include "windows.cpp"
@@ -19,11 +19,16 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
     while(fgets(buffer, sizeof(buffer), file) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
         line_count += 1;
-        //printf("%02d: ", line_count);
+        #ifdef DEBUG
+            printf("%02d: ", line_count);
+        #endif
         formatter->execute1(outputer, buffer);
-        //puts("");
-        if (line_count % 1000 == 0) printf("%03dk\n", line_count / 1000);
-        //if (line_count == 3) break;
+        #ifdef DEBUG
+            puts("");
+            if (line_count == DEBUG) break;
+        #endif
+        if (line_count % 10000 == 0) printf("%03dk\n", line_count / 1000);
+
     }
     ruby_interface->save_config1(line_count, output_config);
     fclose(file);
@@ -33,10 +38,14 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     InputManager *inputer = new InputManager(input_path);
     int line_count = ruby_interface->load_config1(input_config);
     for(int i = 1; i <= line_count; ++i){
-        //printf("%02d: ", i);
+        #ifdef DEBUG
+            printf("%02d: ", i);
+        #endif
         formatter->execute2(inputer);
-        //puts("");
-        if (i % 1000 == 0) printf("%03dk\n", i / 1000);
+        #ifdef DEBUG
+            puts("");
+        #endif
+        if (i % 10000 == 0) printf("%03dk\n", i / 1000);
     }
     printf("~~~~~~~~~~~~~~");
     delete inputer;
