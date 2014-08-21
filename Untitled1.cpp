@@ -1,4 +1,4 @@
-//#define DEBUG 15
+//#define DEBUG 5
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 #include<stdio.h>
@@ -24,7 +24,8 @@ ConfigInterfaceIN1 *ruby_interface;
 InputFormatter *formatter;
 //---------------------------------------------------
 ShowTime showtime;
-#define SHOW_LINE_COUNT(COUNT) printf("%6d", (COUNT)); showtime.show("","");
+#define SHOW_LINE_RANGE 20000
+#define SHOW_LINE_COUNT(COUNT) printf("%8d", (COUNT)); showtime.show("","");
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     OutputManager *outputer = new OutputManager(output_path);
     FormatList &global_formatList = ruby_interface->global_formatList;
@@ -45,9 +46,10 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
             puts("");
             if (line_count == DEBUG) break;
         #endif
-        if (line_count % 10000 == 0){ SHOW_LINE_COUNT(line_count); }
+        if (line_count % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(line_count); }
+        //if (line_count > 10000) break;
     }
-    if (line_count % 10000 != 0){ SHOW_LINE_COUNT(line_count); }
+    if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
     ruby_interface->save_config1(line_count, output_config);
     fclose(file);
     delete outputer;
@@ -88,9 +90,9 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         #ifdef DEBUG
             puts("");
         #endif
-        if (i % 10000 == 0){ SHOW_LINE_COUNT(i); }
+        if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(i); }
     }
-    if (line_count % 10000 != 0){ SHOW_LINE_COUNT(line_count); }
+    if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
     ruby_interface->save_config2(line_count, output_config);
     delete inputer;
     #ifdef GROUP_FORMATTER_DATA
@@ -120,9 +122,9 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
         #ifdef DEBUG
             puts("");
         #endif
-        if (i % 10000 == 0){ SHOW_LINE_COUNT(i); }
+        if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(i); }
     }
-    if (line_count % 10000 != 0){ SHOW_LINE_COUNT(line_count); }
+    if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
     delete inputer;
 }
 
@@ -134,6 +136,8 @@ int main(int argc, char **argv){
     return 0;
     */
     const char *ConfigPath = "data/input.config";
+    //const char *InputPath  = "D:/test/iisfw.log.89";
+    //const char *OutputPath = "D:/test/iisfw.log.89.output";
     const char *InputPath  = "data/input_large";
     const char *OutputPath = "data/output_min";
     ruby = new RubyInterpreter();
@@ -225,7 +229,7 @@ int main(int argc, char **argv){
     printf("%s => %d\n","123", BlahBlah["123"]);
     return 0;
 */
-
+system("pause");
 
 return 0;
     /*

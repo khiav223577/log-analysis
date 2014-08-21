@@ -104,7 +104,8 @@ public:
 //-------------------------------------------------------------------------
 	inline unsigned int getCapacity()     const { return capacity;      }
 	inline unsigned int getLength()       const { return curr_len;      }
-	inline XXXXX getBlock(unsigned int i) const { return buffer[i];        }
+	inline XXXXX *getBuffer()             const { return buffer;     }
+	inline XXXXX getBlock(unsigned int i) const { return buffer[i];     }
 	inline bool  isEmpty()                const { return curr_len == 0; }
 };
 

@@ -63,12 +63,30 @@ BigUnsignedInABase::BigUnsignedInABase(const BigUnsigned &x, Base base) {
 }
 
 BigUnsignedInABase::operator BigUnsigned() const {
-	BigUnsigned ans(0), buBase(base), temp;
+    unsigned int base3 = base * base * base;
+    unsigned int base6 = base3 * base3;
+	BigUnsigned ans(0), buBase6(base6), temp;
 	unsigned int digitNum = curr_len;
-	while (digitNum > 0) {
-		digitNum--;
-		temp.multiply(ans, buBase);
-		ans.add(temp, BigUnsigned(buffer[digitNum]));
+	while (digitNum > 0){
+	    if (digitNum >= 6){
+	        unsigned int val = buffer[digitNum -= 1];
+	        val = val * base + buffer[digitNum -= 1];
+	        val = val * base + buffer[digitNum -= 1];
+	        val = val * base + buffer[digitNum -= 1];
+	        val = val * base + buffer[digitNum -= 1];
+	        val = val * base + buffer[digitNum -= 1];
+	        temp.multiply(ans, buBase6);
+	        ans.add(temp, BigUnsigned(val));
+	    }else{
+	        unsigned int baseX = base;
+	        unsigned int val = buffer[digitNum -= 1];
+	        while(digitNum > 0){
+	            baseX *= base;
+                val = val * base + buffer[digitNum -= 1];
+	        }
+            temp.multiply(ans, BigUnsigned(baseX));
+            ans.add(temp, BigUnsigned(val));
+	    }
 	}
 	return ans;
 }
