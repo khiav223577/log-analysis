@@ -57,9 +57,19 @@ inline void FormatterInteger::load_config2(FILE *file){
     initialized = true;
 };
 inline void FormatterIPaddr::load_config2(FILE *file){
-    //fprintf(file, "IPv4\n");
-    char buffer[32];
-    fgets(buffer, sizeof(buffer), file);
+    //fprintf(file, "IPv4 %u", hashTable.size());
+    char type[5];
+    fscanf(file, "%4s", type);
+    fscanf(file, " %u", &hashValueCounter);
+    sizeManager.load(file);
+    fscanf(file, "\n");
+    hashKeys = std::vector<unsigned int>(hashValueCounter);
+    for(unsigned int idx, i = 0; i < hashValueCounter; ++i){
+        unsigned int input;
+        fscanf(file, "%x %x\n", &idx, &input);
+        hashKeys[idx] = input;
+        RMap< std::map<unsigned int, unsigned int> >::InsertKeyToMap(hashTable, input, idx);
+    }
 };
 inline void FormatterString::load_config2(FILE *file){
     //fprintf(file, "String %d\n", hashTable.size());
@@ -67,17 +77,17 @@ inline void FormatterString::load_config2(FILE *file){
     unsigned int bit_num_int;
     char type[7];
     fscanf(file, "%6s", type);
-    fscanf(file, "%d %u", &hashValueCounter, &bit_num_int);
+    fscanf(file, " %u %u", &hashValueCounter, &bit_num_int);
     sizeManager.load(file);
     fscanf(file, "\n");
     bit_num = bit_num_int;
     hashKeys = std::vector<char *>(hashValueCounter);
-    for(int idx, i = 0; i < hashValueCounter; ++i){
+    for(unsigned int idx, i = 0; i < hashValueCounter; ++i){
         char *input = (char *) malloc((MaxLen + 1) * sizeof(char));
         *input = '\0'; //prevent error when input is empty string
-        fscanf(file, "%d%*1[ ]%[^\n]\n", &idx, input);
+        fscanf(file, "%x%*1[ ]%[^\n]\n", &idx, input);
         hashKeys[idx] = input;
-        RMap<MapChar(int)>::InsertKeyToMap(hashTable, input, idx);
+        RMap<MapChar(unsigned int)>::InsertKeyToMap(hashTable, input, idx);
     }
 };
 

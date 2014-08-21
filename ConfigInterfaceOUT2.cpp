@@ -30,14 +30,19 @@ inline void FormatterInteger::save_config2(FILE *file){
     fprintf(file, "\n");
 };
 inline void FormatterIPaddr::save_config2(FILE *file){
-    fprintf(file, "IPv4\n");
+    fprintf(file, "IPv4 %u", hashTable.size());
+    sizeManager.save(file);
+    fprintf(file, "\n");
+    for(std::map<unsigned int, unsigned int>::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
+        fprintf(file, "%x %x\n", it->second, it->first);
+    }
 };
 inline void FormatterString::save_config2(FILE *file){
     fprintf(file, "String %d %u", hashTable.size(), bit_num);
     sizeManager.save(file);
     fprintf(file, "\n");
-    for(MapChar(int)::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
-        fprintf(file, "%d %s\n", it->second, it->first);
+    for(MapChar(unsigned int)::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
+        fprintf(file, "%x %s\n", it->second, it->first);
     }
 };
 
