@@ -1,4 +1,4 @@
-//#define DEBUG 5
+//#define DEBUG 15
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 #include<stdio.h>
@@ -47,7 +47,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
         #endif
         if (line_count % 10000 == 0){ SHOW_LINE_COUNT(line_count); }
     }
-    SHOW_LINE_COUNT(line_count);
+    if (line_count % 10000 != 0){ SHOW_LINE_COUNT(line_count); }
     ruby_interface->save_config1(line_count, output_config);
     fclose(file);
     delete outputer;
@@ -90,7 +90,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         #endif
         if (i % 10000 == 0){ SHOW_LINE_COUNT(i); }
     }
-    SHOW_LINE_COUNT(line_count);
+    if (line_count % 10000 != 0){ SHOW_LINE_COUNT(line_count); }
     ruby_interface->save_config2(line_count, output_config);
     delete inputer;
     #ifdef GROUP_FORMATTER_DATA
@@ -98,7 +98,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         for(int i = 0, size = global_formatList.size(); i < size; ++i){ //merge all files
             delete global_formatList[i]->outputer;
             sprintf(output_path2, "%s_%d_%s", output_path, i, typeid(*(global_formatList[i])).name());
-            copy_file->copy(output_path2, true);
+            copy_file->copy(output_path2, false);
         }
         free(output_path2);
     #else
@@ -122,7 +122,7 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
         #endif
         if (i % 10000 == 0){ SHOW_LINE_COUNT(i); }
     }
-    SHOW_LINE_COUNT(line_count);
+    if (line_count % 10000 != 0){ SHOW_LINE_COUNT(line_count); }
     delete inputer;
 }
 

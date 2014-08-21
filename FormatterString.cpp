@@ -5,7 +5,6 @@
 #include<stdlib.h>
 #include<string.h>
 #include<memory.h>
-#include "RMap.cpp"
 class FormatterString : public FormatterController{
 public:
     typedef FormatterController super;
@@ -33,13 +32,11 @@ public:
 	int format_len;
     FormatterString(const char *_format, int maxlen) : super(_format, new VirtualCreator(maxlen)), MaxLen(maxlen){
         prev_result = NULL;
-        hashValueCounter = 0;
         executeCounter = 0;
         bit_num = 32;
         format_len = strlen(format);
     }
     ~FormatterString(){
-        RMap<MapChar(unsigned int)>::FreeClearMap_1(hashTable);
         free(prev_result);
     }
     char *get_prev_string(){ //Will be called by FormatterIFStatement.
@@ -55,6 +52,7 @@ public:
 //  execute
 //--------------------------------------
 private:
+    HashCompressor<char *, MapChar(unsigned int)> hashCompressor;
     SizeFlagManager sizeManager;
     int executeCounter;
     unsigned char bit_num;
@@ -66,7 +64,7 @@ public:
         char *str = retrieve(inputStream, format);
         free(prev_result);
         prev_result = str;
-        unsigned int output = compress(str);
+        unsigned int output = hashCompressor.compress(str);
         outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
         executeCounter += 1;
         debug();
@@ -78,9 +76,9 @@ public:
     int execute2(){
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
-        prev_result = decompress(output);
+        prev_result = hashCompressor.decompress(output);
         if (bit_num == 0); //do nothing
-        //else if ((byte_num << 3) >= bit_num) outputer->write_bits(output, bit_num);
+        else if ((byte_num << 3) >= bit_num) outputer->write_bits(output, bit_num);
         else outputer->write(output, byte_num);
         executeCounter += 1;
         debug();
@@ -90,9 +88,9 @@ public:
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output;
         if (bit_num == 0) output = 0;
-        //else if ((byte_num << 3) >= bit_num) output = inputer->read_bits(bit_num);
+        else if ((byte_num << 3) >= bit_num) output = inputer->read_bits(bit_num);
         else output = (unsigned int) inputer->read_int(byte_num);
-        prev_result = decompress(output);
+        prev_result = hashCompressor.decompress(output);
 
         executeCounter += 1;
         debug();
@@ -124,28 +122,6 @@ public:
         if (**input != '\0') *input += 1; //drop stop-word
         buffer[scanfLen] = '\0'; //avoid error when scanfLen == 0
         return buffer;
-    }
-//--------------------------------------
-//  compress
-//--------------------------------------
-private:
-    MapChar(unsigned int) hashTable;
-    std::vector<char *> hashKeys;
-    unsigned int hashValueCounter;
-public:
-    inline unsigned int compress(char *input){
-        int mem_size = (strlen(input) + 1) * sizeof(char);
-        char *key = (char *) malloc(mem_size);
-        memcpy(key, input, mem_size);
-        unsigned int value = RMap<MapChar(unsigned int)>::InsertKeyToMap(hashTable, key, hashValueCounter);
-        if (value == hashValueCounter){
-            hashKeys.push_back(input);
-            hashValueCounter += 1; //str is a new key!
-        }
-        return value;
-    }
-    inline char *decompress(unsigned int input){
-        return hashKeys[input];
     }
 };
 

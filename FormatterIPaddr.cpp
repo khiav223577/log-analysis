@@ -24,7 +24,6 @@ public:
         }
 	};
     FormatterIPaddr(const char *_format) : super(_format, new VirtualCreator()){
-        hashValueCounter = 0;
         executeCounter = 0;
     }
 public:
@@ -36,6 +35,7 @@ public:
 //  execute
 //--------------------------------------
 private:
+    HashCompressor< unsigned int, std::map<unsigned int, unsigned int> > hashCompressor;
     SizeFlagManager sizeManager;
     int executeCounter;
     int execute1(const char **inputStream){
@@ -43,7 +43,7 @@ private:
             evalu_ip.start();
         #endif
         unsigned int result = retrieve(inputStream, format);
-        unsigned int output = compress(result);
+        unsigned int output = hashCompressor.compress(result);
         outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
         executeCounter += 1;
         debug(result);
@@ -55,7 +55,7 @@ private:
     int execute2(){
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
-        unsigned int result = decompress(output);
+        unsigned int result = hashCompressor.decompress(output);
         outputer->write(output, byte_num);
         executeCounter += 1;
         debug(result);
@@ -64,7 +64,7 @@ private:
     int execute3(){
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
-        unsigned int result = decompress(output);
+        unsigned int result = hashCompressor.decompress(output);
         executeCounter += 1;
         debug(result);
         return 0;
@@ -99,26 +99,6 @@ private:
         }
         *input = inputStream;
         return output;
-    }
-
-//--------------------------------------
-//  compress
-//--------------------------------------
-private:
-    std::map<unsigned int, unsigned int> hashTable;
-    std::vector<unsigned int> hashKeys;
-    unsigned int hashValueCounter;
-public:
-    inline unsigned int compress(unsigned int input){
-        unsigned int value = RMap< std::map<unsigned int, unsigned int> >::InsertKeyToMap(hashTable, input, hashValueCounter);
-        if (value == hashValueCounter){
-            hashKeys.push_back(input);
-            hashValueCounter += 1; //input is a new key!
-        }
-        return value;
-    }
-    inline unsigned int decompress(unsigned int input){
-        return hashKeys[input];
     }
 };
 

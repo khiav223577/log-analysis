@@ -144,7 +144,7 @@ public:
         char tmp;
         fscanf(file, " %c", &tmp);
         #ifdef PERROR
-            PERROR(tmp != 'B' && tmp != 'I', printf("syntax error"););
+            PERROR(tmp != 'B' && tmp != 'I', printf("syntax error [tmp == '%c']", tmp););
         #endif
         if (tmp == 'B'){
             std::string bigIntString = SafeScanf::readBigInt10(file);

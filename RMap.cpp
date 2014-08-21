@@ -25,15 +25,15 @@ public:
 //----------------------------------------------------------------
 //  Clear map and free elements.
 //----------------------------------------------------------------
-    inline static void FreeClearMap_1(MAP & map){
+    inline static void FreeClearMap_1(MAP &map){
         for(ITERATOR it = map.begin(); it != map.end(); ++it){ free(it->first);  }
         map.clear();
     }
-    inline static void FreeClearMap_2(MAP & map){
+    inline static void FreeClearMap_2(MAP &map){
         for(ITERATOR it = map.begin(); it != map.end(); ++it){ free(it->second); }
         map.clear();
     }
-    inline static void FreeClearMap_1_2(MAP & map){
+    inline static void FreeClearMap_1_2(MAP &map){
         for(ITERATOR it = map.begin(); it != map.end(); ++it){ free(it->first); free(it->second); }
         map.clear();
     }

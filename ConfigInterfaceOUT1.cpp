@@ -25,20 +25,16 @@ inline void FormatterInteger::save_config1(FILE *file){
     fprintf(file, " %c\n", (increasingFuncFlag ? 'T' : 'F'));
 };
 inline void FormatterIPaddr::save_config1(FILE *file){
-    fprintf(file, "IPv4 %u", hashTable.size());
+    fprintf(file, "IPv4");
     sizeManager.save(file);
+    hashCompressor.save(file);
     fprintf(file, "\n");
-    for(std::map<unsigned int, unsigned int>::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
-        fprintf(file, "%x %x\n", it->second, it->first);
-    }
 };
 inline void FormatterString::save_config1(FILE *file){
-    fprintf(file, "String %u", hashTable.size());
+    fprintf(file, "String");
     sizeManager.save(file);
+    hashCompressor.save(file);
     fprintf(file, "\n");
-    for(MapChar(unsigned int)::iterator it = hashTable.begin(); it != hashTable.end(); ++it){
-        fprintf(file, "%x %s\n", it->second, it->first);
-    }
 };
 
 #endif
