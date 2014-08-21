@@ -33,9 +33,8 @@ public:
         RMap<MapChar(int)>::FreeClearMap_1(hashTable);
     }
     char *get_prev_string(){ //Will be called by FormatterIFStatement.
-        if (prev_result != NULL) return prev_result;
-        printf("Error: fails to get_prev_string() in FormatterString.");
-        exit(1);
+        PERROR(prev_result == NULL, printf("Error: fails to get_prev_string() in FormatterString."););
+        return prev_result;
     }
 public:
     virtual void output_config1(FILE *file);

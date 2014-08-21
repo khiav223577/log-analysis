@@ -38,10 +38,7 @@ public:
         int scanfLen = 0;
         int a = -1,b = -1,c = -1,d = -1;
         sscanf(*input, format, &a, &b, &c, &d, &scanfLen);
-        if (a == -1 || b == -1 || c == -1 || d == -1){
-            printf("retrieve IP failed. input = %s", *input);
-            exit(1);
-        }
+        PERROR(a == -1 || b == -1 || c == -1 || d == -1, printf("retrieve IP failed. input = %s", *input););
         *input += scanfLen;
         return (a << 24) | (b << 16) | (c << 8) | (d << 0);
     }

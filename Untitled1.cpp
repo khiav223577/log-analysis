@@ -1,3 +1,4 @@
+
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
@@ -5,11 +6,8 @@
 #include<time.h>
 #include<vector>
 #include<iostream>
-
-
-#define MAX_CONFIG_SIZE 1024
-#define MAX_LOG_SIZE 8192
 #include "windows.cpp"
+
 #include "FormatterController.cpp"
 //#include "RMap.cpp"
 
@@ -34,7 +32,27 @@ public:
 #include "ConfigInterfaceIN1.cpp"
 #include "testing.cpp"
 #include "FlexibleInt.cpp"
+
+#define MAX_LOG_SIZE 8192
 int main(){
+    /*
+    PERROR(1 == 1, printf("read BigInt fail, format = %s, input = %s", "000", ":???"););
+    return 0;
+    std::cout << BigInteger(BigUnsignedInABase("01Aa", 16));
+    return 0;
+    int a1;
+    scanf("%x", &a1);
+    printf("%d",a1);
+
+    return 0;
+    std::string s = "TT";
+    char test1[] = "12345";
+    char test2[] = "ABCDE";
+    s += test1;
+    s += test2;
+    std::cout << s;
+
+    return 0;*/
     /*
     if (1 >= BigInteger(1)){ return 1;}
 

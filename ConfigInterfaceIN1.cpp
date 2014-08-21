@@ -44,7 +44,7 @@ public:
                 continue;
             }
             switch(FIX2INT(type)){
-            case 0:{ puts("Unknown type! in ruby return_string"); exit(1); }
+            case 0:{ PERROR(true, puts("Unknown type! in ruby return_string"); );              }
             case 1:{ node = new FormatterDate   (StringValuePtr(format));                 break;} //Date
             case 2:{ node = new FormatterString (StringValuePtr(format), FIX2INT(extra)); break;} //String
             case 3:{ node = new FormatterInteger(StringValuePtr(format));                 break;} //Int

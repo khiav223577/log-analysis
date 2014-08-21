@@ -27,8 +27,7 @@ public:
         formatList.clear();
     }
     inline void Perror(char op){
-        printf("Unknown operator in FormatterIFStatement: '%c'", op);
-        exit(1);
+        PERROR(true, printf("Unknown operator in FormatterIFStatement: '%c'", op););
     }
 public:
     virtual void output_config1(FILE *file);

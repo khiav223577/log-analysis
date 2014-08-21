@@ -8,10 +8,7 @@
 
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename,mode);
-    if (f == NULL){
-        printf("Cannot open %s.",filename);
-        exit(1);
-    }
+    PERROR(f == NULL, printf("Cannot open %s.",filename); );
     return f;
 }
 

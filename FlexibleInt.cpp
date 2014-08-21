@@ -21,7 +21,7 @@ public:
     }
     ~FlexibleInt(){
         if (isBigInt()){
-            std::cout << *(getValuePtr()) << std::endl;
+            //std::cout << *(getValuePtr()) << std::endl;
             delete inner_data.valuePtr;
             inner_data.valuePtr = NULL;
         }
@@ -61,9 +61,8 @@ public:
     inline FlexibleInt operator +(const FlexibleInt &x) const {
         FlexibleInt ans;
         if (isBigInt() || x.isBigInt()){
-            BigInteger *valuePtr = new BigInteger(GETVALUE(*this) + GETVALUE(x));
             ans.setBigInt();
-            ans.setValuePtr(valuePtr);
+            ans.setValuePtr(new BigInteger(GETVALUE(*this) + GETVALUE(x)));
         }else{
             ans.setValue(getValue() + x.getValue());
         }
@@ -72,9 +71,8 @@ public:
     inline FlexibleInt operator -(const FlexibleInt &x) const {
         FlexibleInt ans;
         if (isBigInt() || x.isBigInt()){
-            BigInteger *valuePtr = new BigInteger(GETVALUE(*this) + GETVALUE(x));
             ans.setBigInt();
-            ans.setValuePtr(valuePtr);
+            ans.setValuePtr(new BigInteger(GETVALUE(*this) + GETVALUE(x)));
         }else{
             ans.setValue(getValue() - x.getValue());
         }
@@ -97,5 +95,5 @@ public:
 	inline bool operator > (const FlexibleInt &x) const { return GETVALUE(*this) >= GETVALUE(x); }
 
 };
-
+#undef GETVALUE
 #endif

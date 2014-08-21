@@ -5,6 +5,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include "FlexibleInt.cpp"
+#include "SafeScanf.cpp"
 
 class FormatterInteger : public FormatterController{
 public:
@@ -24,7 +25,7 @@ public:
             case  8:{ format[1] = 'o'; break;} //"%o%n"
             case 10:{ format[1] = 'd'; break;} //"%d%n"
             case 16:{ format[1] = 'x'; break;} //"%x%n"
-            default:{ printf("Unknown Int format: %s (must be 8 or 10 or 16)",_format); exit(1);}
+            default:{ PERROR(true, printf("Unknown Int format: %s (must be 8 or 10 or 16)",_format);); }
             }
             return format; //Ex: format = "%d%n"
         }
@@ -33,9 +34,8 @@ public:
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()), BigIntFlag(false){
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
-        if (initialized) return prev_int.getValue(); // TODO BigInt.
-        printf("Error: fails to get_prev_int() in FormatterInteger.");
-        exit(1);
+        PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
+        return prev_int.getValue(); // TODO BigInt.
     }
 public:
     virtual void output_config1(FILE *file);
@@ -48,12 +48,11 @@ private:
 public:
     int execute1(OutputManager *outputer, const char **inputStream){
         if (BigIntFlag == false){
-            int value = FormatterInteger::retrieve(inputStream, format);
+            int value = retrieve(inputStream, format);
             if (SuccessFlag) prev_int = FlexibleInt(value);
             else BigIntFlag = true;
         }
-        if (BigIntFlag == true) prev_int = FlexibleInt(new BigInteger(stringToBigInteger("1234567")));
-
+        if (BigIntFlag == true) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
         SetColor2(); prev_int.output(); SetColor(7);//DEBUG
         if (initialized){
             if (prev_int < record_min) record_min = prev_int;
@@ -69,7 +68,7 @@ public:
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
-    inline int retrieve(const char **input, const char *format){   //format = "%d%n","%x%n","%o%n"
+    inline int retrieve(const char **input, const char *format){   //format = "%d%n" or "%x%n" or "%o%n"
         SuccessFlag = false;
         const char *inputPtr = *input;
         int scanfLen = 0, result;
@@ -97,7 +96,7 @@ public:
         case 'x':{ if (scanfLen <=  7) SuccessFlag = true; break;}
         }
         if (SuccessFlag == false){
-            static char format2[3] = "%d";                      //compare input's and result's number by "strcmp"
+            static char format2[3] = "%?";                      //compare input's and result's number by "strcmp"
             format2[1] = n_decimal;
             char *buffer = (char *) malloc(20 * sizeof(char));  //20 is enough for max number length in that we have checked overflow by length.
             sprintf(buffer, format2, (result < 0 ? -result : result));
@@ -107,6 +106,22 @@ public:
         *input = inputPtr + scanfLen;
         SuccessFlag = true;
         return result;
+    }
+    _DEF_SafeScanf(readBigInt08, 255, "[0-7]");
+    _DEF_SafeScanf(readBigInt10, 255, "[0-9]");
+    _DEF_SafeScanf(readBigInt16, 255, "[0-9a-fA-F]");
+    inline BigInteger *retrieveBInt(const char **input, const char *format){   //format = "%d%n" or "%x%n" or "%o%n"
+        std::string bigIntString;
+        int n_digit = -1;
+        switch(format[1]){
+        case 'o':{ bigIntString = readBigInt08(*input); n_digit =  8; break; }
+        case 'd':{ bigIntString = readBigInt10(*input); n_digit = 10; break; }
+        case 'x':{ bigIntString = readBigInt16(*input); n_digit = 16; break; }
+        }
+        int size =  bigIntString.size();
+        PERROR(size <= 0, printf("read BigInt fail, format = %s, input = %s", format, *input););
+        *input += size;
+        return new BigInteger(BigUnsignedInABase(bigIntString, n_digit));
     }
 };
 

@@ -145,8 +145,7 @@ public:
                 }
                 if (scanfLen == 0){
                     LABEL_ERROR:
-                    printf("Unknown format in readDate:\nformat=%s, prev=[%%c:%c, %%d:%d], counter=%d\ninput=\"%s\"\n",format, prev, prev, counter,inputPtr);
-                    exit(1);
+                    PERROR(true, printf("Unknown format in readDate:\nformat=%s, prev=[%%c:%c, %%d:%d], counter=%d\ninput=\"%s\"\n",format, prev, prev, counter,inputPtr););
                 }
                 inputPtr += scanfLen;
                 counter = 1;
