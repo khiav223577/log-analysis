@@ -42,7 +42,6 @@ public:
 
 class SizeFlagManager{
 private:
-    unsigned char byte_num;
     int Size2FlagAt;
     int Size3FlagAt;
     int Size4FlagAt;
@@ -52,7 +51,6 @@ public:
     inline void setSize4FlagAt(int val){ Size4FlagAt = val; }
 public:
     SizeFlagManager(){
-        byte_num = 1;
         Size2FlagAt = -1;
         Size3FlagAt = -1;
         Size4FlagAt = -1;

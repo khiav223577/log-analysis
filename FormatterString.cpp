@@ -35,7 +35,6 @@ public:
         prev_result = NULL;
         hashValueCounter = 0;
         executeCounter = 0;
-        byte_num = 1;
         bit_num = 32;
         format_len = strlen(format);
     }
@@ -58,7 +57,7 @@ public:
 private:
     SizeFlagManager sizeManager;
     int executeCounter;
-    unsigned char byte_num, bit_num;
+    unsigned char bit_num;
 public:
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME
@@ -77,7 +76,7 @@ public:
         return 0;
     }
     int execute2(){
-        byte_num = sizeManager.get_read_byte(executeCounter);
+        unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
         prev_result = decompress(output);
         if (bit_num == 0); //do nothing
@@ -88,7 +87,7 @@ public:
         return 0;
     }
     int execute3(){
-        byte_num = sizeManager.get_read_byte(executeCounter);
+        unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output;
         if (bit_num == 0) output = 0;
         //else if ((byte_num << 3) >= bit_num) output = inputer->read_bits(bit_num);

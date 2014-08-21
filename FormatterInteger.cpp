@@ -35,7 +35,6 @@ public:
         BigIntFlagAt1 = -1;
         BigIntFlagAt2 = -1;
         executeCounter = 0;
-        byte_num = 1;
         increasingFuncFlag = true;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
@@ -52,7 +51,6 @@ public:
 //  execute
 //--------------------------------------
 private:
-    unsigned char byte_num;
     SizeFlagManager sizeManager1;
     SizeFlagManager sizeManager2;
     int executeCounter, BigIntFlagAt1, BigIntFlagAt2;
@@ -99,6 +97,7 @@ public:
         return 0;
     }
     int execute2(){
+        unsigned char byte_num = 1;
         bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
         if (isBigInt){
             prev_int = FlexibleInt(inputer->read_bigInt());
@@ -146,19 +145,19 @@ public:
             if (isBigInt){
                 delta = FlexibleInt(inputer->read_bigInt());
             }else{
-                byte_num = sizeManager2.get_read_byte(executeCounter);
+                unsigned char byte_num = sizeManager2.get_read_byte(executeCounter);
                 delta = FlexibleInt(inputer->read_n_byte_int(byte_num));
             }
             prev_int = delta_encoding.decode(delta); //delta encoding
         }else if (record_range.isBigInt() == false){
-            byte_num = sizeManager2.get_read_byte(executeCounter);
+            unsigned char byte_num = sizeManager2.get_read_byte(executeCounter);
             prev_int = record_min + FlexibleInt(inputer->read_n_byte_int(byte_num));
         }else{
             bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
             if (isBigInt){
                 prev_int = FlexibleInt(inputer->read_bigInt());
             }else{
-                byte_num = sizeManager1.get_read_byte(executeCounter);
+                unsigned char byte_num = sizeManager1.get_read_byte(executeCounter);
                 prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
             }
         }
