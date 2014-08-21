@@ -28,10 +28,10 @@ public:
         free(format);
     }
     virtual char *get_prev_string(){    //Will be called by FormatterIFStatement.
-        PERROR(true, printf("Error: fails to get_prev_string()"););
+        PERROR(true, printf("Error: fails to get_prev_string() in %s", typeid(*this).name()););
     }
     virtual int get_prev_int(){         //Will be called by FormatterIFStatement.
-        PERROR(true, printf("Error: fails to get_prev_int()"););
+        PERROR(true, printf("Error: fails to get_prev_int() in %s", typeid(*this).name()););
     }
     virtual int execute1(const char **inputStream)=0; //回傳要skip掉的指令數
     virtual int execute2()=0;    //回傳要skip掉的指令數

@@ -2,6 +2,7 @@
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 #include<stdio.h>
+#include<typeinfo>
 #include<iostream>
 #include "windows.cpp"
 //---------------------------------------------------
@@ -30,6 +31,10 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
     OutputManager *outputer = new OutputManager(output_path);
     FormatList &global_formatList = ruby_interface->global_formatList;
     for(int i = 0, size = global_formatList.size(); i < size; ++i) global_formatList[i]->outputer = outputer;
+    #ifdef DEBUG
+      //for(int i = 0, size = global_formatList.size(); i < size; ++i) printf("%d:%s\n", i, typeid(*(global_formatList[i])).name());
+    #endif
+
 
     FILE *file = fopen2(input_path,"r");
     int line_count = 0;
@@ -61,7 +66,6 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
         evalu_discard.show("Discard");
     #endif
 }
-#include <typeinfo>
 inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     #ifdef GROUP_FORMATTER_DATA
         char *output_path2 = (char *) malloc((strlen(output_path) + 1 + 64) * sizeof(char));

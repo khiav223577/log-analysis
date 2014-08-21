@@ -47,7 +47,7 @@ public:
                 continue;
             }
             switch(FIX2INT(type)){
-            case 0:{ PERROR(true, puts("Unknown type! in ruby return_string"); );              }
+            case 0:{ PERROR(true, puts("Unknown type! in ruby return_string"); );         break;}
             case 1:{ node = new FormatterDate   (StringValuePtr(format));                 break;} //Date
             case 2:{ node = new FormatterString (StringValuePtr(format), FIX2INT(extra)); break;} //String
             case 3:{ node = new FormatterInteger(StringValuePtr(format));                 break;} //Int
@@ -57,8 +57,10 @@ public:
             case 7: case 8:{ //#if, #elsif
                 FormatterIFStatement *ifnode = parse_bool_statement(format);
                 ifList.push_back(ifnode); //記錄elsif數量。(elsif也是一個node，每多一個elsif，skip要再加1)。
-                node = ifnode;
+                global_formatList.push_back(ifnode);
+                formatList->push_back(ifnode);
                 inner_retrieve_format(&ifnode->formatList);
+                continue;
                 break;}
             case 9:{  //#else
                 int size = formatList->size();
