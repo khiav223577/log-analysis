@@ -4,7 +4,7 @@
 #define ___ConfigInterfaceOUT1_cpp__
 
 inline void FormatterDate::save_config1(FILE *file){
-    fprintf(file, "Date %d\n", delta_encoding.get_first_value());
+    fprintf(file, "Date %d %d\n", delta_encoding.get_first_value(), Size4FlagAt);
 };
 inline void FormatterDebug::save_config1(FILE *file){};
 inline void FormatterDiscard::save_config1(FILE *file){};

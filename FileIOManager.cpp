@@ -105,6 +105,14 @@ public:
         write(buffer_len);
         for(unsigned int i = 0; i < buffer_len; ++i) write(buffer[i]);
     }
+    inline void write_n_byte_int(int value, unsigned char byte_num){
+        switch(byte_num){
+        case 1:{write1(value); break;}
+        case 2:{write2(value); break;}
+        case 3:{write3(value); break;}
+        case 4:{write4(value); break;}
+        }
+    }
 };
 
 class InputManager{
@@ -159,6 +167,16 @@ public:
         BigInteger *bigInt = new BigInteger(buffer, buffer_len, BigInteger::Sign(sign));
         free(buffer);
         return bigInt;
+    }
+    inline int read_n_byte_int(unsigned char byte_num){
+        switch(byte_num){
+        case 1:{int val = read_int(1); return (val >     127 ? val -      256 : val); }
+        case 2:{int val = read_int(2); return (val >   32767 ? val -    65536 : val); }
+        case 3:{int val = read_int(3); return (val > 8388607 ? val - 16777216 : val); }
+        case 4:{return read_int(4); }
+        }
+        PERROR((byte_num == 0 || byte_num > 4), printf("byte_num should be 1,2,3,4."););
+        return -1;
     }
 };
 

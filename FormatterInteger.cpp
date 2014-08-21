@@ -34,6 +34,7 @@ public:
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
         BigIntFlagAt = -1;
         Size4FlagAt = -1;
+        SameFlagAt = -1;
         executeCounter = 0;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
@@ -67,21 +68,20 @@ public:
             record_max = prev_int;
         }
         if (BigIntFlagAt == -1){
-            if (Size4FlagAt == -1 && (prev_int > 128 || prev_int < -127)) Size4FlagAt = executeCounter;
-            if (Size4FlagAt == -1) outputer->write(prev_int.getValue() + 127, 1);
-            else outputer->write(prev_int.getValue(), 4);
-        }else outputer->write(prev_int.getValuePtr());
+            if (Size4FlagAt == -1 && (prev_int > 127 || prev_int < -128)) Size4FlagAt = executeCounter;
+            outputer->write_n_byte_int(prev_int.getValue(), (Size4FlagAt == -1 ? 1 : 4));
+        }else{
+            outputer->write(prev_int.getValuePtr());
+        }
         executeCounter += 1;
         debug();
         return 0;
     }
     int execute2(InputManager *inputer){
         if (BigIntFlagAt == -1 || executeCounter < BigIntFlagAt){
-            if (Size4FlagAt == -1 || executeCounter < Size4FlagAt){
-                prev_int = FlexibleInt(inputer->read_int(1) - 127);
-            }else{
-                prev_int = FlexibleInt(inputer->read_int(4));
-            }
+            unsigned char byte_num = 4;
+            if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
+            prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
         }else{
             prev_int = FlexibleInt(inputer->read_bigInt());
         }

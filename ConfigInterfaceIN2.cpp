@@ -10,7 +10,7 @@ inline void FormatterDate::load_config1(FILE *file){
     int first_value;
     char type[5];
     fscanf(file, "%4s", type);
-    fscanf(file, "%d\n", &first_value);
+    fscanf(file, "%d %d\n", &first_value, &Size4FlagAt);
     delta_encoding.set_first_value(first_value);
 };
 inline void FormatterDebug::load_config1(FILE *file){};

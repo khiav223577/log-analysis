@@ -21,6 +21,8 @@ public:
         }
 	};
     FormatterDate(const char *_format) : super(_format, new VirtualCreator()){
+        Size4FlagAt = -1;
+        executeCounter = 0;
     }
 public:
     virtual void save_config1(FILE *file);
@@ -29,14 +31,23 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
+private:
+    int executeCounter, Size4FlagAt;
+public:
     int execute1(OutputManager *outputer, const char **inputStream){
         int date = retrieve(inputStream, format);
-        outputer->write(delta_encoding.encode(date)); //delta encoding
+        int output = delta_encoding.encode(date); //delta encoding
+        if (Size4FlagAt == -1 && (output > 127 || output < -128)) Size4FlagAt = executeCounter;
+        outputer->write_n_byte_int(output, (Size4FlagAt == -1 ? 1 : 4));
+        executeCounter += 1;
         debug(date);
         return 0;
     }
     int execute2(InputManager *inputer){
-        int date = delta_encoding.decode(inputer->read_int()); //delta encoding
+        unsigned char byte_num = 4;
+        if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
+        int date = delta_encoding.decode(inputer->read_n_byte_int(byte_num)); //delta encoding
+        executeCounter += 1;
         debug(date);
         return 0;
     }
