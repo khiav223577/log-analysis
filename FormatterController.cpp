@@ -18,10 +18,12 @@ public:
 	OutputManager *outputer;
 	InputManager *inputer;
 	char *format;
-	bool initialized;
+	bool initialized, attr_drop, attr_peek;
     FormatterController(const char *_format, VirtualCreator *v) : outputer(NULL), inputer(NULL){
         format = v->trans_format(_format);
         initialized = false;
+        attr_drop = false;
+        attr_peek = false;
         delete v;
     }
     virtual ~FormatterController(){

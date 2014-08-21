@@ -16,6 +16,7 @@ public:
         const int MaxLen, StringMaxLen;
         VirtualCreator(const int maxlen) : MaxLen(maxlen), StringMaxLen(maxlen < 10 ? 1 : maxlen < 100 ? 2 : maxlen < 1000 ? 3 : maxlen < 10000 ? 4 : maxlen < 100000 ? 5 :
                                                                         maxlen < 1000000 ? 6 : maxlen < 10000000 ? 7 : maxlen < 100000000 ? 8 : maxlen < 1000000000 ? 9 : 10){
+            PERROR(maxlen <= 0, printf("string's maxlen must be positive.\n"););
         }
         char *trans_format(const char *_format){
             char *format = (char *) malloc((strlen(_format) + 1) * sizeof(char));
@@ -64,10 +65,13 @@ public:
         #ifdef EVALUATE_TIME
             evalu_string.start();
         #endif
+        const char *originInput = *inputStream;
         prev_result = retrieve(inputStream, format);
-        unsigned int output = hashCompressor.compress(prev_result);
-        outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
-
+        if (attr_drop == false){
+            unsigned int output = hashCompressor.compress(prev_result);
+            outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
+        }
+        if (attr_peek == true) *inputStream = originInput;
         executeCounter += 1;
         debug();
         #ifdef EVALUATE_TIME

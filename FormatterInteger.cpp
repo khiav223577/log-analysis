@@ -62,6 +62,7 @@ public:
         #ifdef EVALUATE_TIME
             evalu_int.start();
         #endif
+        const char *originInput = *inputStream;
         FlexibleInt prev_int_sav = prev_int;
         if (BigIntFlagAt1 == -1){
             int value = retrieve(inputStream, format);
@@ -69,26 +70,29 @@ public:
             else BigIntFlagAt1 = executeCounter;
         }
         if (BigIntFlagAt1 != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
-        if (initialized){
-            if (BigIntFlagAt1 == -1){ //just for speed up. (reduce exec-time from 0.8s to 0.08s for 100k lines of data)
-                if      (prev_int.getValue() > record_max.getValue())  record_max.setValue(prev_int.getValue());
-                else if (prev_int.getValue() < record_min.getValue())  record_min.setValue(prev_int.getValue());
-                if (increasingFuncFlag && prev_int.getValue() < prev_int_sav.getValue()) increasingFuncFlag = false;
+        if (attr_drop == false){
+            if (initialized){
+                if (BigIntFlagAt1 == -1){ //just for speed up. (reduce exec-time from 0.8s to 0.08s for 100k lines of data)
+                    if      (prev_int.getValue() > record_max.getValue())  record_max.setValue(prev_int.getValue());
+                    else if (prev_int.getValue() < record_min.getValue())  record_min.setValue(prev_int.getValue());
+                    if (increasingFuncFlag && prev_int.getValue() < prev_int_sav.getValue()) increasingFuncFlag = false;
+                }else{
+                    if      (prev_int > record_max) record_max = prev_int;
+                    else if (prev_int < record_min) record_min = prev_int;
+                    if (increasingFuncFlag && prev_int < prev_int_sav) increasingFuncFlag = false;
+                }
             }else{
-                if      (prev_int > record_max) record_max = prev_int;
-                else if (prev_int < record_min) record_min = prev_int;
-                if (increasingFuncFlag && prev_int < prev_int_sav) increasingFuncFlag = false;
+                initialized = true;
+                record_min = prev_int;
+                record_max = prev_int;
             }
-        }else{
-            initialized = true;
-            record_min = prev_int;
-            record_max = prev_int;
+            if (prev_int.isBigInt()){
+                outputer->write(prev_int.getValuePtr());
+            }else{
+                outputer->write(prev_int.getValue(), sizeManager1.get_write_byte(prev_int.getValue(), executeCounter));
+            }
         }
-        if (prev_int.isBigInt()){
-            outputer->write(prev_int.getValuePtr());
-        }else{
-            outputer->write(prev_int.getValue(), sizeManager1.get_write_byte(prev_int.getValue(), executeCounter));
-        }
+        if (attr_peek == true) *inputStream = originInput;
         executeCounter += 1;
         debug();
         #ifdef EVALUATE_TIME

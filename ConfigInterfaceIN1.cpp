@@ -12,14 +12,16 @@ class ConfigInterfaceIN1{
 public:
     FormatList global_formatList;
     RubyInterpreter *ruby;
+    bool ignore_drop_node;
 public:
     ConfigInterfaceIN1(RubyInterpreter *_ruby) : ruby(_ruby){
     }
 //-------------------------------------------------------------------------
 //  CreateFormatter
 //-------------------------------------------------------------------------
-    InputFormatter* CreateFormatters(const char *filename){
+    InputFormatter* CreateFormatters(const char *filename, bool flag){
         InputFormatter *formatter = new InputFormatter();
+        ignore_drop_node = flag;
 
         ruby->execute_code("$IN_C_CODE = true");
         ruby->execute_file("./test.rb");
@@ -36,13 +38,12 @@ public:
     void inner_retrieve_format(FormatList *formatList){
         IFList ifList;
         int skip_base = 0;
-        FormatterController *node;
+        FormatterController *node = NULL;
         VALUE array, type, format, hash;
         while((array  = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0)) != Qnil){
             type   = rb_ary_entry(array,0); //[type, format, variable_name, hash]
             format = rb_ary_entry(array,1);
             hash   = rb_ary_entry(array,3);
-
             if (type == Qnil){
                 puts("Unown type in CreateFormatter");
                 continue;
@@ -55,39 +56,36 @@ public:
                 global_formatList.push_back(ifnode);
                 formatList->push_back(ifnode);
                 inner_retrieve_format(&ifnode->formatList);
-                continue;
-                break;}
+                continue;}
             case  3:{  //#else
                 int size = formatList->size();
                 inner_retrieve_format(formatList);
                 skip_base = formatList->size() - size;
-                continue;
-                break;}
+                continue;}
             case  4:{  //#end
                 for(IFList::reverse_iterator it = ifList.rbegin(); it != ifList.rend(); ++it) (*it)->skip = skip_base++;
                 ifList.clear(); //elsif, else也都是node，需要被skip。例如(if, elsif, else)的skip量分別為(skip+2, skip+1, skip+0)
                 skip_base = 0;
-                continue;
-                break;}
-            case  5:{ //EXIT_BLOCK
-                return;
-                break;}
-            //------------------------------
+                continue;}
+            case  5:{  //EXIT_BLOCK
+                return;}
+            //-----------------------------------
             //  Formatter
-            //------------------------------
-            case  6:{ node = new FormatterDebug  (StringValuePtr(format));                 break;} //#DEBUG
-            case  7:{ node = new FormatterDate   (StringValuePtr(format));                 break;} //Date
-            case  8:{ //String
-                int max_size = FIX2INT(rb_hash(hash, "max_size"));
-                node = new FormatterString(StringValuePtr(format), max_size);
-                break;}
-            case  9:{ node = new FormatterInteger(StringValuePtr(format));                 break;} //Int
-            case 10:{ node = new FormatterIPaddr (StringValuePtr(format));                 break;} //IPv4
-            case 11:{ node = new FormatterDiscard(StringValuePtr(format));                 break;} //DROP
-            case 12:{ node = new FormatterChar   (StringValuePtr(format));                 break;} //Char
+            //-----------------------------------
+            case  6:{ node = new FormatterDebug  (StringValuePtr(format));                                     break;} //#DEBUG
+            case  7:{ node = new FormatterDate   (StringValuePtr(format));                                     break;} //Date
+            case  8:{ node = new FormatterString (StringValuePtr(format), FIX2INT(rb_hash(hash, "max_size"))); break;} //String
+            case  9:{ node = new FormatterInteger(StringValuePtr(format));                                     break;} //Int
+            case 10:{ node = new FormatterIPaddr (StringValuePtr(format));                                     break;} //IPv4
+            case 11:{ node = new FormatterDiscard(StringValuePtr(format));                                     break;} //DROP
+            case 12:{ node = new FormatterChar   (StringValuePtr(format));                                     break;} //Char
+            }
+            if (hash != Qnil){
+                node->attr_drop = RTEST(rb_hash(hash, "drop"));
+                node->attr_peek = RTEST(rb_hash(hash, "peek"));
             }
             global_formatList.push_back(node);
-            formatList->push_back(node);
+            if (ignore_drop_node == false || node->attr_drop == false) formatList->push_back(node);
         }
     }
 //-------------------------------------------------------------------------

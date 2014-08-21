@@ -5,6 +5,7 @@
 
 (O) 讀取   Date 資料型態
 (O) 讀取 String 資料型態
+(O) 讀取   Char 資料型態
 (O) 讀取    Int 資料型態
 (O) 讀取   IPv4 資料型態
 (O) 讀取   DROP 資料型態
@@ -12,6 +13,7 @@
 
 (X) #if語句支援比對   Date 欄位
 (O) #if語句支援比對 String 欄位
+(O) #if語句支援比對   Char 欄位
 (O) #if語句支援比對    Int 欄位
 (X) #if語句支援比對   IPv4 欄位
 (X) #if語句支援比對 Big Integer
@@ -40,5 +42,5 @@
 (O) 建立config以便讀回(1st pass)輸出後的資料
 (O) 從config檔讀回(1st pass)資料
 
-(X) 用delta encoding壓縮
+(O) 用delta encoding壓縮
 (X) 動態長度編碼

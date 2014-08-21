@@ -40,9 +40,13 @@ public:
         #ifdef EVALUATE_TIME
             evalu_date.start();
         #endif
+        const char *originInput = *inputStream;
         int date = retrieve(inputStream, format);
-        int output = delta_encoding.encode(date); //delta encoding
-        outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
+        if (attr_drop == false){
+            int output = delta_encoding.encode(date); //delta encoding
+            outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
+        }
+        if (attr_peek == true) *inputStream = originInput;
         executeCounter += 1;
         debug(date);
         #ifdef EVALUATE_TIME

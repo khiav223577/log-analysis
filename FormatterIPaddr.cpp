@@ -42,9 +42,13 @@ private:
         #ifdef EVALUATE_TIME
             evalu_ip.start();
         #endif
+        const char *originInput = *inputStream;
         unsigned int result = retrieve(inputStream, format);
-        unsigned int output = hashCompressor.compress(result);
-        outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
+        if (attr_drop == false){
+            unsigned int output = hashCompressor.compress(result);
+            outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
+        }
+        if (attr_peek == true) *inputStream = originInput;
         executeCounter += 1;
         debug(result);
         #ifdef EVALUATE_TIME

@@ -44,9 +44,11 @@ public:
         return 0;
     }
     int execute2(){
+        PERROR(true, printf("This line should not be executed"););
         return 0;
     }
     int execute3(){
+        PERROR(true, printf("This line should not be executed"););
         return 0;
     }
 //-------------------------------------------------------------------------

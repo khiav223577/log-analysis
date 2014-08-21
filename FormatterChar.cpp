@@ -14,6 +14,12 @@ public:
         }
 	};
     FormatterChar(const char *_format) : super(_format, new VirtualCreator()){
+        prev_result[0] = '\0';
+        prev_result[1] = '\0';
+    }
+    char prev_result[2];
+    char *get_prev_string(){ //Will be called by FormatterIFStatement.
+        return prev_result;
     }
 public:
     virtual void save_config1(FILE *file);
@@ -30,8 +36,13 @@ public:
         #ifdef EVALUATE_TIME
             evalu_char.start();
         #endif
+        const char *originInput = *inputStream;
         char result = retrieve(inputStream, format);
-        outputer->write(result);
+        prev_result[0] = result;
+        if (attr_drop == false){
+            outputer->write(result);
+        }
+        if (attr_peek == true) *inputStream = originInput;
         executeCounter += 1;
         debug(result);
         #ifdef EVALUATE_TIME
@@ -41,6 +52,7 @@ public:
     }
     int execute2(){
         char result = inputer->read_char();
+        prev_result[0] = result;
         outputer->write(result);
         executeCounter += 1;
         debug(result);
@@ -48,6 +60,7 @@ public:
     }
     int execute3(){
         char result = inputer->read_char();
+        prev_result[0] = result;
         executeCounter += 1;
         debug(result);
         return 0;

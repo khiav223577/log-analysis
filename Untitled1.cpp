@@ -152,7 +152,7 @@ int main(int argc, char **argv){
     puts("#==========================================================");
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
-        formatter = ruby_interface->CreateFormatters(ConfigPath);
+        formatter = ruby_interface->CreateFormatters(ConfigPath, false);
         //return 0;
         char *input_path    = (char *) malloc(sizeof(char) * strlen( InputPath) + 1 + 0);
         char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
@@ -174,7 +174,7 @@ int main(int argc, char **argv){
     puts("#==========================================================");
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
-        formatter = ruby_interface->CreateFormatters(ConfigPath);
+        formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         char *input_path    = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
         char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
         char *input_config  = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
@@ -199,7 +199,7 @@ int main(int argc, char **argv){
     puts("#==========================================================");
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
-        formatter = ruby_interface->CreateFormatters(ConfigPath);
+        formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         char *input_path    = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
         char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
         char *input_config  = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);

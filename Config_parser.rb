@@ -54,15 +54,16 @@ class Config_Parser
 				local_symbols = nested_symbols[-1]
 				buffer << [$1]
 			else
-				hash = {}
+				hash = {:drop => false, :peek => false}
 				case
-				when line =~ /^(Date)\[(.*)\] \s*(\w+)/
-				when line =~ /^(String)\[(.*)\] \s*(\w+)/
+				when line =~ /^(Date)\[(.*)\] \s*(\w+)\s*({.*?})?/
+				when line =~ /^(String)\[(.*)\] \s*(\w+)\s*({.*?})?/
 					hash[:max_size] = (@setting_max_size["String"] || 511)
-				when line =~ /^(Char)() \s*(\w+)/
-				when line =~ /^(Int)\[([0-9]+)\] \s*(\w+)/
-				when line =~ /^(IPv4)\[(.*)\] \s*(\w+)/
+				when line =~ /^(Char)() \s*(\w+)\s*({.*?})?/
+				when line =~ /^(Int)\[([0-9]+)\] \s*(\w+)\s*({.*?})?/
+				when line =~ /^(IPv4)\[(.*)\] \s*(\w+)\s*({.*?})?/
 				when line =~ /^(DROP)\[(.*)\]/
+					hash[:drop] = true
 				when line =~ /^(#DEBUG) (.*)/
 				else ; perror.call("Syntax error") and next
 				end
@@ -71,10 +72,11 @@ class Config_Parser
 					local_symbols[$3] = global_symbols[$3]
 					global_symbols[$3] = [buffer_item_counter, local_symbols[:buffer_start]]
 				end
+				eval($4).each{|key, value| hash[key] = value} if $4 != nil
 				buffer << [$1,$2.extract_escape_symbol, $3, hash] #[Type, format, vocabulary, hash] 
 				buffer_item_counter += 1
 				if (drop_after = @setting_drop_after[$1])
-					buffer << ["DROP", drop_after]
+					buffer << ["DROP", drop_after, nil, {:drop => true, :peek => false}]
 					buffer_item_counter += 1
 				end
 			end
