@@ -30,7 +30,7 @@ public:
     virtual void save_config2(FILE *file);
     virtual void load_config1(FILE *file);
     virtual void load_config2(FILE *file);
-    DeltaEncoding delta_encoding;
+    DeltaEncoding<int> delta_encoding;
 //--------------------------------------
 //  execute
 //--------------------------------------

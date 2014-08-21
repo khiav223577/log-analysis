@@ -12,12 +12,17 @@ inline void FormatterIFStatement::save_config2(FILE *file){ //TODO
     fprintf(file, "IF\n");
 };
 inline void FormatterInteger::save_config2(FILE *file){
-    if (BigIntFlagAt == -1){ //Int
-        fprintf(file, "Int %d %d %d %d\n", record_min.getValue(), record_max.getValue(), Size4FlagAt1, Size4FlagAt2);
+    if (BigIntFlagAt1 == -1){ //Int
+        fprintf(file, "Int %d", Size4FlagAt1);
     }else{  //BigInt
-        fprintf(file, "BigInt %s %s %d %d\n", record_min.getValuePtrAsStr().c_str(), record_max.getValuePtrAsStr().c_str(), BigIntFlagAt, Size4FlagAt2);
+        fprintf(file, "BigInt %d", BigIntFlagAt1);
     }
-
+    record_min.save(file);
+    record_max.save(file);
+    fprintf(file, " %d", Size4FlagAt2);
+    if (increasingFuncFlag == true){
+       fprintf(file, " T\n");
+    }else fprintf(file, " F\n");
 };
 inline void FormatterIPaddr::save_config2(FILE *file){
     fprintf(file, "IPv4\n");

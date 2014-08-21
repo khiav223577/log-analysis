@@ -23,22 +23,25 @@ inline void FormatterIFStatement::load_config2(FILE *file){
 inline void FormatterInteger::load_config2(FILE *file){
     char type[7];
     fscanf(file, "%6s", type);
-    if (type[0] == 'I'){
-        //fprintf(file, "Int %d %d %d %d\n", record_min.getValue(), record_max.getValue(), Size4FlagAt1, Size4FlagAt2);
-        int min, max;
-        fscanf(file, "%d %d %d %d\n", &min, &max, &Size4FlagAt1, &Size4FlagAt2);
-        record_min = FlexibleInt(min);
-        record_max = FlexibleInt(max);
-    }else{
-        //fprintf(file, "BigInt %s %s %d %d\n", record_min.getValuePtrAsStr().c_str(), record_max.getValuePtrAsStr().c_str(), BigIntFlagAt, Size4FlagAt2);
-        std::string bigIntString1 = readBigInt10(file);
-        std::string bigIntString2 = readBigInt10(file);
-        fscanf(file, "%d", &BigIntFlagAt);
-        fscanf(file, "%d", &Size4FlagAt2);
-        fscanf(file, "\n");
-        record_min = FlexibleInt(new BigInteger(BigUnsignedInABase(bigIntString1, 10)));
-        record_max = FlexibleInt(new BigInteger(BigUnsignedInABase(bigIntString2, 10)));
+    if (type[0] == 'I'){ //fprintf(file, "Int %d", Size4FlagAt1);
+        fscanf(file, " %d", &Size4FlagAt1);
+    }else{ //fprintf(file, "BigInt %d", BigIntFlagAt1);
+        fscanf(file, " %d", &BigIntFlagAt1);
     }
+    //record_min.save(file);
+    //record_max.save(file);
+    //fprintf(file, " %d", Size4FlagAt2);
+    record_min = FlexibleInt::load(file);
+    record_max = FlexibleInt::load(file);
+    fscanf(file, " %d", &Size4FlagAt2);
+    //if (increasingFuncFlag == true){
+    //   fprintf(file, " T\n");
+    //}else fprintf(file, " F\n");
+    char tmp1;
+    fscanf(file, " %c\n", &tmp1);
+    PERROR(tmp1 != 'T' && tmp1 != 'F', printf("syntax error"););
+    increasingFuncFlag = (tmp1 == 'T' ? true : false);
+
     record_range = (record_max - record_min);
     record_range.try_to_cast_to_int();
     SameFlag = (record_range == 0);

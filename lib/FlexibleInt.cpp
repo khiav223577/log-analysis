@@ -3,6 +3,8 @@
 #define ___FlexibleInt_cpp__
 //#include <iostream>
 #include "bigint-2010.04.30/_BigIntegerLibrary.cc"
+#include "SafeScanf.cpp"
+#include <string>
 #define GETVALUE(x) ((x).isBigInt() ? *(x).getValuePtr() : (x).getValue())
 class FlexibleInt{
 private:
@@ -104,7 +106,26 @@ public:
 	inline bool operator <=(const FlexibleInt &x) const { return GETVALUE(*this) <= GETVALUE(x); }
 	inline bool operator >=(const FlexibleInt &x) const { return GETVALUE(*this) >  GETVALUE(x); }
 	inline bool operator > (const FlexibleInt &x) const { return GETVALUE(*this) >= GETVALUE(x); }
-
+//----------------------------------------------
+//  Save / Load
+//----------------------------------------------
+    inline void save(FILE *file){
+        if (isBigInt()) fprintf(file, " B %s", getValuePtrAsStr().c_str());
+        else fprintf(file, " I %d", getValue());
+    }
+    static inline FlexibleInt load(FILE *file){
+        char tmp;
+        fscanf(file, " %c", &tmp);
+        PERROR(tmp != 'B' && tmp != 'I', printf("syntax error"););
+        if (tmp == 'B'){
+            std::string bigIntString = SafeScanf::readBigInt10(file);
+            return FlexibleInt(new BigInteger(BigUnsignedInABase(bigIntString, 10)));
+        }else{
+            int value;
+            fscanf(file, " %d", &value);
+            return FlexibleInt(value);
+        }
+    }
 };
 #undef GETVALUE
 #endif

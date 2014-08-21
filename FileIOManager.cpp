@@ -250,7 +250,9 @@ public:
     }
 };
 
+#undef SIZE_OF_UINT
 #undef CHECK_AND_WRITE_BLOCK
 #undef OUTPUT_MANAGER_BUFFER_SIZE
+#undef INPUT_MANAGER_BUFFER_SIZE
 #endif
 

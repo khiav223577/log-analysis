@@ -3,8 +3,8 @@
 #define ___SafeScanf_cpp__
 #include <stdio.h>
 #include <string>
-#define _DEF_SafeScanf(FUNCNAME, BUFFERLEN, FORMAT) \
-inline std::string FUNCNAME(const char *inputStream){\
+#define _DEF_SafeScanf(HEADER, FUNCNAME, BUFFERLEN, FORMAT) \
+HEADER std::string FUNCNAME(const char *inputStream){\
     std::string output("");\
     int scanfLen;\
     char buffer[BUFFERLEN + 1];\
@@ -19,7 +19,7 @@ inline std::string FUNCNAME(const char *inputStream){\
     }\
     return output;\
 }\
-inline std::string FUNCNAME(FILE *file){\
+HEADER std::string FUNCNAME(FILE *file){\
     std::string output("");\
     int scanfLen;\
     char buffer[BUFFERLEN + 1];\
@@ -31,7 +31,7 @@ inline std::string FUNCNAME(FILE *file){\
     }\
     return output;\
 }\
-inline std::string FUNCNAME(){\
+HEADER std::string FUNCNAME(){\
     std::string output("");\
     int scanfLen;\
     char buffer[BUFFERLEN + 1];\
@@ -43,7 +43,14 @@ inline std::string FUNCNAME(){\
     }\
     return output;\
 }
-#endif
+
+
+class SafeScanf{
+public:
+    _DEF_SafeScanf(static inline, readBigInt08, 255, "[0-7]");
+    _DEF_SafeScanf(static inline, readBigInt10, 255, "[0-9]");
+    _DEF_SafeScanf(static inline, readBigInt16, 255, "[0-9a-fA-F]");
+};
 
 
 /*
@@ -63,3 +70,5 @@ int main(){
     return 0;
 }
 */
+
+#endif

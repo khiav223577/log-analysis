@@ -5,7 +5,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include "lib/FlexibleInt.cpp"
-#include "SafeScanf.cpp"
+#include "lib/SafeScanf.cpp"
 
 class FormatterInteger : public FormatterController{
 public:
@@ -32,11 +32,13 @@ public:
 	};
 	FlexibleInt prev_int;
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
-        BigIntFlagAt = -1;
+        BigIntFlagAt1 = -1;
+        BigIntFlagAt2 = -1;
         Size4FlagAt1 = -1;
         Size4FlagAt2 = -1;
         executeCounter = 0;
         byte_num = 1;
+        increasingFuncFlag = false; //TODO: true
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
@@ -52,37 +54,40 @@ public:
 //--------------------------------------
 private:
     unsigned char byte_num;
-    int executeCounter, BigIntFlagAt, Size4FlagAt1, Size4FlagAt2;
-    bool SuccessFlag, SameFlag;
+    int executeCounter, BigIntFlagAt1, BigIntFlagAt2, Size4FlagAt1, Size4FlagAt2;
+    bool SuccessFlag, SameFlag, increasingFuncFlag;
     FlexibleInt record_min, record_max, record_range;
+    DeltaEncoding<FlexibleInt> delta_encoding;
 public:
     int execute1(OutputManager *outputer, const char **inputStream){
-        if (BigIntFlagAt == -1){
+        FlexibleInt prev_int_sav = prev_int;
+        if (BigIntFlagAt1 == -1){
             int value = retrieve(inputStream, format);
             if (SuccessFlag) prev_int = FlexibleInt(value);
-            else BigIntFlagAt = executeCounter;
+            else BigIntFlagAt1 = executeCounter;
         }
-        if (BigIntFlagAt != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
+        if (BigIntFlagAt1 != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
         if (initialized){
             if (prev_int < record_min) record_min = prev_int;
             if (prev_int > record_max) record_max = prev_int;
+            if (increasingFuncFlag && (prev_int - prev_int_sav) < 0) increasingFuncFlag = false;
         }else{
             initialized = true;
             record_min = prev_int;
             record_max = prev_int;
         }
-        if (BigIntFlagAt == -1){
+        if (prev_int.isBigInt()){
+            outputer->write(prev_int.getValuePtr());
+        }else{
             if (Size4FlagAt1 == -1 && (prev_int > 127 || prev_int < -128)) Size4FlagAt1 = executeCounter;
             outputer->write(prev_int.getValue(), (Size4FlagAt1 == -1 ? 1 : 4));
-        }else{
-            outputer->write(prev_int.getValuePtr());
         }
         executeCounter += 1;
         debug();
         return 0;
     }
     int execute2(OutputManager *outputer, InputManager *inputer){
-        bool isBigInt = (BigIntFlagAt != -1 && executeCounter >= BigIntFlagAt);
+        bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
         if (isBigInt){
             prev_int = FlexibleInt(inputer->read_bigInt());
         }else{
@@ -91,15 +96,27 @@ public:
         }
         if (SameFlag){
             //do nothing
+        }else if (increasingFuncFlag == true){
+            FlexibleInt output = delta_encoding.encode(prev_int); //delta encoding
+            if (BigIntFlagAt2 == -1){
+                output.try_to_cast_to_int();
+                if (output.isBigInt() == false) BigIntFlagAt2 = executeCounter;
+            }
+            if (output.isBigInt()){
+                outputer->write(output.getValuePtr());
+            }else{
+                if (Size4FlagAt2 == -1 && output > 255) Size4FlagAt2 = executeCounter;
+                outputer->write(output.getValue(), (Size4FlagAt2 == -1 ? 1 : 4));
+            }
         }else if (record_range.isBigInt() == false){
-            FlexibleInt tmp = (prev_int - record_min);
-            bool success = tmp.try_to_cast_to_int();
-            PERROR(success == false, printf("Unable to cast BigInt to int"););
-            int output = tmp.getValue();
-            if (Size4FlagAt2 == -1 && output > 255) Size4FlagAt2 = executeCounter;
-            outputer->write(output, (Size4FlagAt2 == -1 ? 1 : 4));
+            FlexibleInt output = (prev_int - record_min);
+            bool success = output.try_to_cast_to_int();
+            PERROR(success == false, printf("Unable to cast BigInt to int");); //should always be able to.
+            int value = output.getValue();
+            if (Size4FlagAt2 == -1 && value > 255) Size4FlagAt2 = executeCounter;
+            outputer->write(value, (Size4FlagAt2 == -1 ? 1 : 4));
         }else{
-            if (isBigInt){
+            if (prev_int.isBigInt()){
                 outputer->write(prev_int.getValuePtr());
             }else{
                 outputer->write(prev_int.getValue(), byte_num);
@@ -112,11 +129,13 @@ public:
     int execute3(InputManager *inputer){
         if (SameFlag){
             prev_int = record_min;
+        }else if (increasingFuncFlag == true){
+
         }else if (record_range.isBigInt() == false){
             if (Size4FlagAt2 != -1 && executeCounter >= Size4FlagAt2) byte_num = 4;
             prev_int = record_min + FlexibleInt(inputer->read_n_byte_int(byte_num));
         }else{
-            bool isBigInt = (BigIntFlagAt != -1 && executeCounter >= BigIntFlagAt);
+            bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
             if (isBigInt){
                 prev_int = FlexibleInt(inputer->read_bigInt());
             }else{
@@ -175,16 +194,13 @@ public:
         SuccessFlag = true;
         return result;
     }
-    _DEF_SafeScanf(readBigInt08, 255, "[0-7]");
-    _DEF_SafeScanf(readBigInt10, 255, "[0-9]");
-    _DEF_SafeScanf(readBigInt16, 255, "[0-9a-fA-F]");
     inline BigInteger *retrieveBInt(const char **input, const char *format){   //format = "%d%n" or "%x%n" or "%o%n"
         std::string bigIntString;
         int n_digit = -1;
         switch(format[1]){
-        case 'o':{ bigIntString = readBigInt08(*input); n_digit =  8; break; }
-        case 'd':{ bigIntString = readBigInt10(*input); n_digit = 10; break; }
-        case 'x':{ bigIntString = readBigInt16(*input); n_digit = 16; break; }
+        case 'o':{ bigIntString = SafeScanf::readBigInt08(*input); n_digit =  8; break; }
+        case 'd':{ bigIntString = SafeScanf::readBigInt10(*input); n_digit = 10; break; }
+        case 'x':{ bigIntString = SafeScanf::readBigInt16(*input); n_digit = 16; break; }
         }
         int size =  bigIntString.size();
         PERROR(size <= 0, printf("read BigInt fail, format = %s, input = %s", format, *input););
