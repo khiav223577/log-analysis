@@ -48,6 +48,7 @@ protected:
 //------------------------------------------------------------
 public:
     inline KEY_TYPE decompress(unsigned int input){
+        PERROR(hashKeys.size() <= input, printf("[%d <= %d]", hashKeys.size(), input));
         return hashKeys[input];
     }
 //------------------------------------------------------------
@@ -59,7 +60,6 @@ protected:
     inline void free_memory(         char ele){}
     inline void free_memory(unsigned char ele){}
     inline void free_memory(char *ele){
-
         RMap<MAP_TYPE>::FreeClearMap_1(hashTable);
     }
 //------------------------------------------------------------

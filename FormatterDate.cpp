@@ -205,9 +205,9 @@ public:
             date.getShow(tmp1);
             test.getShow(tmp2);
             if (strcmp(tmp1,tmp2) != 0){// || strcmp(tmp2,*input) != 0
-                printf("%s\n",*input);
-                printf("%s\n",tmp1);
-                printf("%s\n",tmp2);
+                printf("[%s]\n",*input);
+                printf("[%s]\n",tmp1);
+                printf("[%s]\n",tmp2);
             }else{
                 //printf("%s\n",*input);
                 //date.show();
@@ -222,13 +222,16 @@ public:
         //case 1:{sscanf(inputPtr, "%d%n",       &date.second,  &scanfLen); break;} //second: 0,1,2,...,58,59
         //case 2:{sscanf(inputPtr, "%02d%n",     &date.second,  &scanfLen); break;} //second: 00,01,02,...,58,59
         //}
-        int n1 = inputPtr[0] - '0';
-        int n2 = inputPtr[1] - '0';
+        int len = 0;
+        while(!isdigit(inputPtr[len])) len += 1;
+        int n1 = inputPtr[len++] - '0';
+        int n2 = inputPtr[len] - '0';
         int output = n1;
         if (n2 >= 0 && n2 <= 9){
             output = output * 10 + n2;
-            *scanfLen = 2;
-        }else *scanfLen = 1;
+            len += 1;
+        }
+        *scanfLen = len;
         return output;
     }
 };

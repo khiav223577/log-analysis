@@ -116,14 +116,14 @@ public:
             if (output.isBigInt()){
                 outputer->write(output.getValuePtr());
             }else{
-                unsigned int value = output.getValue();
+                int value = output.getValue();
                 outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
             }
         }else if (record_range.isBigInt() == false){
             FlexibleInt output = (prev_int - record_min);
             bool success = output.try_to_cast_to_int();
             PERROR(success == false, printf("Unable to cast BigInt to int");); //should always be able to.
-            unsigned int value = output.getValue();
+            int value = output.getValue();
             outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
         }else{
             if (prev_int.isBigInt()){
@@ -176,41 +176,67 @@ public:
     inline int retrieve(const char **input, const char *format){   //format = "%d%n" or "%x%n" or "%o%n"
         SuccessFlag = false;
         const char *inputPtr = *input;
-        int scanfLen = 0, result;
+        int scanfLen = 0, result = 0;
         while (*inputPtr == ' ' || *inputPtr == '\t') inputPtr += 1; //use for speed up. (reduce exec-time from 0.25s to 0.05s for 100k lines of data)
         //sscanf(inputPtr, "%*[ \f\n\r\t\v]%n", &scanfLen);   //remove white-space characters
         //inputPtr += scanfLen;
-        sscanf(inputPtr, format, &result, &scanfLen);       //read integer.
-        if (scanfLen == 0) return -1;
-        if (*inputPtr == '-'){      //check overflow by (+-) sign
-            if (result > 0) return -1;
-        }else{
-            if (result < 0) return -1;
-        }
-        if (*inputPtr == '-' || *inputPtr == '+'){          //remove (+-) sign
+        bool positive = true;
+        if (*inputPtr == '-' || *inputPtr == '+'){  //remove (+-) sign
+            if (*inputPtr == '-') positive = false;
             inputPtr += 1;
-            scanfLen -= 1;
         }
-        while(*inputPtr == '0'){    //remove redundant zero
-            inputPtr += 1;
-            scanfLen -= 1;
-        }
+        while(*inputPtr == '0') inputPtr += 1;      //remove redundant zero
         char n_decimal = format[1];
-        switch(n_decimal){          //check overflow by length
-        case 'o':{ if (scanfLen <= 10) SuccessFlag = true; break;}
-        case 'd':{ if (scanfLen <=  9) SuccessFlag = true; break;}
-        case 'x':{ if (scanfLen <=  7) SuccessFlag = true; break;}
+        switch(n_decimal){
+        case 'o':{
+            while(1){
+                int val = (*inputPtr - '0');
+                if (val < 0 || val > 7) break;
+                result = result * 8 + val;
+                inputPtr += 1;
+                scanfLen += 1;
+            }
+            if (scanfLen <= 10) SuccessFlag = true; //check overflow by length
+            break;}
+        case 'd':{
+            while(1){
+                int val = (*inputPtr - '0');
+                if (val < 0 || val > 9) break;
+                result = result * 10 + val;
+                inputPtr += 1;
+                scanfLen += 1;
+            }
+            if (scanfLen <=  9) SuccessFlag = true; //check overflow by length
+            break;}
+        case 'x':{
+            while(1){
+                int val = (*inputPtr >= 'a' ? (*inputPtr - 'a') : (*inputPtr >= 'A' ? (*inputPtr - 'A') : (*inputPtr - '0')));
+                if (val < 0 || val > 15) break;
+                result = result * 16 + val;
+                inputPtr += 1;
+                scanfLen += 1;
+            }
+            if (scanfLen <=  7) SuccessFlag = true; //check overflow by length
+            break;}
+        }
+        if (positive){      //check overflow by (+-) sign
+            if (result < 0) return -1;
+        }else{
+            result *= -1;
+            if (result > 0) return -1;
         }
         if (SuccessFlag == false){
+            inputPtr -= scanfLen;
             static char format2[3] = "%?";                      //compare input's and result's number by "strcmp"
             format2[1] = n_decimal;
             char *buffer = (char *) malloc(20 * sizeof(char));  //20 is enough for max number length in that we have checked overflow by length.
             sprintf(buffer, format2, (result < 0 ? -result : result));
             for(int i = 0; i < scanfLen; ++i){ if (inputPtr[i] != buffer[i]) return -1;}
             free(buffer);
+            SuccessFlag = true;
+            inputPtr += scanfLen;
         }
-        *input = inputPtr + scanfLen;
-        SuccessFlag = true;
+        *input = inputPtr;
         return result;
     }
     inline BigInteger *retrieveBInt(const char **input, const char *format){   //format = "%d%n" or "%x%n" or "%o%n"

@@ -92,7 +92,7 @@ private:
     inline unsigned int read_a_int(const char **input){
         unsigned int output = 0;
         const char *inputStream = *input;
-        PERROR(!isdigit(*inputStream), printf("retrieve IP failed. input = %s", *input););
+        PERROR(!isdigit(*inputStream), printf("retrieve IP failed. input = %s, executeCounter = %d", *input, executeCounter););
         while(isdigit(*inputStream)){
             output = output * 10 + (*inputStream - '0');
             inputStream += 1;

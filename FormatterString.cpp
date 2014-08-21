@@ -27,17 +27,20 @@ public:
             return format; //Ex: format = "%25[^,]%n"*/
         }
 	};
+	char *string_buffer;;
 	char *prev_result;
 	const int MaxLen;
 	int format_len;
     FormatterString(const char *_format, int maxlen) : super(_format, new VirtualCreator(maxlen)), MaxLen(maxlen){
         prev_result = NULL;
+        string_buffer = (char *) malloc((MaxLen + 1) * sizeof(char));
         executeCounter = 0;
         bit_num = 32;
         format_len = strlen(format);
     }
     ~FormatterString(){
-        free(prev_result);
+        //free(prev_result);
+        free(string_buffer);
     }
     char *get_prev_string(){ //Will be called by FormatterIFStatement.
         PERROR(prev_result == NULL, printf("Error: fails to get_prev_string() in FormatterString."););
@@ -61,11 +64,10 @@ public:
         #ifdef EVALUATE_TIME
             evalu_string.start();
         #endif
-        char *str = retrieve(inputStream, format);
-        free(prev_result);
-        prev_result = str;
-        unsigned int output = hashCompressor.compress(str);
+        prev_result = retrieve(inputStream, format);
+        unsigned int output = hashCompressor.compress(prev_result);
         outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
+
         executeCounter += 1;
         debug();
         #ifdef EVALUATE_TIME
@@ -110,18 +112,17 @@ public:
         char *buffer = (char *) malloc((MaxLen + 1) * sizeof(char));
         sscanf(*input, format, buffer, &scanfLen);
         *input += scanfLen;*/
-        char *buffer = (char *) malloc((MaxLen + 1) * sizeof(char));
         const char *inputStr = *input;
         int scanfLen = 0;
         for(scanfLen = 0; scanfLen < MaxLen; ++scanfLen){
             for(int i = 0; i < format_len; ++i) if (*inputStr == format[i]) goto BREAK;
-            buffer[scanfLen] = *inputStr;
+            string_buffer[scanfLen] = *inputStr;
             inputStr += 1;
         } BREAK:
         *input = inputStr;
         if (**input != '\0') *input += 1; //drop stop-word
-        buffer[scanfLen] = '\0'; //avoid error when scanfLen == 0
-        return buffer;
+        string_buffer[scanfLen] = '\0'; //avoid error when scanfLen == 0
+        return string_buffer;
     }
 };
 
