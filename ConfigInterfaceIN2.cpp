@@ -73,9 +73,11 @@ inline void FormatterString::load_config1(FILE *file){
     bit_num = ((bit_num + 7)/ 8) * 8;
     if (bit_num <= 8) sizeManager.setSize2FlagAt(-1); //no need to use partial 1-byte compressor.
 };
-
-
-
+inline void FormatterChar::load_config2(FILE *file){
+    //fprintf(file, "Char\n");
+    char buffer[32];
+    fgets(buffer, sizeof(buffer), file);
+};
 
 
 

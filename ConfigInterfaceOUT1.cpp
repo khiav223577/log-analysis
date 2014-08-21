@@ -36,5 +36,10 @@ inline void FormatterString::save_config1(FILE *file){
     hashCompressor.save(file);
     fprintf(file, "\n");
 };
+inline void FormatterChar::save_config1(FILE *file){
+    fprintf(file, "Char\n");
+};
+
+
 
 #endif

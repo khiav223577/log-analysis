@@ -57,6 +57,7 @@ class Config_Parser
 				case
 				when line =~ /^(Date)\[(.*)\] \s*(\w+)/
 				when line =~ /^(String)\[(.*)\] \s*(\w+)/
+				when line =~ /^(Char)() \s*(\w+)/
 				when line =~ /^(Int)\[([0-9]+)\] \s*(\w+)/
 				when line =~ /^(IPv4)\[(.*)\] \s*(\w+)/
 				when line =~ /^(DROP)\[(.*)\]/

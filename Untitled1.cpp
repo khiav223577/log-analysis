@@ -10,6 +10,7 @@
 #ifdef EVALUATE_TIME
     EvaluateTime evalu_int;
     EvaluateTime evalu_string;
+    EvaluateTime evalu_char;
     EvaluateTime evalu_date;
     EvaluateTime evalu_ip;
     EvaluateTime evalu_discard;
@@ -61,6 +62,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
     #ifdef EVALUATE_TIME
         evalu_int.show("Int");
         evalu_string.show("String");
+        evalu_char.show("Char");
         evalu_date.show("Date");
         evalu_ip.show("IP");
         evalu_discard.show("Discard");

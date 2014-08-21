@@ -44,6 +44,7 @@ public:
 
 #include "FormatterDate.cpp"
 #include "FormatterString.cpp"
+#include "FormatterChar.cpp"
 #include "FormatterInteger.cpp"
 #include "FormatterDiscard.cpp"
 #include "FormatterDebug.cpp"

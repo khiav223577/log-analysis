@@ -78,7 +78,11 @@ inline void FormatterString::load_config2(FILE *file){
     fscanf(file, "\n");
     bit_num = bit_num_int; //avoid memory overflow
 };
-
+inline void FormatterChar::load_config1(FILE *file){
+    //fprintf(file, "Char\n");
+    char buffer[32];
+    fgets(buffer, sizeof(buffer), file);
+};
 
 
 
