@@ -63,16 +63,23 @@ public:
         return 0;
     }
     int execute2(OutputManager *outputer, InputManager *inputer){
-        unsigned int data;
+        unsigned int output;
         unsigned char byte_num = 4;
         if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
-        data = (unsigned int) inputer->read_int(byte_num);
-        prev_result = decompress(data);
+        output = (unsigned int) inputer->read_int(byte_num);
+        outputer->write(output, (Size4FlagAt == -1 ? 1 : 4));
+        prev_result = decompress(output);
         executeCounter += 1;
         debug();
         return 0;
     }
     int execute3(InputManager *inputer){
+        unsigned int output;
+        unsigned char byte_num = 4;
+        if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
+        output = (unsigned int) inputer->read_int(byte_num);
+        prev_result = decompress(output);
+        executeCounter += 1;
         debug();
         return 0;
     }

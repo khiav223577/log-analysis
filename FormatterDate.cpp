@@ -48,12 +48,19 @@ public:
     int execute2(OutputManager *outputer, InputManager *inputer){
         unsigned char byte_num = 4;
         if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
-        int date = delta_encoding.decode(inputer->read_n_byte_int(byte_num)); //delta encoding
+        int output = inputer->read_n_byte_int(byte_num);
+        int date = delta_encoding.decode(output); //delta encoding
+        outputer->write_n_byte_int(output, (Size4FlagAt == -1 ? 1 : 4));
         executeCounter += 1;
         debug(date);
         return 0;
     }
     int execute3(InputManager *inputer){
+        unsigned char byte_num = 4;
+        if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
+        int date = delta_encoding.decode(inputer->read_n_byte_int(byte_num)); //delta encoding
+        executeCounter += 1;
+        debug(date);
         return 0;
     }
     inline void debug(int date){

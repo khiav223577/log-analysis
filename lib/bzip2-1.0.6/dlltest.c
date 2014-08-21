@@ -119,8 +119,10 @@ void compress(const char *input_path, const char *output_path, int level){
     BZ2_bzclose(BZ2fp_w);
     if(fp_r!=stdin)fclose(fp_r);
 }
-int main(int argc,char *argv[])
-{
+//---------------------------------------------------
+//  Main
+//---------------------------------------------------
+int main(int argc,char *argv[]){
    int decompress_flag = 0;
    int level = 9;
    char *input_path = NULL;
@@ -136,8 +138,9 @@ int main(int argc,char *argv[])
 #endif
 
 
-    compress("test/test.txt", "test/test.bz2", 9);
-    decompress("test/test.bz2", NULL, 9);
+    compress("test/output_min.temp1", "test/output_min.bz2", 9);
+    //compress("test/test.txt", "test/test.bz2", 9);
+    //decompress("test/test.bz2", NULL, 9);
     return 0;
    while(++argv,--argc){
        break;
