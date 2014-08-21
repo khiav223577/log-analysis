@@ -59,6 +59,12 @@ inline void FormatterString::load_config1(FILE *file){
         hashKeys[idx] = input;
         RMap<MapChar(int)>::InsertKeyToMap(hashTable, input, idx);
     }
+    if (hashValueCounter > 1){
+        bit_num = 1;
+        int tmp = hashValueCounter;
+        while(tmp >>= 1, tmp != 0) bit_num += 1;
+    }else bit_num = 0;
+    if (bit_num <= 8) Size4FlagAt = -1; //no need to use partial 1-byte compressor.
 };
 
 

@@ -31,6 +31,8 @@ public:
         hashValueCounter = 0;
         executeCounter = 0;
         Size4FlagAt = -1;
+        byte_num = 1;
+        bit_num = 32;
     }
     ~FormatterString(){
         RMap<MapChar(int)>::FreeClearMap_1(hashTable);
@@ -50,6 +52,7 @@ public:
 //--------------------------------------
 private:
     int executeCounter, Size4FlagAt;
+    unsigned char byte_num, bit_num;
 public:
     int execute1(OutputManager *outputer, const char **inputStream){
         char *str = retrieve(inputStream, format);
@@ -63,22 +66,20 @@ public:
         return 0;
     }
     int execute2(OutputManager *outputer, InputManager *inputer){
-        unsigned int output;
-        unsigned char byte_num = 4;
-        if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
-        output = (unsigned int) inputer->read_int(byte_num);
-        outputer->write(output, byte_num);
+        if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
+        unsigned int output = (unsigned int) inputer->read_int(byte_num);
         prev_result = decompress(output);
+
+        outputer->write(output, byte_num);
         executeCounter += 1;
         debug();
         return 0;
     }
     int execute3(InputManager *inputer){
-        unsigned int output;
-        unsigned char byte_num = 4;
-        if (Size4FlagAt == -1 || executeCounter < Size4FlagAt) byte_num = 1;
-        output = (unsigned int) inputer->read_int(byte_num);
+        if (Size4FlagAt != -1 && executeCounter >= Size4FlagAt) byte_num = 4;
+        unsigned int output = (unsigned int) inputer->read_int(byte_num);
         prev_result = decompress(output);
+
         executeCounter += 1;
         debug();
         return 0;

@@ -27,11 +27,12 @@ class OutputManager{
 private:
     FILE *file;
     unsigned char buffer[OUTPUT_MANAGER_BUFFER_SIZE];
-    int buffer_counter;
+    int buffer_counter, bit_counter;
 public:
     OutputManager(const char *filename){
         file = fopen2(filename, "wb");
         buffer_counter = 0;
+        bit_counter = 0;
     }
     ~OutputManager(){
         flush();
@@ -44,8 +45,14 @@ public:
     inline void write(char data){ write((unsigned char) data); }
     inline void write(long data){ write((unsigned long) data); }
     inline void write(unsigned char data){
-        buffer[buffer_counter] = data;
-        plus_buffer_counter();
+        if (bit_counter == 0){
+            buffer[buffer_counter] = data;
+            plus_buffer_counter();
+        }else{
+            buffer[buffer_counter] |= (data << bit_counter);
+            plus_buffer_counter();
+            buffer[buffer_counter] |= (data >> (8 - bit_counter));
+        }
     }
     inline void write(unsigned int data){
         write((unsigned char) (data >>  0)); //little endian
@@ -111,6 +118,21 @@ public:
         case 2:{write2(value); break;}
         case 3:{write3(value); break;}
         case 4:{write4(value); break;}
+        }
+    }
+    inline void write_bits(unsigned int value, unsigned int bit_num){
+        while(bit_num >= 8){
+            write((unsigned char) value);
+            value >>= 8;
+            bit_num -= 8;
+        }
+        if (bit_num == 0) return;
+        buffer[buffer_counter] |= (value << bit_counter);
+        bit_counter += bit_num;
+        if (bit_counter >= 8){
+            bit_counter -= 8;
+            plus_buffer_counter();
+            buffer[buffer_counter] |= (value >> (bit_num - bit_counter)); //8 - bit_counter
         }
     }
 };
