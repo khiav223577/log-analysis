@@ -39,11 +39,12 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    inline int execute(const char **inputStream){
+    inline int execute(OutputManager *outputer, const char **inputStream){
         char *str = retrieve(inputStream, format);
         SetColor2(); printf("[%s] ",str); SetColor(7);//DEBUG
         free(prev_result);
         prev_result = str;
+        //outputer->write(???); //map<string, string> namemap;
         return 0;
     }
 //-------------------------------------------------------------------------

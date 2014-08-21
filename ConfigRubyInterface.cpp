@@ -102,7 +102,7 @@ public:
                 char *string = StringValuePtr(a2);
                 switch(string[0]){
                 case '"':{ FormatStack::push(&stack, new FormatterIF_CmpString(type, target, string)); break;} //string
-                default:{  FormatStack::push(&stack, new FormatterIF_CmpInt(   type, target, string)); break;} //integer
+                default:{  FormatStack::push(&stack, new FormatterIF_CmpInt   (type, target, string)); break;} //integer
                 }
                 break;}
             default:{

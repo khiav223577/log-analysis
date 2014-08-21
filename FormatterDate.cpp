@@ -27,9 +27,10 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    int execute(const char **inputStream){
+    int execute(OutputManager *outputer, const char **inputStream){
         int date = retrieve(inputStream, format);
         RDate::show(date); //DEBUG
+        outputer->write(date);
         return 0;
     }
 //-------------------------------------------------------------------------

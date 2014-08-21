@@ -25,7 +25,7 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    inline int execute(const char **inputStream){
+    inline int execute(OutputManager *outputer, const char **inputStream){
         printf("%s", format);
         return 0;
     }

@@ -14,7 +14,7 @@ void test_FormatterDate(){
         char data[999];
         const char *inputStream = data;
         sprintf(data,"%d/%02d/%02d %02d:%02d:%02d",year,month,day,hour,min,sec);
-        SetColor2();formatData.execute(&inputStream);
+        SetColor2();formatData.execute(NULL, &inputStream);
     }
     SetColor(7);
 }
@@ -39,5 +39,5 @@ void test_InputFormatter(){
     formatter2.formatList.push_back(new FormatterDiscard(","));
     formatter2.formatList.push_back(new FormatterIPaddr(NULL));
     formatter2.formatList.push_back(new FormatterDiscard(","));
-    formatter2.execute("Dec  3 04:00:01 iisfw 1,2013/12/03 04:00:01,0011C101825,TRAFFIC,end,1,2013/12/03 04:00:00,140.109.23.120,140.109.254.5,0.0.0.0,0.0.0.0");
+    formatter2.execute(NULL, "Dec  3 04:00:01 iisfw 1,2013/12/03 04:00:01,0011C101825,TRAFFIC,end,1,2013/12/03 04:00:00,140.109.23.120,140.109.254.5,0.0.0.0,0.0.0.0");
 }

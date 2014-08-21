@@ -4,7 +4,6 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
-#define NAN (1 << 31)
 class FormatterInteger : public FormatterController{
 public:
     typedef FormatterController super;
@@ -30,26 +29,35 @@ public:
 	};
 	int prev_int;
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
-        prev_int = NAN;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
-        if (prev_int != NAN) return prev_int;
+        if (initialized) return prev_int;
         printf("Error: fails to get_prev_int() in FormatterInteger.");
         exit(1);
     }
 public:
     bool SuccessFlag;
+    int record_min, record_max;
 //--------------------------------------
 //  execute
 //--------------------------------------
-    inline int execute(const char **inputStream){
+    inline int execute(OutputManager *outputer, const char **inputStream){
         int num = FormatterInteger::retrieve(inputStream, format);
         if (!SuccessFlag){ //TODO overflow
             puts("overflow");
             exit(1);
         }
-        SetColor2(); printf("[%d] ",num); SetColor(7);//DEBUG
         prev_int = num;
+        SetColor2(); printf("[%d] ",num); SetColor(7);//DEBUG
+        if (initialized){
+            if (num < record_min) record_min = num;
+            if (num > record_max) record_max = num;
+        }else{
+            initialized = true;
+            record_min = num;
+            record_max = num;
+        }
+        outputer->write(num);
         return 0;
     }
 //-------------------------------------------------------------------------

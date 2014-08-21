@@ -25,35 +25,27 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-    void execute(const char *_input){
+    void execute(OutputManager *outputer, const char *_input){
         inputStream = _input;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(&inputStream); //execute回傳要skip掉的指令數
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute(outputer, &inputStream); //execute回傳要skip掉的指令數
     }
 };
 #include "ConfigRubyInterface.cpp"
-FILE *fopen2(const char *filename, const char *mode){
-    FILE *f = fopen(filename,mode);
-    if (f == NULL){
-        printf("Cannot open %s.",filename);
-        exit(1);
-    }
-    return f;
-}
-
 #include "testing.cpp"
 int main(){
     ConfigRubyInterface ruby_interface;
     InputFormatter *formatter = ruby_interface.CreateFormatter("data/test_config2");
     char buffer[MAX_LOG_SIZE];
-    FILE *file = fopen2("data/test_input2","r");
+    FILE *file1 = fopen2("data/test_input2","r");
+    OutputManager outputer("data/test_output2");
     int i = 0;
-    while(fgets(buffer, MAX_LOG_SIZE, file) != NULL){
+    while(fgets(buffer, MAX_LOG_SIZE, file1) != NULL){
         if (buffer[0] == '\0' || buffer[0] == '\n') continue;
         printf("%02d: ", ++i);
-        formatter->execute(buffer);
+        formatter->execute(&outputer, buffer);
         puts("");
     }
-    fclose(file);
+    fclose(file1);
     delete formatter;
 
     //test_InputFormatter();
