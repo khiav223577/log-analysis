@@ -72,7 +72,7 @@ public:
     }
     int execute2(InputManager *inputer){
         bool is_BigInt = (BigIntFlagAt != -1 && execute1Counter >= BigIntFlagAt);
-        prev_int = is_BigInt ? FlexibleInt(inputer->read_bigInt()) : FlexibleInt(inputer->read_int());
+        prev_int = (is_BigInt ? FlexibleInt(inputer->read_bigInt()) : FlexibleInt(inputer->read_int()));
         SetColor2(); prev_int.output(); SetColor(7);//DEBUG
         execute1Counter += 1;
         return 0;

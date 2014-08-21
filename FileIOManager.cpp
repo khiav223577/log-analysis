@@ -126,6 +126,7 @@ public:
         int sign = read_int() - 1;
         unsigned int buffer_len = (unsigned int) read_int();
         unsigned long *buffer = (unsigned long *) malloc(buffer_len * sizeof(unsigned long));
+        fread(buffer, sizeof(unsigned long), buffer_len, file);
         BigInteger *bigInt = new BigInteger(buffer, buffer_len, BigInteger::Sign(sign));
         free(buffer);
         return bigInt;

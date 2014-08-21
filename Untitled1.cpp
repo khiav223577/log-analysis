@@ -44,9 +44,9 @@ int main(int argc, char **argv){
     std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
     return 0;
     */
-    const char *ConfigPath = "data/test_config2";
-    const char *InputPath  = "data/test_input2";
-    const char *OutputPath = "data/test_output2";
+    const char *ConfigPath = "data/input.config";
+    const char *InputPath  = "data/input_min";
+    const char *OutputPath = "data/output_min";
     ruby = new RubyInterpreter();
     {
         ruby_interface = new ConfigInterfaceIN1(ruby);
@@ -59,7 +59,7 @@ int main(int argc, char **argv){
         sprintf(output_path  , "%s.temp1"  , OutputPath);
         sprintf(output_config, "%s.config1", OutputPath);
         first_pass(input_path, output_path, input_config, output_config);
-        free( input_path);
+        free(input_path);
         free(output_path);
         free(input_config);
         free(output_config);
@@ -79,7 +79,7 @@ int main(int argc, char **argv){
         sprintf(input_config , "%s.config1", OutputPath);
         sprintf(output_config, "%s.config2", OutputPath);
         second_pass(input_path, output_path, input_config, output_config);
-        free( input_path);
+        free(input_path);
         free(output_path);
         free(input_config);
         free(output_config);

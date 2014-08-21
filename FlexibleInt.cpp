@@ -79,10 +79,10 @@ public:
         }
         return ans;
     }
-    inline FlexibleInt& operator =(const FlexibleInt &x) {
+    inline FlexibleInt& operator =(const FlexibleInt &x){
         if (x.isBigInt()) setBigInt();
         if (isBigInt()){
-            *getValuePtr() = GETVALUE(x);
+            setValuePtr(new BigInteger(GETVALUE(x)));
         }else{
             setValue(x.getValue());
         }
