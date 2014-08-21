@@ -10,4 +10,36 @@ struct char_cmp{
    }
 };
 
+template<typename MAP> class RMap{
+public:
+    typedef typename MAP::mapped_type  VALUE;
+    typedef typename MAP::key_type     KEY;
+    typedef typename MAP::value_type   PAIR;
+    typedef typename MAP::iterator     ITERATOR;
+//----------------------------------------------------------------
+//  Insert (key, value) into a map if map[key] doesn't exist. And return map[key].
+//----------------------------------------------------------------
+    inline static VALUE &InsertKeyToMap(MAP &map, KEY const& key, VALUE const& value) {
+        return map.insert(PAIR(key, value)).first->second; //insert(XXX).first is the iterator of map[key] which pointers to std::pair<key, value>
+    }
+//----------------------------------------------------------------
+//  Clear map and free elements.
+//----------------------------------------------------------------
+    inline static void FreeClearMap_1(MAP & map){
+        for(ITERATOR it = map.begin(); it != map.end(); ++it){ free(it->first);  }
+        map.clear();
+    }
+    inline static void FreeClearMap_2(MAP & map){
+        for(ITERATOR it = map.begin(); it != map.end(); ++it){ free(it->second); }
+        map.clear();
+    }
+    inline static void FreeClearMap_1_2(MAP & map){
+        for(ITERATOR it = map.begin(); it != map.end(); ++it){ free(it->first); free(it->second); }
+        map.clear();
+    }
+};
+
+
+
+
 #endif

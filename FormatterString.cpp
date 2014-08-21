@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include "RMap.cpp"
 class FormatterString : public FormatterController{
 public:
     typedef FormatterController super;
@@ -26,9 +27,10 @@ public:
 	const int MaxLen;
     FormatterString(const char *_format, int maxlen) : super(_format, new VirtualCreator(maxlen)), MaxLen(maxlen){
         prev_result = NULL;
+        hashValueCounter = 0;
     }
     ~FormatterString(){
-        free(prev_result);
+        RMap<MapChar(int)>::FreeClearMap_1(hashTable);
     }
     char *get_prev_result(){ //Will be called by FormatterIFStatement.
         if (prev_result != NULL) return prev_result;
@@ -36,15 +38,19 @@ public:
         exit(1);
     }
 public:
+    MapChar(int) hashTable;
+    int hashValueCounter;
 //--------------------------------------
 //  execute
 //--------------------------------------
     inline int execute(OutputManager *outputer, const char **inputStream){
         char *str = retrieve(inputStream, format);
         SetColor2(); printf("[%s] ",str); SetColor(7);//DEBUG
-        free(prev_result);
         prev_result = str;
-        //outputer->write(???); //map<string, string> namemap;
+        int value = RMap<MapChar(int)>::InsertKeyToMap(hashTable, str, hashValueCounter);
+        if (value == hashValueCounter) hashValueCounter += 1; //str is a new key!
+        outputer->write(value);
+        printf("~~~~~~[%s => %d]         ", str, value);
         return 0;
     }
 //-------------------------------------------------------------------------

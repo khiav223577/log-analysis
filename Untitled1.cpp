@@ -10,7 +10,7 @@
 #define MAX_LOG_SIZE 8192
 #include "windows.cpp"
 #include "FormatterController.cpp"
-#include "RMap.cpp"
+//#include "RMap.cpp"
 
 class InputFormatter{
 public:
@@ -33,6 +33,7 @@ public:
 #include "ConfigRubyInterface.cpp"
 #include "testing.cpp"
 int main(){
+
     ConfigRubyInterface ruby_interface;
     InputFormatter *formatter = ruby_interface.CreateFormatter("data/test_config2");
     char buffer[MAX_LOG_SIZE];
@@ -56,15 +57,16 @@ int main(){
 /*
     MapChar(int) BlahBlah;
     char key[] = "123";
-    printf("%d",BlahBlah[key]);
+    printf("%s => %d\n",key, BlahBlah[key]);
+    printf("set %s = %d\n",key, 3);
     BlahBlah[key] = 3;
     key[0] = 'A';
     key[1] = 'B';
     key[2] = 'C';
-    printf("[%s]\n",key);
-    printf("%d",BlahBlah[key]);
-    printf("%d",BlahBlah["123"]);
-    return 0;*/
+    printf("%s => %d\n",key, BlahBlah[key]); //store reference
+    printf("%s => %d\n","123", BlahBlah["123"]);
+    return 0;
+*/
 
 
 return 0;
