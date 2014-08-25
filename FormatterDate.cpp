@@ -35,20 +35,33 @@ public:
 private:
     SizeFlagManager sizeManager;
     int executeCounter;
+    bool SameFlag, increasingFuncFlag;
+    unsigned int prev_date, record_min, record_max;
 public:
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME
             evalu_date.start();
         #endif
         const char *originInput = *inputStream;
-        int date = retrieve(inputStream, format);
+        unsigned int prev_date_sav = prev_date;
+        prev_date = retrieve(inputStream, format);
         if (attr_drop == false){
-            int output = delta_encoding.encode(date); //delta encoding
-            outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
+            if (initialized){
+                if (prev_date < record_min) record_min = prev_date;
+                if (prev_date > record_max) record_max = prev_date;
+                if (increasingFuncFlag && prev_date < prev_date_sav) increasingFuncFlag = false;
+            }else{
+                initialized = true;
+                increasingFuncFlag = true;
+                record_min = prev_date;
+                record_max = prev_date;
+            }
+            int delta = delta_encoding.encode(prev_date); //delta encoding
+            outputer->write(delta, sizeManager.get_write_byte(delta, executeCounter));
         }
         if (attr_peek == true) *inputStream = originInput;
         executeCounter += 1;
-        debug(date);
+        debug(prev_date);
         #ifdef EVALUATE_TIME
             evalu_date.stop();
         #endif
@@ -56,22 +69,30 @@ public:
     }
     int execute2(){
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
-        int output = inputer->read_n_byte_int(byte_num);
-        int date = delta_encoding.decode(output); //delta encoding
-        outputer->write(output, byte_num);
+        int delta = inputer->read_n_byte_int(byte_num);
+        prev_date = delta_encoding.decode(delta); //delta encoding
+        if (SameFlag){
+            //do nothing
+        }else{
+            outputer->write(delta, byte_num);
+        }
         executeCounter += 1;
-        debug(date);
+        debug(prev_date);
         return 0;
     }
     int execute3(){
-        unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
-        int output = inputer->read_n_byte_int(byte_num);
-        int date = delta_encoding.decode(output); //delta encoding
+        if (SameFlag){
+            prev_date = record_min;
+        }else{
+            unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
+            int delta = inputer->read_n_byte_int(byte_num);
+            prev_date = delta_encoding.decode(delta); //delta encoding
+        }
         executeCounter += 1;
-        debug(date);
+        debug(prev_date);
         return 0;
     }
-    inline void debug(int date){
+    inline void debug(unsigned int date){
         #ifdef DEBUG
             RDate::show(date);
         #endif
@@ -79,10 +100,10 @@ public:
 //-------------------------------------------------------------------------
 //  retrieve data from input according the format.
 //-------------------------------------------------------------------------
-    inline int retrieve(const char **input, const char *format){
+    inline unsigned int retrieve(const char **input, const char *format){
         const char *inputPtr = *input;
         RDate date;
-        int scanfLen,counter = 0; //longest common char
+        unsigned int scanfLen,counter = 0; //longest common char
         char prev = *format, curr = *format;
         while(prev != '\0'){
             if (curr != prev || counter > 9){
@@ -188,7 +209,7 @@ public:
                     sscanf(inputPtr, tmp, &scanfLen);
                     if (scanfLen != counter){ printf("tmp = %s,scanfLen = %d\n",tmp,scanfLen); goto LABEL_ERROR;}*/
                     //reduce exec-time from 0.8s to 0.1s for 100k lines of data
-                    for(int i = 0; i < counter; ++i) if (inputPtr[i] != prev) goto LABEL_ERROR;
+                    for(unsigned int i = 0; i < counter; ++i) if (inputPtr[i] != prev) goto LABEL_ERROR;
                     scanfLen = counter;
                     break;}
                 }
@@ -221,7 +242,7 @@ public:
         *input = inputPtr;
         return date.toSecond();
     }
-    inline int read_int2(const char *inputPtr, int counter, int *scanfLen){
+    inline int read_int2(const char *inputPtr, unsigned int counter, unsigned int *scanfLen){
         //switch(counter){
         //case 1:{sscanf(inputPtr, "%d%n",       &date.second,  &scanfLen); break;} //second: 0,1,2,...,58,59
         //case 2:{sscanf(inputPtr, "%02d%n",     &date.second,  &scanfLen); break;} //second: 00,01,02,...,58,59

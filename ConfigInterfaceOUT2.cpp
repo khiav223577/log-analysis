@@ -6,6 +6,8 @@
 inline void FormatterDate::save_config2(FILE *file){
     fprintf(file, "Date %d", delta_encoding.get_first_value());
     sizeManager.save(file);
+    fprintf(file, " %c", (increasingFuncFlag ? 'T' : 'F'));
+    fprintf(file, " %u %u", record_min, record_max);
     fprintf(file, "\n");
 };
 inline void FormatterDebug::save_config2(FILE *file){};

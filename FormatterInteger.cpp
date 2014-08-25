@@ -35,7 +35,6 @@ public:
         BigIntFlagAt1 = -1;
         BigIntFlagAt2 = -1;
         executeCounter = 0;
-        increasingFuncFlag = true;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
@@ -83,6 +82,7 @@ public:
                 }
             }else{
                 initialized = true;
+                increasingFuncFlag = true;
                 record_min = prev_int;
                 record_max = prev_int;
             }

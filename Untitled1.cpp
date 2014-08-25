@@ -1,7 +1,7 @@
-//#define DEBUG 5
+//#define DEBUG 20
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
-#define BLOCK_SIZE 20000
+#define BLOCK_SIZE 2220000
 //---------------------------------------------------
 #include<stdio.h>
 #include<typeinfo>
