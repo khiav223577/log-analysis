@@ -15,16 +15,16 @@ public:
 //  ACCESS
 //-------------------------------------------------------------------------
     bool recordingFlag;
-    inline XXXXX getPrevValue(){       return prev_value; }
-    inline XXXXX getMinValue(){        return record_min; }
-    inline XXXXX getMaxValue(){        return record_max; }
-    inline XXXXX getMinMaxRange(){     return record_max - record_min; }
-    inline bool isAlwaysIncreasing(){  return increasingFuncFlag; }
-    inline bool isInitialized(){       return increasingFuncFlag; }
+    inline XXXXX& getPrevValue(){       return prev_value; }
+    inline XXXXX& getMinValue(){        return record_min; }
+    inline XXXXX& getMaxValue(){        return record_max; }
+    inline XXXXX getMinMaxRange(){      return record_max - record_min; }
+    inline bool& isAlwaysIncreasing(){  return increasingFuncFlag; }
+    inline bool& isInitialized(){       return initialized; }
 public:
     StreamingRecorder() : initialized(false), recordingFlag(true){
     }
-    inline void nextData_quick(FlexibleInt value){ //for custom speed up methods.
+    inline void nextData_quick(FlexibleInt &value){ //for custom speed up methods.
         if (recordingFlag && initialized){
             if      (value.getValue() < record_min.getValue()) record_min.setValue(value.getValue());
             else if (value.getValue() > record_max.getValue()) record_max.setValue(value.getValue());
@@ -35,7 +35,7 @@ public:
         }
         nextData(value);
     }
-    inline void nextData(XXXXX value){
+    inline void nextData(XXXXX &value){
         if (recordingFlag){
             if (initialized){
                 if      (value < record_min) record_min = value;

@@ -30,7 +30,6 @@ public:
             return format; //Ex: format = "%d%n"
         }
 	};
-	FlexibleInt prev_int;
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
         BigIntFlagAt1 = -1;
         BigIntFlagAt2 = -1;
@@ -50,6 +49,7 @@ public:
 //  execute
 //--------------------------------------
 private:
+    FlexibleInt prev_int;
     SizeFlagManager sizeManager1;
     SizeFlagManager sizeManager2;
     int executeCounter, BigIntFlagAt1, BigIntFlagAt2;

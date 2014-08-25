@@ -33,6 +33,7 @@ public:
 //  execute
 //--------------------------------------
 private:
+    unsigned int prev_date;
     SizeFlagManager sizeManager;
     int executeCounter;
     bool SameFlag;
@@ -44,10 +45,10 @@ public:
             evalu_date.start();
         #endif
         const char *originInput = *inputStream;
-        unsigned int date = retrieve(inputStream, format);
+        prev_date = retrieve(inputStream, format);
         if (attr_drop == false){
-            streamingRecorder.nextData(date);
-            int delta = delta_encoding.encode(date); //delta encoding
+            streamingRecorder.nextData(prev_date);
+            int delta = delta_encoding.encode(prev_date); //delta encoding
             outputer->write(delta, sizeManager.get_write_byte(delta, executeCounter));
         }
         if (attr_peek == true) *inputStream = originInput;
@@ -61,27 +62,26 @@ public:
     int execute2(){
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         int delta = inputer->read_n_byte_int(byte_num);
-        unsigned int date = delta_encoding.decode(delta); //delta encoding
+        prev_date = delta_encoding.decode(delta); //delta encoding
         if (SameFlag == true){
             //do nothing
         }else{
             outputer->write(delta, byte_num);
         }
         executeCounter += 1;
-        debug(date);
+        debug(prev_date);
         return 0;
     }
     int execute3(){
-        unsigned int date;
         if (SameFlag == true){
-            date = streamingRecorder.getMinValue();
+            prev_date = streamingRecorder.getMinValue();
         }else{
             unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
             int delta = inputer->read_n_byte_int(byte_num);
-            date = delta_encoding.decode(delta); //delta encoding
+            prev_date = delta_encoding.decode(delta); //delta encoding
         }
         executeCounter += 1;
-        debug(date);
+        debug(prev_date);
         return 0;
     }
     inline void debug(unsigned int date){
