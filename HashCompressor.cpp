@@ -24,10 +24,10 @@ public:
 //  compress
 //------------------------------------------------------------
 public:
-    inline unsigned int compress(          int input){ return inner_compress(input);}
-    inline unsigned int compress( unsigned int input){ return inner_compress(input);}
-    inline unsigned int compress(         char input){ return inner_compress(input);}
-    inline unsigned int compress(unsigned char input){ return inner_compress(input);}
+    inline unsigned int compress(          int &input){ return inner_compress(input);}
+    inline unsigned int compress( unsigned int &input){ return inner_compress(input);}
+    inline unsigned int compress(         char &input){ return inner_compress(input);}
+    inline unsigned int compress(unsigned char &input){ return inner_compress(input);}
     inline unsigned int compress(char *input){
         int mem_size = (strlen(input) + 1) * sizeof(char);
         char *key = (char *) malloc(mem_size);
@@ -38,7 +38,7 @@ public:
         return value;
     }
 protected:
-    inline unsigned int inner_compress(KEY_TYPE input){
+    inline unsigned int inner_compress(KEY_TYPE &input){
         unsigned int value = RMap<MAP_TYPE>::InsertKeyToMap(hashTable, input, hashValueCounter);
         if (value == hashValueCounter){
             hashKeys.push_back(input);
@@ -50,7 +50,7 @@ protected:
 //  decompress
 //------------------------------------------------------------
 public:
-    inline KEY_TYPE decompress(unsigned int input){
+    inline KEY_TYPE decompress(unsigned int &input){
         PERROR(hashKeys.size() <= input, printf("[%d <= %d] ", hashKeys.size(), input); show_keys(hashKeys););
         return hashKeys[input];
     }
@@ -58,19 +58,19 @@ public:
 //  free_memory
 //------------------------------------------------------------
 protected:
-    inline void free_memory(          int ele){}
-    inline void free_memory( unsigned int ele){}
-    inline void free_memory(         char ele){}
-    inline void free_memory(unsigned char ele){}
-    inline void free_memory(char *ele){
+    inline void free_memory(          int &unused){}
+    inline void free_memory( unsigned int &unused){}
+    inline void free_memory(         char &unused){}
+    inline void free_memory(unsigned char &unused){}
+    inline void free_memory(char *unused){
         RMap<MAP_TYPE>::FreeClearMap_1(hashTable);
     }
 //------------------------------------------------------------
 //  show keys
 //------------------------------------------------------------
 public:
-    inline void show_keys(std::vector<char *      > keys){ printf("hashKeys[0] = %s\n", hashKeys[0]); }
-    inline void show_keys(std::vector<unsigned int> keys){ printf("hashKeys[0] = %u\n", hashKeys[0]); }
+    inline void show_keys(std::vector<char *      > &keys){ printf("hashKeys[0] = %s\n", hashKeys[0]); }
+    inline void show_keys(std::vector<unsigned int> &keys){ printf("hashKeys[0] = %u\n", hashKeys[0]); }
 //------------------------------------------------------------
 //  save
 //------------------------------------------------------------
@@ -80,7 +80,7 @@ public:
         inner_save(file, key_type);
     }
 protected:
-    inline void inner_save(FILE *file, unsigned int unused){
+    inline void inner_save(FILE *file, unsigned int &unused){
         unsigned int *buffer = (unsigned int *) malloc(hashValueCounter * sizeof(unsigned int));
         for(unsigned int i = 0 ; i < hashValueCounter; ++i) buffer[i] = hashKeys[i];
         fprintf(file, ":"); //prevent white characters be dropped by fscanf("\n").
@@ -101,7 +101,7 @@ public:
         inner_load(file, key_type);
     }
 protected:
-    inline void inner_load(FILE *file, unsigned int unused){
+    inline void inner_load(FILE *file, unsigned int &unused){
         unsigned int *buffer = (unsigned int *) malloc(hashValueCounter * sizeof(unsigned int));
         fscanf(file, ":");
         fread(buffer, sizeof(unsigned int), hashValueCounter, file);
