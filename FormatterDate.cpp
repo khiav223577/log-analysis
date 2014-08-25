@@ -28,40 +28,31 @@ public:
     virtual void save_config2(FILE *file);
     virtual void load_config1(FILE *file);
     virtual void load_config2(FILE *file);
-    DeltaEncoding<int> delta_encoding;
+
 //--------------------------------------
 //  execute
 //--------------------------------------
 private:
     SizeFlagManager sizeManager;
     int executeCounter;
-    bool SameFlag, increasingFuncFlag;
-    unsigned int prev_date, record_min, record_max;
+    bool SameFlag;
+    DeltaEncoding<int> delta_encoding;
+    StreamingRecorder<unsigned int> streamingRecorder;
 public:
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME
             evalu_date.start();
         #endif
         const char *originInput = *inputStream;
-        unsigned int prev_date_sav = prev_date;
-        prev_date = retrieve(inputStream, format);
+        unsigned int date = retrieve(inputStream, format);
         if (attr_drop == false){
-            if (initialized){
-                if (prev_date < record_min) record_min = prev_date;
-                if (prev_date > record_max) record_max = prev_date;
-                if (increasingFuncFlag && prev_date < prev_date_sav) increasingFuncFlag = false;
-            }else{
-                initialized = true;
-                increasingFuncFlag = true;
-                record_min = prev_date;
-                record_max = prev_date;
-            }
-            int delta = delta_encoding.encode(prev_date); //delta encoding
+            streamingRecorder.nextData(date);
+            int delta = delta_encoding.encode(date); //delta encoding
             outputer->write(delta, sizeManager.get_write_byte(delta, executeCounter));
         }
         if (attr_peek == true) *inputStream = originInput;
         executeCounter += 1;
-        debug(prev_date);
+        debug(streamingRecorder.getPrevValue());
         #ifdef EVALUATE_TIME
             evalu_date.stop();
         #endif
@@ -70,26 +61,27 @@ public:
     int execute2(){
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         int delta = inputer->read_n_byte_int(byte_num);
-        prev_date = delta_encoding.decode(delta); //delta encoding
-        if (SameFlag){
+        unsigned int date = delta_encoding.decode(delta); //delta encoding
+        if (SameFlag == true){
             //do nothing
         }else{
             outputer->write(delta, byte_num);
         }
         executeCounter += 1;
-        debug(prev_date);
+        debug(date);
         return 0;
     }
     int execute3(){
-        if (SameFlag){
-            prev_date = record_min;
+        unsigned int date;
+        if (SameFlag == true){
+            date = streamingRecorder.getMinValue();
         }else{
             unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
             int delta = inputer->read_n_byte_int(byte_num);
-            prev_date = delta_encoding.decode(delta); //delta encoding
+            date = delta_encoding.decode(delta); //delta encoding
         }
         executeCounter += 1;
-        debug(prev_date);
+        debug(date);
         return 0;
     }
     inline void debug(unsigned int date){

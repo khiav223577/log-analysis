@@ -6,8 +6,7 @@
 inline void FormatterDate::save_config1(FILE *file){
     fprintf(file, "Date %d", delta_encoding.get_first_value());
     sizeManager.save(file);
-    fprintf(file, " %c", (increasingFuncFlag ? 'T' : 'F'));
-    fprintf(file, " %u %u", record_min, record_max);
+    streamingRecorder.save(file);
     fprintf(file, "\n");
 };
 inline void FormatterDebug::save_config1(FILE *file){};
@@ -21,10 +20,8 @@ inline void FormatterInteger::save_config1(FILE *file){
     }else{  //BigInt
         fprintf(file, "BigInt %d", BigIntFlagAt1);
     }
-    record_min.save(file);
-    record_max.save(file);
     sizeManager1.save(file);
-    fprintf(file, " %c\n", (increasingFuncFlag ? 'T' : 'F'));
+    streamingRecorder.save(file);
 };
 inline void FormatterIPaddr::save_config1(FILE *file){
     fprintf(file, "IPv4");

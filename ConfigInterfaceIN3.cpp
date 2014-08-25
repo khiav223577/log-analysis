@@ -14,15 +14,9 @@ inline void FormatterDate::load_config2(FILE *file){
     fscanf(file, " %d", &first_value);
     delta_encoding.set_first_value(first_value);
     sizeManager.load(file);
-    //fprintf(file, " %c\n", (increasingFuncFlag ? 'T' : 'F'));
-    char tmp1;
-    fscanf(file, " %c", &tmp1);
-    PERROR(tmp1 != 'T' && tmp1 != 'F', printf("syntax error"););
-    increasingFuncFlag = (tmp1 == 'T' ? true : false);
-    fscanf(file, " %u %u", &record_min, &record_max);
+    streamingRecorder.load(file);
     fscanf(file, "\n");
-    SameFlag = (record_max - record_min == 0);
-    initialized = true;
+    SameFlag = (streamingRecorder.getMinMaxRange() == 0);
 };
 inline void FormatterDebug::load_config2(FILE *file){};
 inline void FormatterDiscard::load_config2(FILE *file){};
@@ -41,33 +35,18 @@ inline void FormatterInteger::load_config2(FILE *file){
     }else{ //fprintf(file, "BigInt %d", BigIntFlagAt1);
         fscanf(file, " %d", &BigIntFlagAt1);
     }
-    //record_min.save(file);
-    //record_max.save(file);
     //sizeManager1.save(file);
     //sizeManager2.save(file);
-    record_min = FlexibleInt::load(file);
-    record_max = FlexibleInt::load(file);
+    //streamingRecorder.save(file);
+    //if (streamingRecorder.isAlwaysIncreasing()) delta_encoding.get_first_value().save(file);
     sizeManager1.load(file);
     sizeManager2.load(file);
-    //if (increasingFuncFlag == true){
-    //   fprintf(file, " T");
-    //   delta_encoding.get_first_value().save();
-    //}else fprintf(file, " F");
-    char tmp1;
-    fscanf(file, " %c", &tmp1);
-    PERROR(tmp1 != 'T' && tmp1 != 'F', printf("syntax error"););
-    increasingFuncFlag = (tmp1 == 'T' ? true : false);
-    if (increasingFuncFlag) delta_encoding.set_first_value(FlexibleInt::load(file));
+    streamingRecorder.load(file);
+    if (streamingRecorder.isAlwaysIncreasing()) delta_encoding.set_first_value(FlexibleInt::load(file));
     fscanf(file, "\n");
-
-
-
-
-
-    record_range = (record_max - record_min);
+    record_range = streamingRecorder.getMinMaxRange();
     record_range.try_to_cast_to_int();
     SameFlag = (record_range == 0);
-    initialized = true;
 };
 inline void FormatterIPaddr::load_config2(FILE *file){
     //fprintf(file, "IPv4");

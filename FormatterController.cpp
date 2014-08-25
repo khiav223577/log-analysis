@@ -6,7 +6,8 @@
 #include<vector>
 #include "FileIOManager.cpp"
 #include "lib/DeltaEncoding.cpp"
-#include "SizeFlagManager.cpp"
+#include "lib/StreamingRecorder.cpp"
+#include "lib/SizeFlagManager.cpp"
 #include "HashCompressor.cpp"
 
 class InputFormatter;
@@ -20,10 +21,9 @@ public:
 	OutputManager *outputer;
 	InputManager *inputer;
 	char *format;
-	bool initialized, attr_drop, attr_peek, attr_index;
+	bool attr_drop, attr_peek, attr_index;
     FormatterController(const char *_format, VirtualCreator *v) : outputer(NULL), inputer(NULL){
         format = v->trans_format(_format);
-        initialized = false;
         attr_drop   = false;
         attr_peek   = false;
         attr_index  = false;

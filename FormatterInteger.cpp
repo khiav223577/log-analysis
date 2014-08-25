@@ -37,7 +37,7 @@ public:
         executeCounter = 0;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
-        PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterInteger."););
+        PERROR(!streamingRecorder.isInitialized(), printf("Error: fails to get_prev_int() in FormatterInteger."););
         PERROR(prev_int.isBigInt(), printf("Unable to compare with BigInteger in IF-Statement."););
         return prev_int.getValue(); // TODO BigInt.
     }
@@ -53,16 +53,16 @@ private:
     SizeFlagManager sizeManager1;
     SizeFlagManager sizeManager2;
     int executeCounter, BigIntFlagAt1, BigIntFlagAt2;
-    bool SuccessFlag, SameFlag, increasingFuncFlag;
-    FlexibleInt record_min, record_max, record_range;
+    bool SuccessFlag, SameFlag;
+    FlexibleInt record_range;
     DeltaEncoding<FlexibleInt> delta_encoding;
+    StreamingRecorder<FlexibleInt> streamingRecorder;
 public:
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME
             evalu_int.start();
         #endif
         const char *originInput = *inputStream;
-        FlexibleInt prev_int_sav = prev_int;
         if (BigIntFlagAt1 == -1){
             int value = retrieve(inputStream, format);
             if (SuccessFlag) prev_int = FlexibleInt(value);
@@ -70,21 +70,10 @@ public:
         }
         if (BigIntFlagAt1 != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
         if (attr_drop == false){
-            if (initialized){
-                if (BigIntFlagAt1 == -1){ //just for speed up. (reduce exec-time from 0.8s to 0.08s for 100k lines of data)
-                    if      (prev_int.getValue() > record_max.getValue())  record_max.setValue(prev_int.getValue());
-                    else if (prev_int.getValue() < record_min.getValue())  record_min.setValue(prev_int.getValue());
-                    if (increasingFuncFlag && prev_int.getValue() < prev_int_sav.getValue()) increasingFuncFlag = false;
-                }else{
-                    if      (prev_int > record_max) record_max = prev_int;
-                    else if (prev_int < record_min) record_min = prev_int;
-                    if (increasingFuncFlag && prev_int < prev_int_sav) increasingFuncFlag = false;
-                }
+            if (BigIntFlagAt1 == -1){ //just for speed up. (reduce exec-time from 0.8s to 0.08s for 100k lines of data)
+                streamingRecorder.nextData_quick(prev_int);
             }else{
-                initialized = true;
-                increasingFuncFlag = true;
-                record_min = prev_int;
-                record_max = prev_int;
+                streamingRecorder.nextData(prev_int);
             }
             if (prev_int.isBigInt()){
                 outputer->write(prev_int.getValuePtr());
@@ -109,9 +98,9 @@ public:
             byte_num = sizeManager1.get_read_byte(executeCounter);
             prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
         }
-        if (SameFlag){
+        if (SameFlag == true){
             //do nothing
-        }else if (increasingFuncFlag == true){
+        }else if (streamingRecorder.isAlwaysIncreasing()){
             FlexibleInt output = delta_encoding.encode(prev_int); //delta encoding
             if (BigIntFlagAt2 == -1){
                 output.try_to_cast_to_int();
@@ -124,7 +113,7 @@ public:
                 outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
             }
         }else if (record_range.isBigInt() == false){
-            FlexibleInt output = (prev_int - record_min);
+            FlexibleInt output = (prev_int - streamingRecorder.getMinValue());
             bool success = output.try_to_cast_to_int();
             PERROR(success == false, printf("Unable to cast BigInt to int");); //should always be able to.
             int value = output.getValue();
@@ -141,9 +130,9 @@ public:
         return 0;
     }
     int execute3(){
-        if (SameFlag){
-            prev_int = record_min;
-        }else if (increasingFuncFlag == true){
+        if (SameFlag == true){
+            prev_int = streamingRecorder.getMinValue();
+        }else if (streamingRecorder.isAlwaysIncreasing()){
             bool isBigInt = (BigIntFlagAt2 != -1 && executeCounter >= BigIntFlagAt2);
             FlexibleInt delta;
             if (isBigInt){
@@ -155,7 +144,7 @@ public:
             prev_int = delta_encoding.decode(delta); //delta encoding
         }else if (record_range.isBigInt() == false){
             unsigned char byte_num = sizeManager2.get_read_byte(executeCounter);
-            prev_int = record_min + FlexibleInt(inputer->read_n_byte_int(byte_num));
+            prev_int = streamingRecorder.getMinValue() + FlexibleInt(inputer->read_n_byte_int(byte_num));
         }else{
             bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
             if (isBigInt){
