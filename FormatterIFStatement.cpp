@@ -11,7 +11,7 @@ public:
 //-------------------------------------------------------------------------
 //  transform config-format to appropriate format. (for speed up)
 //-------------------------------------------------------------------------
-    class VirtualCreator : public super::VirtualCreator{ //Á×§K¦bconstrutor®ÉµLªk¥¿½T¨Ï¥Îvirtual¨ç¦¡ªº°İÃD
+    class VirtualCreator : public super::VirtualCreator{ //é¿å…åœ¨construtoræ™‚ç„¡æ³•æ­£ç¢ºä½¿ç”¨virtualå‡½å¼çš„å•é¡Œ
         virtual char *trans_format(const char *_format)=0;
 	};
 	char boolOperator;
@@ -40,17 +40,17 @@ public:
     virtual bool check_condition()=0;
     int execute1(const char **inputStream){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(inputStream); //execute¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(inputStream); //executeå›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
         return skip;
     }
     int execute2(){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute2(); //execute¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute2(); //executeå›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
         return skip;
     }
     int execute3(){
         if (check_condition() == false) return 0;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute3(); //execute¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute3(); //executeå›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
         return skip;
     }
 };
@@ -62,7 +62,7 @@ public:
 class FormatterIF_CmpString : public FormatterIFStatement{
 public:
     typedef FormatterIFStatement super;
-    class VirtualCreator : public super::VirtualCreator{ //Á×§K¦bconstrutor®ÉµLªk¥¿½T¨Ï¥Îvirtual¨ç¦¡ªº°İÃD
+    class VirtualCreator : public super::VirtualCreator{ //é¿å…åœ¨construtoræ™‚ç„¡æ³•æ­£ç¢ºä½¿ç”¨virtualå‡½å¼çš„å•é¡Œ
         char *trans_format(const char *_format){ //_format = "\"string\""
             if (_format == NULL) return NULL;
             int len = strlen(_format);
@@ -98,7 +98,7 @@ public:
 class FormatterIF_CmpInt : public FormatterIFStatement{
 public:
     typedef FormatterIFStatement super;
-    class VirtualCreator : public super::VirtualCreator{ //Á×§K¦bconstrutor®ÉµLªk¥¿½T¨Ï¥Îvirtual¨ç¦¡ªº°İÃD
+    class VirtualCreator : public super::VirtualCreator{ //é¿å…åœ¨construtoræ™‚ç„¡æ³•æ­£ç¢ºä½¿ç”¨virtualå‡½å¼çš„å•é¡Œ
         char *trans_format(const char *_format){
             return NULL;
         }
@@ -135,7 +135,7 @@ public:
 class FormatterIF_CmpIF : public FormatterIFStatement{
 public:
     typedef FormatterIFStatement super;
-    class VirtualCreator : public super::VirtualCreator{ //Á×§K¦bconstrutor®ÉµLªk¥¿½T¨Ï¥Îvirtual¨ç¦¡ªº°İÃD
+    class VirtualCreator : public super::VirtualCreator{ //é¿å…åœ¨construtoræ™‚ç„¡æ³•æ­£ç¢ºä½¿ç”¨virtualå‡½å¼çš„å•é¡Œ
         char *trans_format(const char *_format){
             return NULL;
         }

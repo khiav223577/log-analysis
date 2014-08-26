@@ -17,7 +17,7 @@ public:
         ruby_init();
         //ruby_init_loadpath();
         rb_set_safe_level(0);
-        ruby_script("ruby"); //³]©w¸}¥»¦W¦r¡C­Y¤£³]©w¡A¦b¨Ï¥Î¨ì__FILE__ ªº¦a¤è´N·|¥X¿ù¡C
+        ruby_script("ruby"); //è¨­å®šè…³æœ¬åå­—ã€‚è‹¥ä¸è¨­å®šï¼Œåœ¨ä½¿ç”¨åˆ°__FILE__ çš„åœ°æ–¹å°±æœƒå‡ºéŒ¯ã€‚
     }
     ~RubyInterpreter(){
         if (!had_execed) ruby_finalize();

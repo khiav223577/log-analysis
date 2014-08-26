@@ -13,7 +13,7 @@ public:
 //-------------------------------------------------------------------------
 //  transform config-format to appropriate format. (for speed up)
 //-------------------------------------------------------------------------
-    class VirtualCreator : public super::VirtualCreator{ //Á×§K¦bconstrutor®ÉµLªk¥¿½T¨Ï¥Îvirtual¨ç¦¡ªº°İÃD
+    class VirtualCreator : public super::VirtualCreator{ //é¿å…åœ¨construtoræ™‚ç„¡æ³•æ­£ç¢ºä½¿ç”¨virtualå‡½å¼çš„å•é¡Œ
         char *trans_format(const char *_format){
             char *format = (char *) malloc((strlen(_format) + 1) * sizeof(char));
             strcpy(format, _format);

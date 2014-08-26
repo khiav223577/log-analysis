@@ -3,44 +3,44 @@
 //  Config:
 //----------------------
 
-(O) Ū��   Date ��ƫ��A
-(O) Ū�� String ��ƫ��A
-(O) Ū��   Char ��ƫ��A
-(O) Ū��    Int ��ƫ��A
-(O) Ū��   IPv4 ��ƫ��A
-(O) Ū��   DROP ��ƫ��A
-(O) Ū��  DEBUG ��ƫ��A
+(O) 讀取   Date 資料型態
+(O) 讀取 String 資料型態
+(O) 讀取   Char 資料型態
+(O) 讀取    Int 資料型態
+(O) 讀取   IPv4 資料型態
+(O) 讀取   DROP 資料型態
+(O) 讀取  DEBUG 資料型態
 
-(X) #if�y�y�䴩���   Date ���
-(O) #if�y�y�䴩��� String ���
-(O) #if�y�y�䴩���   Char ���
-(O) #if�y�y�䴩���    Int ���
-(X) #if�y�y�䴩���   IPv4 ���
-(X) #if�y�y�䴩��� Big Integer
+(X) #if語句支援比對   Date 欄位
+(O) #if語句支援比對 String 欄位
+(O) #if語句支援比對   Char 欄位
+(O) #if語句支援比對    Int 欄位
+(X) #if語句支援比對   IPv4 欄位
+(X) #if語句支援比對 Big Integer
 
-(O) ������#if�y�y //EX: #if (a == 1 && b == 2 || c == 3 && d == 3)
-(O) if�y�k�䴩��"and","or"���O�N��"&&","||"�C
+(O) 複雜的#if語句 //EX: #if (a == 1 && b == 2 || c == 3 && d == 3)
+(O) if語法支援用"and","or"分別代表"&&","||"。
 
-(O) ����]�w#DROP_AFTER
-(X) ����]�w#DROP_BEFORE
-(O) ����]�w#MAX_SIZE
+(O) 全域設定#DROP_AFTER
+(X) 全域設定#DROP_BEFORE
+(O) 全域設定#MAX_SIZE
 
-(O) ������ //comment
-(X) �h����� /*comments*/
+(O) 單行註解 //comment
+(X) 多行註解 /*comments*/
 
-(O) �s��ruby�PC
+(O) 連結ruby與C
 
 //----------------------
 //  Formatter:
 //----------------------
 
-(O) �䴩String[\n] //�`�Nwindows��\r\n�����D
+(O) 支援String[\n] //注意windows中\r\n的問題
 
-(O) ����Int overflow
-(O) �B�zInt overflow
-(O) ��XBigInt
-(O) �إ�config�H�KŪ�^(1st pass)��X�᪺���
-(O) �qconfig��Ū�^(1st pass)���
+(O) 偵測Int overflow
+(O) 處理Int overflow
+(O) 輸出BigInt
+(O) 建立config以便讀回(1st pass)輸出後的資料
+(O) 從config檔讀回(1st pass)資料
 
-(O) ��delta encoding���Y
-(X) �ʺA���׽s�X
+(O) 用delta encoding壓縮
+(X) 動態長度編碼

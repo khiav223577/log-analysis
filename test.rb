@@ -1,6 +1,6 @@
 class String
 	def extract_escape_symbol
-		return self.gsub(/\\(?:\\|n|r|t|"|')/){|t| #³B²zconfig¤¤¸õ²æ¦r¤¸
+		return self.gsub(/\\(?:\\|n|r|t|"|')/){|t| #è™•ç†configä¸­è·³è„«å­—å…ƒ
 			case t
 			when '\r'   ; "\r"
 			when '\n'   ; "\n"

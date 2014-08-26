@@ -11,7 +11,7 @@ public:
 //-------------------------------------------------------------------------
 //  transform config-format to appropriate format. (for speed up)
 //-------------------------------------------------------------------------
-    class VirtualCreator : public super::VirtualCreator{ //Á×§K¦bconstrutor®ÉµLªk¥¿½T¨Ï¥Îvirtual¨ç¦¡ªº°İÃD
+    class VirtualCreator : public super::VirtualCreator{ //é¿å…åœ¨construtoræ™‚ç„¡æ³•æ­£ç¢ºä½¿ç”¨virtualå‡½å¼çš„å•é¡Œ
     public:
         const int MaxLen, StringMaxLen;
         VirtualCreator(const int maxlen) : MaxLen(maxlen), StringMaxLen(maxlen < 10 ? 1 : maxlen < 100 ? 2 : maxlen < 1000 ? 3 : maxlen < 10000 ? 4 : maxlen < 100000 ? 5 :

@@ -15,7 +15,7 @@
     }
 #ifdef _WIN32
     #include<windows.h>
-    inline void SetColor(unsigned short color){ //0╚eбе1╚e╨Я2╚e╛У3╚e╢╨╟╙╚G4╜Iбе5╜I╨Я6╜I╛У7╜I╢╨╟╙╚G8Ёz╘З9Ёz╘З10╓W╧╨╫u11╔╙╧╨╫u12╔k╧╨╫u13╔k╧╨╫u14Ёz╘З15Ёz╘З
+    inline void SetColor(unsigned short color){ //0Е┴█Х≈█1Е┴█Г╤═2Е┴█Г╢┘3Е┴█Ф≥╞И╚≤Д╨╝4Х┐▄Х≈█5Х┐▄Г╤═6Х┐▄Г╢┘7Х┐▄Ф≥╞И╚≤Д╨╝8И─▐Ф≤▌9И─▐Ф≤▌10Д╦┼Е┼┐Г╥ 11Е╥╕Е┼┐Г╥ 12Е▐ЁЕ┼┐Г╥ 13Е▐ЁЕ┼┐Г╥ 14И─▐Ф≤▌15И─▐Ф≤▌
         HANDLE hCon = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(hCon,color);
     }

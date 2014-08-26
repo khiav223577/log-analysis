@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-//Burrows¡VWheeler transform
+//Burrowsâ€“Wheeler transform
 char *decode(const char *input){
     /*
     EX: input = "BNN^AA\0A";

@@ -59,7 +59,7 @@ public:
             case  0:{ PERROR(true, puts("Unknown type! in ruby return_string"); );         break;} //INVALID
             case  1: case  2:{ //#if, #elsif
                 FormatterIFStatement *ifnode = parse_bool_statement(format);
-                ifList.push_back(ifnode); //°O¿ıelsif¼Æ¶q¡C(elsif¤]¬O¤@­Ónode¡A¨C¦h¤@­Óelsif¡Askip­n¦A¥[1)¡C
+                ifList.push_back(ifnode); //è¨˜éŒ„elsifæ•¸é‡ã€‚(elsifä¹Ÿæ˜¯ä¸€å€‹nodeï¼Œæ¯å¤šä¸€å€‹elsifï¼Œskipè¦å†åŠ 1)ã€‚
                 push_node(ifnode);
                 formatList->push_back(ifnode);
                 inner_retrieve_format(&ifnode->formatList);
@@ -71,7 +71,7 @@ public:
                 continue;}
             case  4:{  //#end
                 for(IFList::reverse_iterator it = ifList.rbegin(); it != ifList.rend(); ++it) (*it)->skip = skip_base++;
-                ifList.clear(); //elsif, else¤]³£¬Onode¡A»İ­n³Qskip¡C¨Ò¦p(if, elsif, else)ªºskip¶q¤À§O¬°(skip+2, skip+1, skip+0)
+                ifList.clear(); //elsif, elseä¹Ÿéƒ½æ˜¯nodeï¼Œéœ€è¦è¢«skipã€‚ä¾‹å¦‚(if, elsif, else)çš„skipé‡åˆ†åˆ¥ç‚º(skip+2, skip+1, skip+0)
                 skip_base = 0;
                 continue;}
             case  5:{  //EXIT_BLOCK

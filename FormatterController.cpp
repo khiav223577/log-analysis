@@ -13,7 +13,7 @@
 class InputFormatter;
 class FormatterController{
 public:
-    class VirtualCreator{ //Á×§K¦bconstrutor®ÉµLªk¥¿½T¨Ï¥Îvirtual¨ç¦¡ªº°İÃD
+    class VirtualCreator{ //é¿å…åœ¨construtoræ™‚ç„¡æ³•æ­£ç¢ºä½¿ç”¨virtualå‡½å¼çš„å•é¡Œ
 	public:
 		virtual char *trans_format(const char *_format)=0;
 	};
@@ -38,9 +38,9 @@ public:
     virtual int get_prev_int(){         //Will be called by FormatterIFStatement.
         PERROR(true, printf("Error: fails to get_prev_int() in %s", typeid(*this).name()););
     }
-    virtual int execute1(const char **inputStream)=0; //¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
-    virtual int execute2()=0;    //¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
-    virtual int execute3()=0;    //¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
+    virtual int execute1(const char **inputStream)=0; //å›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
+    virtual int execute2()=0;    //å›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
+    virtual int execute3()=0;    //å›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
     virtual void save_config1(FILE *file)=0;
     virtual void save_config2(FILE *file)=0;
     virtual void load_config1(FILE *file)=0;
@@ -70,13 +70,13 @@ public:
 //--------------------------------------
     void execute1(const char *_input){
         const char *inputStream = _input;
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(&inputStream); //execute¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute1(&inputStream); //executeå›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
     }
     void execute2(){
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute2(); //execute¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute2(); //executeå›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
     }
     void execute3(){
-        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute3(); //execute¦^¶Ç­nskip±¼ªº«ü¥O¼Æ
+        for(int i = 0, size = formatList.size(); i < size; ++i) i += formatList[i]->execute3(); //executeå›å‚³è¦skipæ‰çš„æŒ‡ä»¤æ•¸
     }
 };
 
