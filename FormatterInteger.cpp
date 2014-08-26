@@ -49,11 +49,19 @@ public:
 //  execute
 //--------------------------------------
 private:
+    enum CompressionMode{Mode_drop, Mode_deltaEncoding, Mode_shift, Mode_none} compress_mode;
+    inline CompressionMode caculate_compress_mode(){
+        if (record_range == 0) return Mode_drop; //SameFlag
+        if (streamingRecorder.isAlwaysIncreasing()) return Mode_deltaEncoding;
+        if (record_range.isBigInt() == false) return Mode_shift;
+        return Mode_none;
+    }
+private:
     FlexibleInt prev_int;
     SizeFlagManager sizeManager1;
     SizeFlagManager sizeManager2;
     int executeCounter, BigIntFlagAt1, BigIntFlagAt2;
-    bool SuccessFlag, SameFlag;
+    bool SuccessFlag;
     FlexibleInt record_range;
     DeltaEncoding<FlexibleInt> delta_encoding;
     StreamingRecorder<FlexibleInt> streamingRecorder;
@@ -98,9 +106,10 @@ public:
             byte_num = sizeManager1.get_read_byte(executeCounter);
             prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
         }
-        if (SameFlag == true){
-            //do nothing
-        }else if (streamingRecorder.isAlwaysIncreasing()){
+        switch(compress_mode){
+        case Mode_drop:{  //do nothing
+            break;}
+        case Mode_deltaEncoding:{
             FlexibleInt output = delta_encoding.encode(prev_int); //delta encoding
             if (BigIntFlagAt2 == -1){
                 output.try_to_cast_to_int();
@@ -112,27 +121,32 @@ public:
                 int value = output.getValue();
                 outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
             }
-        }else if (record_range.isBigInt() == false){
+            break;}
+        case Mode_shift:{
             FlexibleInt output = (prev_int - streamingRecorder.getMinValue());
             bool success = output.try_to_cast_to_int();
             PERROR(success == false, printf("Unable to cast BigInt to int");); //should always be able to.
             int value = output.getValue();
             outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
-        }else{
+            break;}
+        case Mode_none:{
             if (prev_int.isBigInt()){
                 outputer->write(prev_int.getValuePtr());
             }else{
                 outputer->write(prev_int.getValue(), byte_num);
             }
+            break;}
         }
         executeCounter += 1;
         debug();
         return 0;
     }
     int execute3(){
-        if (SameFlag == true){
+        switch(compress_mode){
+        case Mode_drop:{  //do nothing
             prev_int = streamingRecorder.getMinValue();
-        }else if (streamingRecorder.isAlwaysIncreasing()){
+            break;}
+        case Mode_deltaEncoding:{
             bool isBigInt = (BigIntFlagAt2 != -1 && executeCounter >= BigIntFlagAt2);
             FlexibleInt delta;
             if (isBigInt){
@@ -142,10 +156,12 @@ public:
                 delta = FlexibleInt(inputer->read_n_byte_int(byte_num));
             }
             prev_int = delta_encoding.decode(delta); //delta encoding
-        }else if (record_range.isBigInt() == false){
+            break;}
+        case Mode_shift:{
             unsigned char byte_num = sizeManager2.get_read_byte(executeCounter);
             prev_int = streamingRecorder.getMinValue() + FlexibleInt(inputer->read_n_byte_int(byte_num));
-        }else{
+            break;}
+        case Mode_none:{
             bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
             if (isBigInt){
                 prev_int = FlexibleInt(inputer->read_bigInt());
@@ -153,6 +169,7 @@ public:
                 unsigned char byte_num = sizeManager1.get_read_byte(executeCounter);
                 prev_int = FlexibleInt(inputer->read_n_byte_int(byte_num));
             }
+            break;}
         }
         executeCounter += 1;
         debug();

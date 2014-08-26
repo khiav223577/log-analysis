@@ -42,7 +42,7 @@ inline void FormatterInteger::load_config1(FILE *file){
     fscanf(file, "\n");
     record_range = streamingRecorder.getMinMaxRange();
     record_range.try_to_cast_to_int();
-    SameFlag = (record_range == 0);
+    compress_mode = caculate_compress_mode();
 };
 inline void FormatterIPaddr::load_config1(FILE *file){
     //fprintf(file, "IPv4");
