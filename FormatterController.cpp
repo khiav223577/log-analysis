@@ -9,7 +9,8 @@
 #include "lib/StreamingRecorder.cpp"
 #include "lib/SizeFlagManager.cpp"
 #include "HashCompressor.cpp"
-
+#include "IndexerDate.cpp"
+#include "IndexerIpaddr.cpp"
 class InputFormatter;
 class FormatterController{
 public:

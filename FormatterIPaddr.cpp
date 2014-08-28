@@ -35,8 +35,8 @@ public:
 //  execute
 //--------------------------------------
 private:
-    typedef HashCompressor< unsigned int, std::map<unsigned int, unsigned int> > HashType;
-    HashType hashCompressor, block_hashRecorder;
+    HashCompressor< unsigned int, std::map<unsigned int, unsigned int> > hashCompressor;
+    IndexerIpaddr indexer;
     SizeFlagManager sizeManager;
     int executeCounter;
     int execute1(const char **inputStream){
@@ -61,7 +61,7 @@ private:
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
         unsigned int result = hashCompressor.decompress(output);
-        block_hashRecorder.compress(result); //store ip in hash.
+        if (attr_index == true) indexer.addIndex(result); //store ip in hash.
         outputer->write(output, byte_num);
         executeCounter += 1;
         debug(result);
@@ -110,20 +110,15 @@ private:
 //  add index.
 //-------------------------------------------------------------------------
     void inner_output_block_info(OutputManager *outputer){
-        HashType &hash = block_hashRecorder;
-        output_info(outputer, hash);
-        hash.reset();
+        indexer.save(outputer);
+        indexer.clear();
     }
     void inner_output_whole_info(OutputManager *outputer){
-        HashType &hash = hashCompressor;
-        output_info(outputer, hash);
-    }
-    inline void output_info(OutputManager *outputer, HashType &hash){
-        unsigned int counter = hash.getHashValueCounter();
-        std::vector<unsigned int> &hashKeys = hash.getHashKeys();
-        outputer->write(counter);
-        for(unsigned int i = 0 ; i < counter; ++i) outputer->write(hashKeys[i]);
+        IndexerIpaddr indexer(hashCompressor.getHashKeys());
+        indexer.save(outputer);
     }
 };
+
+
 
 #endif

@@ -38,7 +38,8 @@ private:
     int executeCounter;
     bool SameFlag;
     DeltaEncoding<int> delta_encoding;
-    StreamingRecorder<unsigned int> streamingRecorder, block_streamingRecorder;
+    StreamingRecorder<unsigned int> streamingRecorder;
+    IndexerDate indexer;
 public:
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME
@@ -63,7 +64,7 @@ public:
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         int delta = inputer->read_n_byte_int(byte_num);
         prev_date = delta_encoding.decode(delta); //delta encoding
-        if (attr_index == true) block_streamingRecorder.nextData(prev_date); //TODO SameFlag
+        if (attr_index == true) indexer.addIndex(prev_date); //TODO SameFlag
         if (SameFlag == true){
             //do nothing
         }else{
@@ -256,21 +257,12 @@ public:
 //  add index.
 //-------------------------------------------------------------------------
     void inner_output_block_info(OutputManager *outputer){
-        StreamingRecorder<unsigned int> &recorder = block_streamingRecorder;
-        output_info(outputer, recorder);
-        recorder.reset();
+        indexer.save(outputer);
+        indexer.clear();
     }
     void inner_output_whole_info(OutputManager *outputer){
-        StreamingRecorder<unsigned int> &recorder = streamingRecorder;
-        if (recorder.isAlwaysIncreasing() || recorder.isAlwaysDecreasing()) outputer->write('C');
-        else outputer->write('.');
-        output_info(outputer, recorder);
-    }
-    inline void output_info(OutputManager *outputer, StreamingRecorder<unsigned int> &recorder){
-        unsigned int min = (recorder.isInitialized() ? recorder.getMinValue() : 999999);
-        unsigned int max = (recorder.isInitialized() ? recorder.getMaxValue() : 0);
-        outputer->write(min);
-        outputer->write(max);
+        IndexerDate indexer(streamingRecorder);
+        indexer.save(outputer);
     }
 };
 

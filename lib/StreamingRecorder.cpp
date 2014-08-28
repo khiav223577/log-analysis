@@ -105,6 +105,19 @@ protected:
         record_min = FlexibleInt::load(file);
         record_max = FlexibleInt::load(file);
     }
+//----------------------------------------------
+//  Operators
+//----------------------------------------------
+public:
+    inline StreamingRecorder<XXXXX>& operator =(const StreamingRecorder<XXXXX> &x){
+        initialized = x.initialized;
+        increasingFuncFlag = x.increasingFuncFlag;
+        decreasingFuncFlag = x.decreasingFuncFlag;
+        record_min = x.record_min;
+        record_max = x.record_max;
+        prev_value = x.prev_value;
+        return *this;
+    }
 };
 
 
