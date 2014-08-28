@@ -15,11 +15,18 @@ public:
     ~HashCompressor(){
         free_memory(key_type);
     }
+    inline void reset(){
+        free_memory(key_type);
+        hashValueCounter = 0;
+        hashKeys.clear();
+        hashTable.clear();
+    }
 //------------------------------------------------------------
 //  ACCESS
 //------------------------------------------------------------
 public:
-    inline unsigned int get_hashValueCounter(){ return hashValueCounter; }
+    inline unsigned int getHashValueCounter(){ return hashValueCounter; }
+    inline std::vector<KEY_TYPE>& getHashKeys(){ return hashKeys; }
 //------------------------------------------------------------
 //  compress
 //------------------------------------------------------------

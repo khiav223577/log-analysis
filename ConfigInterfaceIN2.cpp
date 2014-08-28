@@ -65,7 +65,7 @@ inline void FormatterString::load_config1(FILE *file){
     sizeManager.load(file);
     hashCompressor.load(file);
     fscanf(file, "\n");
-    unsigned int hashValueCounter = hashCompressor.get_hashValueCounter();
+    unsigned int hashValueCounter = hashCompressor.getHashValueCounter();
     if (hashValueCounter > 1){
         bit_num = 1;
         unsigned int tmp = hashValueCounter - 1;

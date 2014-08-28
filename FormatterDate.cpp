@@ -253,20 +253,24 @@ public:
         return output;
     }
 //-------------------------------------------------------------------------
-//  output streaming info.
+//  add index.
 //-------------------------------------------------------------------------
     void inner_output_block_info(OutputManager *outputer){
         StreamingRecorder<unsigned int> &recorder = block_streamingRecorder;
-        outputer->write(recorder.getMinValue());
-        outputer->write(recorder.getMaxValue());
+        output_info(outputer, recorder);
         recorder.reset();
     }
     void inner_output_whole_info(OutputManager *outputer){
-        StreamingRecorder<unsigned int> &recorder = block_streamingRecorder;
+        StreamingRecorder<unsigned int> &recorder = streamingRecorder;
         if (recorder.isAlwaysIncreasing() || recorder.isAlwaysDecreasing()) outputer->write('C');
         else outputer->write('.');
-        outputer->write(recorder.getMinValue());
-        outputer->write(recorder.getMaxValue());
+        output_info(outputer, recorder);
+    }
+    inline void output_info(OutputManager *outputer, StreamingRecorder<unsigned int> &recorder){
+        unsigned int min = (recorder.isInitialized() ? recorder.getMinValue() : 999999);
+        unsigned int max = (recorder.isInitialized() ? recorder.getMaxValue() : 0);
+        outputer->write(min);
+        outputer->write(max);
     }
 };
 
