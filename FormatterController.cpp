@@ -45,6 +45,10 @@ public:
     virtual void save_config2(FILE *file)=0;
     virtual void load_config1(FILE *file)=0;
     virtual void load_config2(FILE *file)=0;
+    void output_block_info(FILE *file){ if (attr_index == true) inner_output_block_info(file); }
+    void output_whole_info(FILE *file){ if (attr_index == true) inner_output_whole_info(file); }
+    virtual void inner_output_block_info(FILE *file){}
+    virtual void inner_output_whole_info(FILE *file){}
 };
 
 #include "FormatterDate.cpp"

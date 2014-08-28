@@ -38,7 +38,7 @@ private:
     int executeCounter;
     bool SameFlag;
     DeltaEncoding<int> delta_encoding;
-    StreamingRecorder<unsigned int> streamingRecorder;
+    StreamingRecorder<unsigned int> streamingRecorder, block_streamingRecorder;
 public:
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME
@@ -63,6 +63,7 @@ public:
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         int delta = inputer->read_n_byte_int(byte_num);
         prev_date = delta_encoding.decode(delta); //delta encoding
+        if (attr_index == true) block_streamingRecorder.nextData(prev_date); //TODO SameFlag
         if (SameFlag == true){
             //do nothing
         }else{
@@ -250,6 +251,16 @@ public:
         }
         *scanfLen = len;
         return output;
+    }
+//-------------------------------------------------------------------------
+//  output streaming info.
+//-------------------------------------------------------------------------
+    void inner_output_block_info(FILE *file){
+        block_streamingRecorder.save(file);
+        block_streamingRecorder.reset();
+    }
+    void inner_output_whole_info(FILE *file){
+        streamingRecorder.save(file);
     }
 };
 
