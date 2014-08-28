@@ -255,12 +255,18 @@ public:
 //-------------------------------------------------------------------------
 //  output streaming info.
 //-------------------------------------------------------------------------
-    void inner_output_block_info(FILE *file){
-        block_streamingRecorder.save(file);
-        block_streamingRecorder.reset();
+    void inner_output_block_info(OutputManager *outputer){
+        StreamingRecorder<unsigned int> &recorder = block_streamingRecorder;
+        outputer->write(recorder.getMinValue());
+        outputer->write(recorder.getMaxValue());
+        recorder.reset();
     }
-    void inner_output_whole_info(FILE *file){
-        streamingRecorder.save(file);
+    void inner_output_whole_info(OutputManager *outputer){
+        StreamingRecorder<unsigned int> &recorder = block_streamingRecorder;
+        if (recorder.isAlwaysIncreasing() || recorder.isAlwaysDecreasing()) outputer->write('C');
+        else outputer->write('.');
+        outputer->write(recorder.getMinValue());
+        outputer->write(recorder.getMaxValue());
     }
 };
 

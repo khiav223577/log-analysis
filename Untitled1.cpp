@@ -32,7 +32,7 @@ InputFormatter *formatter;
 ShowTime showtime;
 #define SHOW_LINE_RANGE 20000
 #define SHOW_LINE_COUNT(COUNT) printf("%8d", (COUNT)); showtime.show("","");
-FILE *current_index_file = NULL;
+OutputManager *index_file_outputer = NULL;
 inline void showFormatList(){
     FormatList &list = ruby_interface->global_formatList;
     for(int i = 0, size = list.size(); i < size; ++i) printf("%d:%s\n", i, typeid(*(list[i])).name());
@@ -49,8 +49,7 @@ void setOutputer2(BlockIOManager<OutputManager>& blockoutputer){
     FormatList &list = ruby_interface->global_formatList;
     for(int i = 0, size = list.size(); i < size; ++i) list[i]->outputer = blockoutputer.getIOManager();
     if (blockoutputer.getCurrentBlock() != 0){
-        for(int i = 0, size = list.size(); i < size; ++i) list[i]->output_block_info(current_index_file);
-        fprintf(current_index_file, "\n");
+        for(int i = 0, size = list.size(); i < size; ++i) list[i]->output_block_info(index_file_outputer);
     }
 }
 void setInputer3(BlockIOManager<InputManager>& blockinputer){
@@ -115,7 +114,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     #else
         char *output_path2 = (char *) malloc((strlen(output_path) + 1 + 6) * sizeof(char));
         sprintf(output_path2, "%s.index", output_path);
-        current_index_file = fopen2(output_path2, "w");
+        index_file_outputer = new OutputManager(output_path2, FILE_MODE_RAW);
         free(output_path2);
         BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer2);
     #endif
@@ -149,7 +148,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     #else
         delete blockoutputer;
     #endif
-    fclose(current_index_file);
+    delete index_file_outputer;
 }
 //------------------------------------------------------------
 //  third_pass

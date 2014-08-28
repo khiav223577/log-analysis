@@ -83,7 +83,7 @@ protected:
     inline void inner_save(FILE *file, unsigned int &unused){
         unsigned int *buffer = (unsigned int *) malloc(hashValueCounter * sizeof(unsigned int));
         for(unsigned int i = 0 ; i < hashValueCounter; ++i) buffer[i] = hashKeys[i];
-        fprintf(file, ":"); //prevent white characters be dropped by fscanf("\n").
+        fprintf(file, ":"); //prevent white characters from being dropped by fscanf("\n").
         fwrite(buffer, sizeof(unsigned int), hashValueCounter, file);
         fprintf(file, "\n");
         free(buffer);

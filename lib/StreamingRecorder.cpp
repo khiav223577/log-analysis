@@ -43,6 +43,7 @@ public:
     inline XXXXX& getMaxValue(){        return record_max; }
     inline XXXXX getMinMaxRange(){      return record_max - record_min; }
     inline bool& isAlwaysIncreasing(){  return increasingFuncFlag; }
+    inline bool& isAlwaysDecreasing(){  return decreasingFuncFlag; }
     inline bool& isInitialized(){       return initialized; }
 public:
     StreamingRecorder() : initialized(false), recordingFlag(true){
