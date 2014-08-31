@@ -30,24 +30,24 @@ private:
     }
 public:
     BlockIOManager(const char *_path, unsigned int bs, unsigned int fm, void (*callback)(BlockIOManager<XXXXX>&)) :
-            line_count(0), block_size(bs), file_mode(fm), manager(NULL), onBlockChange(callback){
+            line_count(0), current_block(-1), block_size(bs), file_mode(fm), manager(NULL), onBlockChange(callback){
         static const int max_number_len = 11; //10 billion
         const int len = strlen(_path);
         path_baselen = len + 5; //strlen(_path + ".part")
         current_path = (char *) malloc((path_baselen + 1 + max_number_len) * sizeof(char));
         strcpy(current_path, _path);
         strcpy(current_path + len, ".part");
-        setBlockIndex(0);
     }
     ~BlockIOManager(){
-        if (line_count % block_size != 0) nextBlock();
         free(current_path);
         delete manager;
+        manager = NULL;
+        if (line_count % block_size != 1) onBlockChange(*this); //To output index(Note that current_block doesn't change)
         //remove(current_path);
     }
     inline XXXXX *         getIOManager(){ return manager; }
     inline unsigned int    getLineCount(){ return line_count; }
-    inline void                nextLine(){ if (++line_count % block_size == 0) nextBlock(); }
+    inline void                nextLine(){ if (++line_count % block_size == 1) nextBlock(); }
     inline BlockConfig *   createConfig(){ return new BlockConfig(line_count, block_size); }
     inline const char *  getCurrentPath(){ return current_path; }
     inline unsigned int getCurrentBlock(){ return current_block; }

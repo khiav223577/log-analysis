@@ -1,7 +1,7 @@
 //#define DEBUG 20
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
-#define BLOCK_SIZE 200000
+#define BLOCK_SIZE 20000
 //---------------------------------------------------
 #include<stdio.h>
 #include<typeinfo>
@@ -72,8 +72,8 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
         #ifdef DEBUG
             printf("%02d: ", line_count);
         #endif
-        formatter->execute1(buffer);
         blockoutputer->nextLine();
+        formatter->execute1(buffer);
         #ifdef DEBUG
             puts("");
             if (line_count == DEBUG) break;
@@ -123,11 +123,11 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         #ifdef DEBUG
             printf("%02d: ", i);
         #endif
-        formatter->execute2();
         blockinputer->nextLine();
         #ifndef GROUP_FORMATTER_DATA
             blockoutputer->nextLine();
         #endif
+        formatter->execute2();
         #ifdef DEBUG
             puts("");
         #endif
@@ -156,15 +156,15 @@ inline void second_pass(const char *input_path, const char *output_path, const c
 inline void third_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     BlockConfig *config = ruby_interface->load_config2(input_config);
     unsigned int line_count = config->line_count;
-    unsigned int block_size = config->block_size;
+    unsigned int block_size = config->block_size; //block_num = block_size / line_count
     BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
     SHOW_LINE_COUNT(0);
     for(unsigned int i = 1; i <= line_count; ++i){
         #ifdef DEBUG
             printf("%02d: ", i);
         #endif
-        formatter->execute3();
         blockinputer->nextLine();
+        formatter->execute3();
         #ifdef DEBUG
             puts("");
         #endif
