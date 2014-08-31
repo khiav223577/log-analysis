@@ -36,7 +36,7 @@ private:
     unsigned char buffer[OUTPUT_MANAGER_BUFFER_SIZE], bit_counter;
     unsigned int buffer_counter;
 public:
-    OutputManager(const char *filename, unsigned int mode = 1){
+    OutputManager(const char *filename, unsigned int mode = FILE_MODE_RAW){
         switch(mode){
         case FILE_MODE_RAW: { file = fopen2(filename, "wb");                    break; }
         case FILE_MODE_BZ2: { file = BzipManager::openBz2File(filename, "w9");  break; }
@@ -156,7 +156,7 @@ private:
     unsigned int buffer_counter, buffer_counter_max;
     bool eof_flag;
 public:
-    InputManager(const char *filename, unsigned int mode = 1) : eof_flag(false){
+    InputManager(const char *filename, unsigned int mode = FILE_MODE_RAW) : eof_flag(false){
         switch(mode){
         case FILE_MODE_RAW: { file = fopen2(filename, "rb");                    break; }
         case FILE_MODE_BZ2: { file = BzipManager::openBz2File(filename, "rb");  break; }

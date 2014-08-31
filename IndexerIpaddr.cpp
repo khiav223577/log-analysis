@@ -2,10 +2,11 @@
 #ifndef ___IndexerIpaddr_cpp__
 #define ___IndexerIpaddr_cpp__
 
-class IndexerIpaddr{
+class IndexerIpaddr : public IndexerBase{
 public:
     typedef std::map<unsigned int, bool> MAP;
     typedef MAP::iterator ITERATOR;
+    typedef IndexerBase super;
 private:
     MAP hashTable;
 public:

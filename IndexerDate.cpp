@@ -2,7 +2,9 @@
 #ifndef ___IndexerDate_cpp__
 #define ___IndexerDate_cpp__
 
-class IndexerDate{
+class IndexerDate : public IndexerBase{
+public:
+    typedef IndexerBase super;
 private:
     StreamingRecorder<unsigned int> streamingRecorder;
 public:

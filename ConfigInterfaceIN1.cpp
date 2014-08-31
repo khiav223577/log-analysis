@@ -9,11 +9,10 @@
 #include "RubyInterpreter.cpp"
 #define FormatStack RStack<FormatterIFStatement>
 #define IFList std::vector<FormatterIFStatement*>
-
 class ConfigInterfaceIN1{
 public:
     InputFormatter *formatter;
-    FormatList global_formatList;
+    FormatList glist; //global_formatList
     RubyInterpreter *ruby;
     bool ignore_drop_node;
 public:
@@ -22,7 +21,7 @@ public:
 //-------------------------------------------------------------------------
 //  CreateFormatter
 //-------------------------------------------------------------------------
-    InputFormatter* CreateFormatters(const char *filename, bool flag){
+    InputFormatter *CreateFormatters(const char *filename, bool flag){
         formatter = new InputFormatter();
         ignore_drop_node = flag;
 
@@ -37,7 +36,7 @@ public:
     }
     void push_node(FormatterController *node){
         node->formatter = formatter;
-        global_formatList.push_back(node);
+        glist.push_back(node);
     }
 //-------------------------------------------------------------------------
 //  mapping Ruby data to C classes
@@ -99,7 +98,7 @@ public:
 //-------------------------------------------------------------------------
 //  parse ruby postfix data to C classes
 //-------------------------------------------------------------------------
-    FormatterIFStatement* parse_bool_statement(VALUE format){ //format = [[XXX],[XXX],OP,...] #postfix
+    FormatterIFStatement *parse_bool_statement(VALUE format){ //format = [[XXX],[XXX],OP,...] #postfix
         long len = RARRAY_LEN(format);
         FormatStack *stack = NULL;
         for (int i = 0; i < len; ++i){
@@ -114,7 +113,7 @@ public:
                 VALUE a0 = rb_ary_entry(element,0);
                 VALUE a1 = rb_ary_entry(element,1);
                 VALUE a2 = rb_ary_entry(element,2);
-                FormatterController *target = global_formatList[FIX2INT(a0)];
+                FormatterController *target = glist[FIX2INT(a0)];
                 char op = FIX2INT(a1);
                 char *string = StringValuePtr(a2);
                 switch(string[0]){
@@ -138,33 +137,40 @@ public:
     void save_config1(const char *filename, BlockConfig *config){
         FILE *file = fopen2(filename, "wb");
         fprintf(file, "%u %u\n", config->line_count, config->block_size);
-        unsigned int size = global_formatList.size();
-        for(unsigned int i = 0; i < size; ++i) global_formatList[i]->save_config1(file);
+        for(unsigned int i = 0, size = glist.size(); i < size; ++i) glist[i]->save_config1(file);
         fclose(file);
     }
     void save_config2(const char *filename, BlockConfig *config){
         FILE *file = fopen2(filename, "wb");
         fprintf(file, "%u %u\n", config->line_count, config->block_size);
-        int size = global_formatList.size();
-        for(int i = 0; i < size; ++i) global_formatList[i]->save_config2(file);
+        for(unsigned int i = 0, size = glist.size(); i < size; ++i) glist[i]->save_config2(file);
         fclose(file);
     }
     BlockConfig *load_config1(const char *filename){
         FILE *file = fopen2(filename, "rb");
-        unsigned int line_count, block_size, size = global_formatList.size();
+        unsigned int line_count, block_size;
         fscanf(file, "%u %u\n", &line_count, &block_size);
-        for(unsigned int i = 0; i < size; ++i) global_formatList[i]->load_config1(file);
+        for(unsigned int i = 0, size = glist.size(); i < size; ++i) glist[i]->load_config1(file);
         fclose(file);
         return new BlockConfig(line_count, block_size);
     }
     BlockConfig *load_config2(const char *filename){
         FILE *file = fopen2(filename, "rb");
-        unsigned int line_count, block_size, size = global_formatList.size();
+        unsigned int line_count, block_size;
         fscanf(file, "%u %u\n", &line_count, &block_size);
-        for(unsigned int i = 0; i < size; ++i) global_formatList[i]->load_config2(file);
+        for(unsigned int i = 0, size = glist.size(); i < size; ++i) glist[i]->load_config2(file);
         fclose(file);
         return new BlockConfig(line_count, block_size);
     }
+//-------------------------------------------------------------------------
+//  Index
+//-------------------------------------------------------------------------
+    InputIndexer *CreateIndexers(const char *filename){
+        InputIndexer *list = new InputIndexer();
+        for(unsigned int i = 0, size = glist.size(); i < size; ++i) list->push(glist[i]->create_indexer());
+        list->load(filename);
+        return list;
+    }
 };
-
+#undef glist
 #endif

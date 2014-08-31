@@ -256,6 +256,7 @@ public:
 //-------------------------------------------------------------------------
 //  add index.
 //-------------------------------------------------------------------------
+    IndexerBase *inner_create_indexer(){ return new IndexerDate();}
     void inner_output_block_info(OutputManager *outputer){
         indexer.save(outputer);
         indexer.clear();

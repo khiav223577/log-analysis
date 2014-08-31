@@ -5,7 +5,7 @@
 
 #include "FormatterController.cpp"
 
-inline void FormatterDate::load_config2(FILE *file){
+void FormatterDate::load_config2(FILE *file){
     //fprintf(file, "Date %d\n", first_date);
     int first_value;
     char type[5];
@@ -18,15 +18,15 @@ inline void FormatterDate::load_config2(FILE *file){
     fscanf(file, "\n");
     SameFlag = (streamingRecorder.getMinMaxRange() == 0);
 };
-inline void FormatterDebug::load_config2(FILE *file){};
-inline void FormatterDiscard::load_config2(FILE *file){};
-inline void FormatterIFStatement::load_config2(FILE *file){
+void FormatterDebug::load_config2(FILE *file){};
+void FormatterDiscard::load_config2(FILE *file){};
+void FormatterIFStatement::load_config2(FILE *file){
     //fprintf(file, "IF\n");
     char type[3];
     if (fscanf(file, "%2s\n", type) != 1) PERROR(true, printf("read IF fail"); );
     PERROR(strcmp("IF", type), printf("Config Error: %s != IF", type););
 };
-inline void FormatterInteger::load_config2(FILE *file){
+void FormatterInteger::load_config2(FILE *file){
     char type[7];
     if (fscanf(file, "%6s", type) != 1) PERROR(true, printf("read Int fail"); );
     PERROR(strcmp("Int", type) && strcmp("BigInt", type), printf("Config Error: %s != Int, BigInt", type););
@@ -48,7 +48,7 @@ inline void FormatterInteger::load_config2(FILE *file){
     record_range.try_to_cast_to_int();
     compress_mode = caculate_compress_mode();
 };
-inline void FormatterIPaddr::load_config2(FILE *file){
+void FormatterIPaddr::load_config2(FILE *file){
     //fprintf(file, "IPv4");
     //sizeManager.save(file);
     //hashCompressor.save(file);
@@ -59,7 +59,7 @@ inline void FormatterIPaddr::load_config2(FILE *file){
     hashCompressor.load(file);
     fscanf(file, "\n");
 };
-inline void FormatterString::load_config2(FILE *file){
+void FormatterString::load_config2(FILE *file){
     //fprintf(file, "String %u", bit_num);
     //sizeManager.save(file);
     //hashCompressor.save(file);
@@ -73,7 +73,7 @@ inline void FormatterString::load_config2(FILE *file){
     fscanf(file, "\n");
     bit_num = bit_num_int; //avoid memory overflow
 };
-inline void FormatterChar::load_config1(FILE *file){
+void FormatterChar::load_config1(FILE *file){
     //fprintf(file, "Char\n");
     char type[5];
     if (fscanf(file, "%4s", type) != 1) PERROR(true, printf("read Char fail"); );

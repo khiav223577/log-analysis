@@ -34,26 +34,26 @@ ShowTime showtime;
 #define SHOW_LINE_COUNT(COUNT) printf("%8d", (COUNT)); showtime.show("","");
 OutputManager *index_file_outputer = NULL;
 inline void showFormatList(){
-    FormatList &list = ruby_interface->global_formatList;
+    FormatList &list = ruby_interface->glist;
     for(int i = 0, size = list.size(); i < size; ++i) printf("%d:%s\n", i, typeid(*(list[i])).name());
 }
 void setOutputer1(BlockIOManager<OutputManager>& blockoutputer){
-    FormatList &list = ruby_interface->global_formatList;
+    FormatList &list = ruby_interface->glist;
     for(int i = 0, size = list.size(); i < size; ++i) list[i]->outputer = blockoutputer.getIOManager();
 }
 void setInputer2(BlockIOManager<InputManager>& blockinputer){
-    FormatList &list = ruby_interface->global_formatList;
+    FormatList &list = ruby_interface->glist;
     for(int i = 0, size = list.size(); i < size; ++i) list[i]->inputer = blockinputer.getIOManager();
 }
 void setOutputer2(BlockIOManager<OutputManager>& blockoutputer){
-    FormatList &list = ruby_interface->global_formatList;
+    FormatList &list = ruby_interface->glist;
     for(int i = 0, size = list.size(); i < size; ++i) list[i]->outputer = blockoutputer.getIOManager();
     if (blockoutputer.getCurrentBlock() != 0){
         for(int i = 0, size = list.size(); i < size; ++i) list[i]->output_block_info(index_file_outputer);
     }
 }
 void setInputer3(BlockIOManager<InputManager>& blockinputer){
-    FormatList &list = ruby_interface->global_formatList;
+    FormatList &list = ruby_interface->glist;
     for(int i = 0, size = list.size(); i < size; ++i) list[i]->inputer = blockinputer.getIOManager();
 }
 
