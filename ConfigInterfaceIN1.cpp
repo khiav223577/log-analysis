@@ -165,10 +165,10 @@ public:
 //-------------------------------------------------------------------------
 //  Index
 //-------------------------------------------------------------------------
-    InputIndexer *CreateIndexers(const char *filename){
+    InputIndexer *CreateIndexers(InputManager *inputer){
         InputIndexer *list = new InputIndexer();
         for(unsigned int i = 0, size = glist.size(); i < size; ++i) list->push(glist[i]->create_indexer());
-        list->load(filename);
+        list->load(inputer);
         return list;
     }
 };

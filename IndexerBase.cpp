@@ -2,6 +2,7 @@
 #ifndef ___IndexerBase_cpp__
 #define ___IndexerBase_cpp__
 #define IndexList std::vector<IndexerBase*>
+#define InputIndexList std::vector<InputIndexer*>
 class IndexerBase{
 public:
     IndexerBase(){
@@ -13,11 +14,15 @@ class InputIndexer{
 private:
     IndexList indexList;
 public:
+    std::vector<InputIndexer*> children;
+public:
     InputIndexer(){
     }
     ~InputIndexer(){
-        for(IndexList::iterator iter = indexList.begin(); iter != indexList.end(); ++iter) delete *iter;
+        for(     IndexList::iterator iter = indexList.begin(); iter != indexList.end(); ++iter) delete *iter;
+        for(InputIndexList::iterator iter =  children.begin(); iter !=  children.end(); ++iter) delete *iter;
         indexList.clear();
+        children.clear();
     }
 //-------------------------------------------------------------------------
 //  CORE
@@ -26,11 +31,8 @@ public:
         if (indexer == NULL) return;
         indexList.push_back(indexer);
     }
-    inline void load(const char *filename, unsigned int mode = FILE_MODE_RAW){
-        InputManager *inputer = new InputManager(filename, mode);
+    inline void load(InputManager *inputer){
         for(IndexList::iterator iter = indexList.begin(); iter != indexList.end(); ++iter) (*iter)->load(inputer);
-        delete inputer;
-
     }
 };
 

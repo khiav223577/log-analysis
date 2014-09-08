@@ -156,7 +156,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
 inline void third_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     BlockConfig *config = ruby_interface->load_config2(input_config);
     unsigned int line_count = config->line_count;
-    unsigned int block_size = config->block_size; //block_num = block_size / line_count
+    unsigned int block_size = config->block_size;
     BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
     SHOW_LINE_COUNT(0);
     for(unsigned int i = 1; i <= line_count; ++i){
@@ -187,9 +187,9 @@ int main(int argc, char **argv){
     std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
     return 0;
     */
-    const char *ConfigPath = "data/input.config";
+    const char *ConfigPath = "data/dd/input_large.config";
     //const char *InputPath  = "D:/test/iisfw.log.89"; const char *OutputPath = "D:/test/iisfw.log.89.output";
-    const char *InputPath  = "data/input_large"; const char *OutputPath = "data/output_min";
+    const char *InputPath  = "data/dd/input_large";
     #if INPUT_MODE == FILE_MODE_BZ2
         const char *fileExtension = ".bz2";
     #elif INPUT_MODE == FILE_MODE_RAW
@@ -205,13 +205,13 @@ int main(int argc, char **argv){
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, false);
         //return 0;
-        char *input_path    = (char *) malloc(sizeof(char) * strlen( InputPath) + 1 + 0 + strlen(fileExtension));
-        char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
+        char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0 + strlen(fileExtension));
+        char *output_path   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
         char *input_config  = NULL;
-        char *output_config = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
-        sprintf( input_path  , "%s%s"      ,  InputPath, fileExtension);
-        sprintf(output_path  , "%s.temp1"  , OutputPath);
-        sprintf(output_config, "%s.config1", OutputPath);
+        char *output_config = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
+        sprintf( input_path  , "%s%s"      , InputPath, fileExtension);
+        sprintf(output_path  , "%s.temp1"  , InputPath);
+        sprintf(output_config, "%s.config1", InputPath);
         first_pass(input_path, output_path, input_config, output_config, BLOCK_SIZE);
         free(input_path);
         free(output_path);
@@ -226,14 +226,14 @@ int main(int argc, char **argv){
         puts("#==========================================================");
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
-        char *input_path    = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
-        char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 0);
-        char *input_config  = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
-        char *output_config = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
-        sprintf(input_path   , "%s.temp1"  , OutputPath);
-        sprintf(output_path  , "%s"        , OutputPath);
-        sprintf(input_config , "%s.config1", OutputPath);
-        sprintf(output_config, "%s.config2", OutputPath);
+        char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
+        char *output_path   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
+        char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
+        char *output_config = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
+        sprintf(input_path   , "%s.temp1"  , InputPath);
+        sprintf(output_path  , "%s"        , InputPath);
+        sprintf(input_config , "%s.config1", InputPath);
+        sprintf(output_config, "%s.config2", InputPath);
         second_pass(input_path, output_path, input_config, output_config);
         free(input_path);
         free(output_path);
@@ -245,30 +245,59 @@ int main(int argc, char **argv){
             return 0;
         #endif
         }
-    case 3:{
+    case 3:{ //測試資料是否正確
         puts("#==========================================================");
         puts("#  Third Pass");
         puts("#==========================================================");
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
-        char *input_path    = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 0);
-        char *output_path   = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 5);
-        char *input_config  = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
-        char *output_config = (char *) malloc(sizeof(char) * strlen(OutputPath) + 1 + 7);
-        sprintf(input_path   , "%s"        , OutputPath);
-        sprintf(output_path  , "%s.temp3"  , OutputPath);
-        sprintf(input_config , "%s.config2", OutputPath);
-        sprintf(output_config, "%s.config3", OutputPath);
-        third_pass(input_path, output_path, input_config, output_config);
+        char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
+        char *output_path   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
+        char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
+        //char *output_config = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
+        sprintf(input_path   , "%s"        , InputPath);
+        sprintf(output_path  , "%s.temp3"  , InputPath);
+        sprintf(input_config , "%s.config2", InputPath);
+        //sprintf(output_config, "%s.config3", InputPath);
+        third_pass(input_path, output_path, input_config, NULL);
         free(input_path);
         free(output_path);
         free(input_config);
-        free(output_config);
+        //free(output_config);
         delete formatter;
         delete ruby_interface;
         }
     }
+    { //Read index
+        puts("#==========================================================");
+        puts("#  Query");
+        puts("#==========================================================");
+        showtime.show("before query","");
+        ruby_interface = new ConfigInterfaceIN1(ruby);
+        formatter = ruby_interface->CreateFormatters(ConfigPath, true);
+        char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
+        char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
+        char *input_index   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
+        sprintf(input_path   , "%s"        , InputPath);
+        sprintf(input_config , "%s.config2", InputPath);
+        sprintf(input_index  , "%s.index"  , InputPath);
+        BlockConfig *config = ruby_interface->load_config2(input_config);
+        unsigned int block_num = config->get_block_num();
 
+        InputManager *index_file_inputer = new InputManager(input_index, FILE_MODE_RAW);
+        InputIndexer *input_indexer = new InputIndexer();
+        printf("%d\n", block_num);
+        for(unsigned int i = 0; i < block_num; ++i){
+            input_indexer->children.push_back(ruby_interface->CreateIndexers(index_file_inputer));
+        }
+
+        delete index_file_inputer;
+        delete input_indexer;
+        delete config;
+        free(input_path);
+        free(input_config);
+        showtime.show("end query","");
+    }
     delete ruby;
     //test_InputFormatter();
     //test_FormatterDate();
