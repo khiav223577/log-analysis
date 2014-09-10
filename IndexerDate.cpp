@@ -1,7 +1,7 @@
 
 #ifndef ___IndexerDate_cpp__
 #define ___IndexerDate_cpp__
-
+#include "lib/RDate.cpp"
 class IndexerDate : public IndexerBase{
 public:
     typedef IndexerBase super;
@@ -22,7 +22,8 @@ public:
     void load(InputManager *inputer){
         unsigned int min = inputer->read_int();
         unsigned int max = inputer->read_int();
-        if (min > max) return;
+        PERROR(min > max, printf("Error occurs when loading IndexerDate"); );
+        printf("min: %d, max: %d\n", min, max);
         streamingRecorder.nextData(min);
         streamingRecorder.nextData(max);
     }
@@ -37,7 +38,13 @@ public:
     void clear(){
         streamingRecorder.reset();
     }
-
+//-------------------------------------------------------------------------
+//  ACCESS
+//-------------------------------------------------------------------------
+    bool hasValueEqualTo(int val){
+        //RDate d1( streamingRecorder.getMinValue());RDate d2( val);RDate d3( streamingRecorder.getMaxValue());d1.show();d2.show();d3.show();
+        return (streamingRecorder.getMinValue() <= (unsigned int) val && (unsigned int) val <= streamingRecorder.getMaxValue());
+    }
 };
 
 #endif

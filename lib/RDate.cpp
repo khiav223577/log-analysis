@@ -7,8 +7,10 @@
 class RDate{
 public:
     unsigned int year, month, day, hour, minute, second;
-    RDate(){
-        year = 1970, month = 1, day = 1, hour = 0, minute = 0, second = 0;
+    RDate() : year(1970), month(1), day(1), hour(0), minute(0), second(0){
+    }
+    RDate(unsigned int y, unsigned int m, unsigned int d, unsigned int h = 0, unsigned int mi = 0, unsigned int se = 0) :
+            year(y), month(m), day(d), hour(h), minute(mi), second(se){
     }
     RDate(unsigned int _second) : month(1), second(_second){
         day    = second / 86400; second -= 86400 * day;

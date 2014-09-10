@@ -1,4 +1,4 @@
-//#define DEBUG 20
+//#define DEBUG 2
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 #define BLOCK_SIZE 20000
@@ -290,7 +290,13 @@ int main(int argc, char **argv){
         for(unsigned int i = 0; i < block_num; ++i){
             input_indexer->children.push_back(ruby_interface->CreateIndexers(index_file_inputer));
         }
+        RDate date(2013, 12, 3, 4, 0, 1);
+        printf("%d!\n",date.toSecond());
+        for(unsigned int i = 0, size = input_indexer->children.size(); i < size; ++i){
 
+            bool test = input_indexer->children[i]->indexList[0]->hasValueEqualTo(date.toSecond());
+            printf("%d: %s\n", i, test ? "true" : "false");
+        }
         delete index_file_inputer;
         delete input_indexer;
         delete config;

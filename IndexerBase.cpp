@@ -8,10 +8,14 @@ public:
     IndexerBase(){
     }
     virtual void load(InputManager *inputer)=0;
+//-------------------------------------------------------------------------
+//  ACCESS
+//-------------------------------------------------------------------------
+    virtual bool hasValueEqualTo(int val)=0;
 };
 
 class InputIndexer{
-private:
+public:
     IndexList indexList;
 public:
     std::vector<InputIndexer*> children;

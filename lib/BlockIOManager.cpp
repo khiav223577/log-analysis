@@ -11,7 +11,11 @@ public:
         line_count = _line_count;
         block_size = _block_size;
     }
+    inline unsigned int get_block_num(){ return (line_count - 1) / block_size + 1; }
 };
+//-------------------------------------------------------------
+//  BlockIOManager
+//-------------------------------------------------------------
 template<typename XXXXX> class BlockIOManager{
 private:
     char *current_path;
@@ -42,7 +46,8 @@ public:
         free(current_path);
         delete manager;
         manager = NULL;
-        if (line_count % block_size != 1) onBlockChange(*this); //To output index(Note that current_block doesn't change)
+        current_block += 1;
+        if (line_count % block_size != 1) onBlockChange(*this); //To output index
         //remove(current_path);
     }
     inline XXXXX *         getIOManager(){ return manager; }

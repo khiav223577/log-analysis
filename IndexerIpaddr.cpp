@@ -36,6 +36,12 @@ public:
     void clear(){
         hashTable.clear();
     }
+//-------------------------------------------------------------------------
+//  ACCESS
+//-------------------------------------------------------------------------
+    bool hasValueEqualTo(int val){
+        return (hashTable.count(val) == 1);
+    }
 };
 
 #endif
