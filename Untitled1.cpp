@@ -9,6 +9,7 @@
 #include "windows.cpp"
 //---------------------------------------------------
 #include "lib/ShowTime.cpp"
+#include "lib/RIPaddr.cpp"
 #ifdef EVALUATE_TIME
     EvaluateTime evalu_int;
     EvaluateTime evalu_string;
@@ -246,29 +247,31 @@ int main(int argc, char **argv){
         #endif
         }
     case 3:{ //測試資料是否正確
-        puts("#==========================================================");
-        puts("#  Third Pass");
-        puts("#==========================================================");
-        ruby_interface = new ConfigInterfaceIN1(ruby);
-        formatter = ruby_interface->CreateFormatters(ConfigPath, true);
-        char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
-        char *output_path   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
-        char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
-        //char *output_config = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
-        sprintf(input_path   , "%s"        , InputPath);
-        sprintf(output_path  , "%s.temp3"  , InputPath);
-        sprintf(input_config , "%s.config2", InputPath);
-        //sprintf(output_config, "%s.config3", InputPath);
-        third_pass(input_path, output_path, input_config, NULL);
-        free(input_path);
-        free(output_path);
-        free(input_config);
-        //free(output_config);
-        delete formatter;
-        delete ruby_interface;
+        #ifdef TEST_THIRD_PASS
+            puts("#==========================================================");
+            puts("#  Third Pass");
+            puts("#==========================================================");
+            ruby_interface = new ConfigInterfaceIN1(ruby);
+            formatter = ruby_interface->CreateFormatters(ConfigPath, true);
+            char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
+            char *output_path   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
+            char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
+            //char *output_config = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
+            sprintf(input_path   , "%s"        , InputPath);
+            sprintf(output_path  , "%s.temp3"  , InputPath);
+            sprintf(input_config , "%s.config2", InputPath);
+            //sprintf(output_config, "%s.config3", InputPath);
+            third_pass(input_path, output_path, input_config, NULL);
+            free(input_path);
+            free(output_path);
+            free(input_config);
+            //free(output_config);
+            delete formatter;
+            delete ruby_interface;
+        #endif
         }
     }
-    { //Read index
+    if (true){ //Read index
         puts("#==========================================================");
         puts("#  Query");
         puts("#==========================================================");
@@ -282,21 +285,66 @@ int main(int argc, char **argv){
         sprintf(input_config , "%s.config2", InputPath);
         sprintf(input_index  , "%s.index"  , InputPath);
         BlockConfig *config = ruby_interface->load_config2(input_config);
-        unsigned int block_num = config->get_block_num();
+        unsigned int line_count = config->line_count;
+        unsigned int block_size = config->block_size;
+        unsigned int block_num  = config->get_block_num();
 
         InputManager *index_file_inputer = new InputManager(input_index, FILE_MODE_RAW);
         InputIndexer *input_indexer = new InputIndexer();
-        printf("%d\n", block_num);
+        printf("block_num: %d\n", block_num);
         for(unsigned int i = 0; i < block_num; ++i){
             input_indexer->children.push_back(ruby_interface->CreateIndexers(index_file_inputer));
         }
-        RDate date(2013, 12, 3, 4, 0, 1);
-        printf("%d!\n",date.toSecond());
-        for(unsigned int i = 0, size = input_indexer->children.size(); i < size; ++i){
+        //------------------------------------------------------------------
 
-            bool test = input_indexer->children[i]->indexList[0]->hasValueEqualTo(date.toSecond());
-            printf("%d: %s\n", i, test ? "true" : "false");
+
+
+        RDate date(2013, 12, 3, 4, 0, 1);
+        //RIPaddr ip("64.4.11.42");
+        RIPaddr ip("140.109.1.10");
+        date.show();
+        ip.show();
+        puts("");
+
+        BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
+        SHOW_LINE_COUNT(0);
+        unsigned int counter = 1;
+        unsigned int must_read = 0;
+        while(counter <= line_count){
+            if (must_read == 0){
+                unsigned int current_block = blockinputer->getCurrentBlock() + 1;
+                InputIndexer *indexers = input_indexer->children[current_block];
+                bool test1 = indexers->indexList[0]->hasValueEqualTo(date.toSecond());
+                bool test2 = indexers->indexList[1]->hasValueEqualTo(ip.to_int());
+                bool test3 = indexers->indexList[2]->hasValueEqualTo(ip.to_int());
+                printf("results: %s %s %s\n", test1 ? "true" : "false", test2 ? "true" : "false", test3 ? "true" : "false");
+                if (test1 && test2 && test3){
+                    must_read = block_size;
+                    printf("must_read = %d\n", must_read);
+                }else{
+                    counter += block_size;
+                    blockinputer->skipBlock();
+                    printf("Skip block%d: %d\n", current_block, counter);
+                }
+                continue;
+            }else must_read -= 1;
+            #ifdef DEBUG
+                printf("%02d: ", counter);
+            #endif
+            blockinputer->nextLine();
+            formatter->execute3();
+            #ifdef DEBUG
+                puts("");
+            #endif
+            if (counter % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(counter); }
+            counter += 1;
         }
+        if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
+
+
+
+        //------------------------------------------------------------------
+        delete blockinputer;
         delete index_file_inputer;
         delete input_indexer;
         delete config;

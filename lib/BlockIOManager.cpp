@@ -50,6 +50,11 @@ public:
         if (line_count % block_size != 1) onBlockChange(*this); //To output index
         //remove(current_path);
     }
+    inline void skipBlock(){ //skip a block.
+        if (line_count % block_size != 0) puts("Warning: line_count % block_size != 0.\nIt's undefined behavior.");
+        line_count += block_size;
+        current_block += 1;
+    }
     inline XXXXX *         getIOManager(){ return manager; }
     inline unsigned int    getLineCount(){ return line_count; }
     inline void                nextLine(){ if (++line_count % block_size == 1) nextBlock(); }

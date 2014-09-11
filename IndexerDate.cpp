@@ -23,7 +23,6 @@ public:
         unsigned int min = inputer->read_int();
         unsigned int max = inputer->read_int();
         PERROR(min > max, printf("Error occurs when loading IndexerDate"); );
-        printf("min: %d, max: %d\n", min, max);
         streamingRecorder.nextData(min);
         streamingRecorder.nextData(max);
     }
