@@ -15,7 +15,7 @@ public:
         //ruby_init_stack(&variable_in_this_stack_frame);  //
         RUBY_INIT_STACK;
         ruby_init();
-        //ruby_init_loadpath();
+        ruby_init_loadpath(); //若沒設定，則無法require到ruby內建library。
         rb_set_safe_level(0);
         ruby_script("ruby"); //設定腳本名字。若不設定，在使用到__FILE__ 的地方就會出錯。
     }

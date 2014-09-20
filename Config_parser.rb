@@ -3,13 +3,14 @@ class ConfigParser
   attr_reader   :setting_max_size 
   MAP_OPERATOR = {"==" => "=".ord, "!=" => "!".ord, ">" => ">".ord, "<" => "<".ord, ">=" => ".".ord, "<=" => ",".ord}
   def parse(input)
-    @setting_drop_after = {}
-    @setting_max_size   = {}
-    global_symbols      = {}
-    local_symbols       = {:buffer_start => 0} #recode outer symbol hidden by local symbol.
-    nested_symbols      = [local_symbols]
-    buffer              = []
-    buffer_item_counter = 0
+    @setting_drop_after    = {}
+    @setting_max_size      = {}
+    global_symbols         = {} #記錄當前有效的所有symbol
+    local_symbols          = {:buffer_start => 0} #recode outer symbol hidden by local symbol.
+    nested_symbols         = [local_symbols]
+    buffer_symbol_mappings = {} #記錄變數名字對應到buffer index的位置
+    buffer                 = []
+    buffer_item_counter    = 0
     line = nil
     line_count = 0
     bparser = BooleanParser.new
@@ -68,8 +69,9 @@ class ConfigParser
         else ; perror.call("Syntax error") and next
         end
         if $3 != nil
-            perror.call("Duplicate symbol") and next if local_symbols[$3] != nil
+          perror.call("Duplicate symbol") and next if local_symbols[$3] != nil
           local_symbols[$3] = global_symbols[$3]
+          buffer_symbol_mappings[$3] = buffer_item_counter
           global_symbols[$3] = [buffer_item_counter, local_symbols[:buffer_start]]
         end
         eval($4).each{|key, value| hash[key] = value} if $4 != nil
@@ -86,6 +88,6 @@ class ConfigParser
     #p global_symbols
     #p nested_symbols
     #p buffer, buffer.size
-    return buffer
+    return {:buffer => buffer, :buffer_symbol_mappings => buffer_symbol_mappings}
   end
 end

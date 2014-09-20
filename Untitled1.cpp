@@ -1,4 +1,4 @@
-//#define DEBUG 10
+#define DEBUG 10
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 //#define TEST_THIRD_PASS
@@ -272,7 +272,8 @@ int main(int argc, char **argv){
         #endif
         }
     }
-    if (true){ //Read index
+    rb_funcall(rb_const("QueryInterface"), rb_intern("wait_query"), 0);
+    if (false){ //Read index
         puts("#==========================================================");
         puts("#  Query");
         puts("#==========================================================");
@@ -353,6 +354,7 @@ int main(int argc, char **argv){
         free(input_config);
         showtime.show("end query","");
     }
+
     delete ruby;
     //test_InputFormatter();
     //test_FormatterDate();

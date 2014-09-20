@@ -14,7 +14,7 @@ class String
 end
 require './Boolean_parser.rb'
 require './Config_parser.rb'
-
+require 'date'
 if !$IN_C_CODE
   a = %{
     #MAX_SIZE[511] String
@@ -57,31 +57,91 @@ if !$IN_C_CODE
     }
   }
   $config = ConfigParser.new
-  $config.parse(a)
-  
+  p $config.parse(a)
   exit
 end
 class ConfigReaderInterface
   @@result_counter = 0
   @@result_buffer = nil
+  @@buffer_symbol_mappings = nil
   @@config = ConfigParser.new
   @@hash = {}
   def self.read_config(config_path)
-    @@result_buffer = @@config.parse(IO.read(config_path))
+    result = @@config.parse(IO.read(config_path))
+    @@result_buffer = result[:buffer]
+    @@buffer_symbol_mappings = result[:buffer_symbol_mappings]
   end
   def self.register_hash(keys)
     keys.each_with_index{|key, idx| @@hash[key] = idx}
   end
   def self.get_next_result
     data = @@result_buffer[@@result_counter] #[Type, format, vocabulary, hash]
-	@@result_counter += 1
+    @@result_counter += 1
     return nil if data == nil
     data[0] = (@@hash[data[0]] || 0) #0 is invalid
     return data
   end
+#---------------------------------
+#  ACCESS
+#---------------------------------
+  def self.get_buffer_index(variable_name)
+    index = @@buffer_symbol_mappings[variable_name]
+    p "variable: #{variable_name} not defined." if index == nil
+    return index
+  end
 end
-
-
+class QueryInterface
+  def self.parseIP(addr)
+    array = addr.split(".")
+    return nil if array.size != 4
+    return array.map{|s|
+      next (0..255).to_a if s == "*"
+      next s.to_i
+    }
+  end
+  def self.showIP(array)
+    return array.map{|s| (s.class == Array ? "*" : s)}.join(".")
+  end
+  def self.parseDate(date)
+    date_time = DateTime.parse(date)
+    return [date_time.year, date_time.month, date_time.day, date_time.hour, date_time.minute, date_time.second]
+  end
+  def self.showDate(array)
+    DateTime.new(*array).strftime("%Y-%m-%d %H:%M:%S")
+  end
+public
+  def self.wait_query
+    loop do
+      print "Input your query: "
+      inputArr = $stdin.gets.chomp.split(",")
+      size = inputArr.size
+      if size == 1  
+        case inputArr[0]
+        when "exit" ; return nil
+        when "help" ; next puts "example: 192.168.0.120, 192.168.*.*, 2012/7/12 12:01:03, 2012/7/15 19:00:00, 300"
+        end
+      end
+      if size == 5
+        outputArr = []
+        outputArr[0] = parseIP(inputArr[0])
+        outputArr[1] = parseIP(inputArr[1])
+        outputArr[2] = parseDate(inputArr[2])
+        outputArr[3] = parseDate(inputArr[3])
+        outputArr[4] = inputArr[4].to_i
+        next puts "Format Error: #{inputArr[0]} is not a IP address" if outputArr[0] == nil
+        next puts "Format Error: #{inputArr[1]} is not a IP address" if outputArr[1] == nil
+        next puts "start time should earlier than end time" if inputArr[2] > inputArr[3] 
+        next puts "time span should not lower than 1." if (outputArr[4] <= 0)
+        print "Query the traffice of IP #{showIP(outputArr[0])} against all #{showIP(outputArr[1])} "
+        print "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
+        return outputArr
+      end
+      puts "Unown input. Please try again. inputArr = #{inputArr}"
+    end
+  end
+end
+#QueryInterface.wait_query
+##192.168.0.120, 192.168.*.*, 2012/7/12 12:01:03, 2012/7/15 19:00:00, 300
 
 
 
