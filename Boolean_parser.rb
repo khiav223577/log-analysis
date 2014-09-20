@@ -1,4 +1,4 @@
-class Boolean_parser
+class BooleanParser
 #---------------------------------
 #  parse statement
 #---------------------------------

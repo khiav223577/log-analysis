@@ -1,4 +1,4 @@
-class Config_Parser
+class ConfigParser
   attr_reader   :setting_drop_after 
   attr_reader   :setting_max_size 
   MAP_OPERATOR = {"==" => "=".ord, "!=" => "!".ord, ">" => ">".ord, "<" => "<".ord, ">=" => ".".ord, "<=" => ",".ord}
@@ -12,7 +12,7 @@ class Config_Parser
     buffer_item_counter = 0
     line = nil
     line_count = 0
-    bparser = Boolean_parser.new
+    bparser = BooleanParser.new
     perror = lambda{|msg| puts msg + " at line %3d:  %s" % [line_count, line]}
     exit_block = lambda{ 
       buffer << ["EXIT_BLOCK"]

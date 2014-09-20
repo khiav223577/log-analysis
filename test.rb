@@ -56,26 +56,29 @@ if !$IN_C_CODE
         :output => false, //store
     }
   }
-  $config = Config_Parser.new
+  $config = ConfigParser.new
   $config.parse(a)
   
   exit
 end
-$config = Config_Parser.new
-
-
-def read_config(config_path)
-  $result_buffer = $config.parse(IO.read(config_path))
-end
-$hash = {}
-def register_hash(keys)
-  keys.each_with_index{|key, idx| $hash[key] = idx}
-end
-def return_string
-  data = $result_buffer.shift #[Type, format, vocabulary, hash]
-  return nil if data == nil
-  data[0] = ($hash[data[0]] || 0) #0 is invalid
-  return data
+class ConfigReaderInterface
+  @@result_counter = 0
+  @@result_buffer = nil
+  @@config = ConfigParser.new
+  @@hash = {}
+  def self.read_config(config_path)
+    @@result_buffer = @@config.parse(IO.read(config_path))
+  end
+  def self.register_hash(keys)
+    keys.each_with_index{|key, idx| @@hash[key] = idx}
+  end
+  def self.get_next_result
+    data = @@result_buffer[@@result_counter] #[Type, format, vocabulary, hash]
+	@@result_counter += 1
+    return nil if data == nil
+    data[0] = (@@hash[data[0]] || 0) #0 is invalid
+    return data
+  end
 end
 
 

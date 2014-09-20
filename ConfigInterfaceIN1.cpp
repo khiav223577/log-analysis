@@ -28,8 +28,22 @@ public:
         ruby->execute_code("$IN_C_CODE = true");
         ruby->execute_file("./test.rb");
 
-        rb_eval_string("register_hash(['INVALID', '#if', '#elsif', '#else', '#end', 'EXIT_BLOCK', '#DEBUG', 'Date', 'String', 'Int', 'IPv4', 'DROP', 'Char'])");
-        rb_funcall(rb_gv_get("$!"), rb_intern("read_config"),  1, rb_str_new2(filename));
+        VALUE array = rb_ary_new();
+        rb_ary_push(array, rb_str_new2("INVALID"));
+        rb_ary_push(array, rb_str_new2("#if"));
+        rb_ary_push(array, rb_str_new2("#elsif"));
+        rb_ary_push(array, rb_str_new2("#else"));
+        rb_ary_push(array, rb_str_new2("#end"));
+        rb_ary_push(array, rb_str_new2("EXIT_BLOCK"));
+        rb_ary_push(array, rb_str_new2("#DEBUG"));
+        rb_ary_push(array, rb_str_new2("Date"));
+        rb_ary_push(array, rb_str_new2("String"));
+        rb_ary_push(array, rb_str_new2("Int"));
+        rb_ary_push(array, rb_str_new2("IPv4"));
+        rb_ary_push(array, rb_str_new2("DROP"));
+        rb_ary_push(array, rb_str_new2("Char"));
+        rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("register_hash"),  1, array);
+        rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("read_config"),  1, rb_str_new2(filename));
 
         inner_retrieve_format(&formatter->formatList);
         return formatter;
@@ -46,7 +60,7 @@ public:
         int skip_base = 0;
         FormatterController *node = NULL;
         VALUE array, type, format, hash;
-        while((array  = rb_funcall(rb_gv_get("$!"), rb_intern("return_string"), 0)) != Qnil){
+        while((array  = rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("get_next_result"), 0)) != Qnil){
             type   = rb_ary_entry(array,0); //[type, format, variable_name, hash]
             format = rb_ary_entry(array,1);
             hash   = rb_ary_entry(array,3);
@@ -55,7 +69,7 @@ public:
                 continue;
             }
             switch(FIX2INT(type)){
-            case  0:{ PERROR(true, puts("Unknown type! in ruby return_string"); );         break;} //INVALID
+            case  0:{ PERROR(true, puts("Unknown type! in ruby get_next_result"); );         break;} //INVALID
             case  1: case  2:{ //#if, #elsif
                 FormatterIFStatement *ifnode = parse_bool_statement(format);
                 ifList.push_back(ifnode); //記錄elsif數量。(elsif也是一個node，每多一個elsif，skip要再加1)。

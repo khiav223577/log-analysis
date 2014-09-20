@@ -75,7 +75,7 @@ public:
     }
 };
 #define rb_hash(hash, string) RubyInterpreter::access_hash(hash, string)
-
+#define rb_const(name) rb_const_get(rb_cObject, rb_intern((name)))
 
 #endif
 

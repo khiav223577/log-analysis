@@ -1,6 +1,7 @@
-//#define DEBUG 2
+//#define DEBUG 10
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
+//#define TEST_THIRD_PASS
 #define BLOCK_SIZE 20000
 //---------------------------------------------------
 #include<stdio.h>
@@ -372,30 +373,12 @@ int main(int argc, char **argv){
     system("pause");
     BzipManager::freeBz2Library();
     return 0;
-    /*
-    char string[] = "a string,of ,,tokens";
-    char *token = strtok(string,"o")
-    while (token != NULL){
-        printf("%s\n", token);
-        token = strtok((char *) NULL,"[^ ]");
-    }*/
-    return 0;
-    /*
-    FILE *f1 = fopen2("config","r");
-    char config[MAX_CONFIG_SIZE];
-    fclose(f1);*/
-    /*
-    const char *filename = "test";
-    char buffer[MAX_LOG_SIZE];
-    FILE *f2 = fopen2(filename,"r");
-
-    while(fgets(buffer, MAX_LOG_SIZE, f2) != NULL){
-
-
-
-    }
-    fclose(f2);
-    printf("%d",'\n');*/
-    return 0;
 }
+
+
+
+
+
+
+
 
