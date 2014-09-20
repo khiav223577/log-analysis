@@ -176,9 +176,28 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
     delete config;
     delete blockinputer;
 }
+
+inline unsigned int *createIpArrayBy(VALUE ruby_array){ //ruby_array = [size_xsum, data_array]
+    unsigned int ipsize = FIX2INT(rb_ary_entry(ruby_array, 0));
+    unsigned int *ip_array = (unsigned int *) malloc(ipsize * sizeof(unsigned int));
+    VALUE data_array = rb_ary_entry(ruby_array, 1);
+    for(unsigned int i = 0; i < ipsize; ++i) ip_array[i] = FIX2INT(rb_ary_entry(data_array, i));
+    return ip_array;
+}
+inline unsigned int createDateBy(VALUE ruby_array){ //[year, month, day, hour, minute, second]
+    unsigned int year   = FIX2INT(rb_ary_entry(ruby_array, 0));
+    unsigned int month  = FIX2INT(rb_ary_entry(ruby_array, 1));
+    unsigned int day    = FIX2INT(rb_ary_entry(ruby_array, 2));
+    unsigned int hour   = FIX2INT(rb_ary_entry(ruby_array, 3));
+    unsigned int minute = FIX2INT(rb_ary_entry(ruby_array, 4));
+    unsigned int second = FIX2INT(rb_ary_entry(ruby_array, 5));
+    RDate date(year, month, day, hour, minute, second);
+    return date.toSecond();
+}
 //------------------------------------------------------------
 //  main
 //------------------------------------------------------------
+
 int main(int argc, char **argv){
     BzipManager::loadBz2Library("lib/bzip2-1.0.6/libbz2-1.0.2.DLL");
 
@@ -272,8 +291,7 @@ int main(int argc, char **argv){
         #endif
         }
     }
-    rb_funcall(rb_const("QueryInterface"), rb_intern("wait_query"), 0);
-    if (false){ //Read index
+    if (true){ //Read index
         puts("#==========================================================");
         puts("#  Query");
         puts("#==========================================================");
@@ -298,55 +316,72 @@ int main(int argc, char **argv){
             input_indexer->children.push_back(ruby_interface->CreateIndexers(index_file_inputer));
         }
         //------------------------------------------------------------------
-
-
-
+        VALUE ruby_data = rb_funcall(rb_const("QueryInterface"), rb_intern("wait_query"), 0);
+        /*
         RDate date(2013, 12, 3, 4, 0, 1);
         //RIPaddr ip("64.4.11.42");
         RIPaddr ip("140.109.1.10");
         date.show();
         ip.show();
-        puts("");
+        puts("");*/
 
-        BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
-        SHOW_LINE_COUNT(0);
-        unsigned int counter = 1;
-        unsigned int must_read = 0;
-        while(counter <= line_count){
-            if (must_read == 0){
-                unsigned int current_block = blockinputer->getCurrentBlock() + 1;
-                InputIndexer *indexers = input_indexer->children[current_block];
-                bool test1 = indexers->indexList[0]->hasValueEqualTo(date.toSecond());
-                bool test2 = indexers->indexList[1]->hasValueEqualTo(ip.to_int());
-                bool test3 = indexers->indexList[2]->hasValueEqualTo(ip.to_int());
-                printf("results: %s %s %s\n", test1 ? "true" : "false", test2 ? "true" : "false", test3 ? "true" : "false");
-                if (test1 && test2 && test3){
-                    must_read = block_size;
-                    printf("must_read = %d\n", must_read);
-                }else{
-                    counter += block_size;
-                    blockinputer->skipBlock();
-                    printf("Skip block%d: %d\n", current_block, counter);
-                }
-                continue;
-            }else must_read -= 1;
-            #ifdef DEBUG
-                printf("%02d: ", counter);
-            #endif
-            blockinputer->nextLine();
-            formatter->execute3();
-            #ifdef DEBUG
-                puts("");
-            #endif
-            if (counter % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(counter); }
-            counter += 1;
+        if (ruby_data != Qnil){
+            VALUE ip_rb_data1 = rb_ary_entry(ruby_data, 0);
+            VALUE ip_rb_data2 = rb_ary_entry(ruby_data, 1);
+            unsigned int *ip_array1 = createIpArrayBy(ip_rb_data1), ip_array1_size = FIX2INT(rb_ary_entry(ip_rb_data1, 0));
+            unsigned int *ip_array2 = createIpArrayBy(ip_rb_data2), ip_array2_size = FIX2INT(rb_ary_entry(ip_rb_data2, 0));
+            unsigned int date1      = createDateBy(rb_ary_entry(ruby_data, 2));
+            unsigned int date2      = createDateBy(rb_ary_entry(ruby_data, 3));
+            unsigned int time_span  = FIX2INT(rb_ary_entry(ruby_data, 4));
+
+
+
+
+            BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
+            SHOW_LINE_COUNT(0);
+            unsigned int counter = 1;
+            unsigned int must_read = 0;
+            while(counter <= line_count){
+                if (must_read == 0){
+                    unsigned int current_block = blockinputer->getCurrentBlock() + 1;
+                    InputIndexer *indexers = input_indexer->children[current_block];
+                    bool test1 = indexers->indexList[0]->hasValueBetween(date1, date2);
+                    bool test2 = indexers->indexList[1]->hasAnyValueEqualIn((int *) ip_array1, ip_array1_size);
+                    bool test3 = indexers->indexList[2]->hasAnyValueEqualIn((int *) ip_array2, ip_array2_size);
+                    printf("results: %s %s %s\n", test1 ? "true" : "false", test2 ? "true" : "false", test3 ? "true" : "false");
+                    if (test1 && test2 && test3){
+                        must_read = block_size;
+                        printf("must_read = %d\n", must_read);
+                    }else{
+                        counter += block_size;
+                        blockinputer->skipBlock();
+                        printf("Skip block%d: %d\n", current_block, counter);
+                    }
+                    continue;
+                }else must_read -= 1;
+                #ifdef DEBUG
+                    printf("%02d: ", counter);
+                #endif
+                blockinputer->nextLine();
+                formatter->execute3();
+                #ifdef DEBUG
+                    puts("");
+                #endif
+                if (counter % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(counter); }
+                counter += 1;
+            }
+            if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
+
+
+
+
+
+
+            free(ip_array1);
+            free(ip_array2);
+            delete blockinputer;
         }
-        if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
-
-
-
         //------------------------------------------------------------------
-        delete blockinputer;
         delete index_file_inputer;
         delete input_indexer;
         delete config;

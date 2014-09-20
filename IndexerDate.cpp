@@ -44,6 +44,13 @@ public:
         //RDate d1( streamingRecorder.getMinValue());RDate d2( val);RDate d3( streamingRecorder.getMaxValue());d1.show();d2.show();d3.show();
         return (streamingRecorder.getMinValue() <= (unsigned int) val && (unsigned int) val <= streamingRecorder.getMaxValue());
     }
+    bool hasValueBetween(int val1, int val2){ //val1 <= val2
+        unsigned int uval1 = val1, uval2 = val2;
+        if (streamingRecorder.getMinValue() > uval2) return false;
+        if (streamingRecorder.getMaxValue() < uval1) return false;
+        if (uval1 > uval2) return false;
+        return true;
+    }
 };
 
 #endif

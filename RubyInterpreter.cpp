@@ -3,6 +3,9 @@
 #ifndef ___RubyInterpreter_cpp__
 #define ___RubyInterpreter_cpp__
 #include <ruby.h>
+#define rb_hash(hash, string) RubyInterpreter::access_hash(hash, string)
+#define rb_const(name) rb_const_get(rb_cObject, rb_intern((name)))
+
 RUBY_GLOBAL_SETUP
 class RubyInterpreter{
 public:
@@ -74,8 +77,6 @@ public:
         return rb_hash_aref(hash, get_rb_symbol(string));
     }
 };
-#define rb_hash(hash, string) RubyInterpreter::access_hash(hash, string)
-#define rb_const(name) rb_const_get(rb_cObject, rb_intern((name)))
 
 #endif
 

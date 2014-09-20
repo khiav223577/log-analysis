@@ -14,7 +14,7 @@ public:
     RIPaddr(unsigned int a, unsigned int b, unsigned int c, unsigned int d){
         ip = get_ip(a, b, c, d);
     }
-    RIPaddr(const char *ip_str){
+    RIPaddr(const char *ip_str){ //EX: RIPaddr ip("140.109.1.10");
         const char **input = &ip_str;
         unsigned int a = read_a_int(input); *input += 1; //TODO check '\0'
         unsigned int b = read_a_int(input); *input += 1;

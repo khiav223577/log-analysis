@@ -42,7 +42,7 @@ void FormatterInteger::load_config2(FILE *file){
     sizeManager1.load(file);
     sizeManager2.load(file);
     streamingRecorder.load(file);
-    if (streamingRecorder.isAlwaysIncreasing()) delta_encoding.set_first_value(FlexibleInt::load(file));
+    if (streamingRecorder.isInitialized() && streamingRecorder.isAlwaysIncreasing()) delta_encoding.set_first_value(FlexibleInt::load(file));
     fscanf(file, "\n");
     record_range = streamingRecorder.getMinMaxRange();
     record_range.try_to_cast_to_int();

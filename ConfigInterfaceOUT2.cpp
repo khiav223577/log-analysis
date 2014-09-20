@@ -23,7 +23,7 @@ void FormatterInteger::save_config2(FILE *file){
     sizeManager1.save(file);
     sizeManager2.save(file);
     streamingRecorder.save(file);
-    if (streamingRecorder.isAlwaysIncreasing()) delta_encoding.get_first_value().save(file);
+    if (streamingRecorder.isInitialized() && streamingRecorder.isAlwaysIncreasing()) delta_encoding.get_first_value().save(file);
     fprintf(file, "\n");
 };
 void FormatterIPaddr::save_config2(FILE *file){

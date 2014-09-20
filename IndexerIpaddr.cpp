@@ -42,6 +42,12 @@ public:
     bool hasValueEqualTo(int val){
         return (hashTable.count(val) == 1);
     }
+    bool hasValueBetween(int val1, int val2){ //val1 <= val2
+        unsigned int uval1 = val1, uval2 = val2;
+        if (uval1 > uval2) return false;
+        PERROR(true, printf("hasValueBetween has not been implemented in IndexerIpaddr.");); //TODO
+        return true;
+    }
 };
 
 #endif

@@ -12,6 +12,11 @@ public:
 //  ACCESS
 //-------------------------------------------------------------------------
     virtual bool hasValueEqualTo(int val)=0;
+    virtual bool hasValueBetween(int val1, int val2)=0;
+    inline bool hasAnyValueEqualIn(int *array, unsigned int size){
+        for(unsigned int i = 0; i < size; ++i) if (hasValueEqualTo(array[i])) return true;
+        return false;
+    }
 };
 
 class InputIndexer{
