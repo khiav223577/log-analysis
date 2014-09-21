@@ -68,6 +68,7 @@ public:
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
         prev_ip = hashCompressor.decompress(output);
+        initialized = true;
         if (attr_index == true) indexer.addIndex(prev_ip); //store ip in hash.
         outputer->write(output, byte_num);
         executeCounter += 1;
@@ -78,6 +79,7 @@ public:
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
         prev_ip = hashCompressor.decompress(output);
+        initialized = true;
         executeCounter += 1;
         debug(prev_ip);
         return 0;

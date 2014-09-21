@@ -40,7 +40,9 @@ public:
 //  ACCESS
 //-------------------------------------------------------------------------
     bool hasValueEqualTo(int val){
-        return (hashTable.count(val) == 1);
+        unsigned int uval = val;
+        //printf("hasValueEqualTo: %u %s\n", uval, (hashTable.count(uval) == 1) ? "true" : "false");
+        return (hashTable.count(uval) == 1);
     }
     bool hasValueBetween(int val1, int val2){ //val1 <= val2
         unsigned int uval1 = val1, uval2 = val2;

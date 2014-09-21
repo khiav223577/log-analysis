@@ -102,8 +102,9 @@ class QueryInterface
     size_xsum = array[0].size * array[1].size * array[2].size * array[3].size
     return nil if size_xsum > 1000000 or size_xsum <= 0
     output = Array.new(size_xsum)
+    counter = -1
     array[0].each{|a| array[1].each{|b| array[2].each{|c| array[3].each{|d| 
-      output[size_xsum -= 1] = ((a << 24) | (b << 16) | (c << 8) | (d << 0))
+      output[counter += 1] = ((a << 24) | (b << 16) | (c << 8) | (d << 0))
     }}}}
     return [size_xsum, output]
   end
@@ -149,6 +150,7 @@ public
         span_num = (total_span / outputArr[4]) + 1
         next puts "wtf span_num < 0 ???" if span_num < 0
         next puts "span_num is too large: #{span_num} > 100000" if span_num > 100000
+        p "outputArr = #{outputArr}"
         print "Query the traffice of IP #{showIP(outputArr[0])} against all #{showIP(outputArr[1])} "
         print "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
         outputArr[5] = span_num;
@@ -174,7 +176,7 @@ def system_call_open(link)
   end
 end
 #QueryInterface.wait_query
-##140.109.21.163, 140.109.1.10, 2013/12/03 04:01:00, 2013/12/03 04:02:00, 10
+##140.109.23.120, 140.109.254.5, 2013/12/03 04:00:00, 2013/12/03 04:02:00, 10
 
 
 

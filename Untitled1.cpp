@@ -1,8 +1,9 @@
-#define DEBUG 10
+//#define DEBUG 10
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 //#define TEST_THIRD_PASS
 #define BLOCK_SIZE 20000
+#define DEBUG_START_PASS 3
 //---------------------------------------------------
 #include<stdio.h>
 #include<typeinfo>
@@ -178,10 +179,10 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
 }
 
 inline unsigned int *createIpArrayBy(VALUE ruby_array){ //ruby_array = [size_xsum, data_array]
-    unsigned int ipsize = FIX2INT(rb_ary_entry(ruby_array, 0));
+    unsigned int ipsize = NUM2UINT(rb_ary_entry(ruby_array, 0));
     unsigned int *ip_array = (unsigned int *) malloc(ipsize * sizeof(unsigned int));
     VALUE data_array = rb_ary_entry(ruby_array, 1);
-    for(unsigned int i = 0; i < ipsize; ++i) ip_array[i] = FIX2INT(rb_ary_entry(data_array, i));
+    for(unsigned int i = 0; i < ipsize; ++i) ip_array[i] = NUM2UINT(rb_ary_entry(data_array, i));
     return ip_array;
 }
 //------------------------------------------------------------
@@ -206,7 +207,7 @@ int main(int argc, char **argv){
     #elif INPUT_MODE == FILE_MODE_RAW
         const char *fileExtension = "";
     #endif
-    const int start_pass = 1;
+    const int start_pass = (argc == 1 ? DEBUG_START_PASS : 3);
     ruby = new RubyInterpreter();
     switch(start_pass){
     case 1:{
@@ -323,13 +324,12 @@ int main(int argc, char **argv){
         if (ruby_data != Qnil){
             VALUE ip_rb_data1 = rb_ary_entry(ruby_data, 0);
             VALUE ip_rb_data2 = rb_ary_entry(ruby_data, 1);
-            unsigned int *ip_array1  = createIpArrayBy(ip_rb_data1), ip_array1_size = FIX2INT(rb_ary_entry(ip_rb_data1, 0));
-            unsigned int *ip_array2  = createIpArrayBy(ip_rb_data2), ip_array2_size = FIX2INT(rb_ary_entry(ip_rb_data2, 0));
-            unsigned int date1       = FIX2INT(rb_ary_entry(ruby_data, 2));
-            unsigned int date2       = FIX2INT(rb_ary_entry(ruby_data, 3));
-            unsigned int time_span   = FIX2INT(rb_ary_entry(ruby_data, 4));
-            unsigned int buffer_size = FIX2INT(rb_ary_entry(ruby_data, 5));
-
+            unsigned int *ip_array1  = createIpArrayBy(ip_rb_data1), ip_array1_size = NUM2UINT(rb_ary_entry(ip_rb_data1, 0));
+            unsigned int *ip_array2  = createIpArrayBy(ip_rb_data2), ip_array2_size = NUM2UINT(rb_ary_entry(ip_rb_data2, 0));
+            unsigned int date1       = NUM2UINT(rb_ary_entry(ruby_data, 2));
+            unsigned int date2       = NUM2UINT(rb_ary_entry(ruby_data, 3));
+            unsigned int time_span   = NUM2UINT(rb_ary_entry(ruby_data, 4));
+            unsigned int buffer_size = NUM2UINT(rb_ary_entry(ruby_data, 5));
             unsigned int *buffer_bytes_sent      = (unsigned int *) malloc(buffer_size * sizeof(unsigned int));
             unsigned int *buffer_bytes_rece      = (unsigned int *) malloc(buffer_size * sizeof(unsigned int));
             FormatterController *fc_source_ip    = ruby_interface->getFormatterByName("Source_address");
@@ -374,14 +374,14 @@ int main(int argc, char **argv){
                         unsigned int date = (unsigned int) fc_receive_time->get_prev_int();
                         unsigned int sIP  = (unsigned int) fc_source_ip->get_prev_int();
                         unsigned int dIP  = (unsigned int) fc_destin_ip->get_prev_int();
-                        if (date1 > date && date2 < date) break;
+                        if (date < date1 || date > date2) break;
                         unsigned int idx;
                         for(idx = 0; idx < ip_array1_size; ++idx) if (ip_array1[idx] == sIP) break;
                         if (idx == ip_array1_size) break;
                         for(idx = 0; idx < ip_array2_size; ++idx) if (ip_array2[idx] == dIP) break;
                         if (idx == ip_array2_size) break;
                         unsigned int site = (date - date1) / time_span; //
-                        PERROR(site >= buffer_size, printf("Unexpected error."));
+                        PERROR(site >= buffer_size, printf("Unexpected error. %d > %d", site, buffer_size));
                         buffer_bytes_sent[site] += fc_bytes_sent->get_prev_int();
                         buffer_bytes_rece[site] += fc_bytes_rece->get_prev_int();
                     }
@@ -431,7 +431,7 @@ int main(int argc, char **argv){
     printf("%s => %d\n","123", BlahBlah["123"]);
     return 0;
 */
-    system("pause");
+    //system("pause");
     BzipManager::freeBz2Library();
     return 0;
 }
