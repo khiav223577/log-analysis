@@ -15,6 +15,8 @@ class FormatterController{
 protected:
     int executeCounter;
 public:
+    inline int getExecuteCounter(){ return executeCounter; }
+public:
     class VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
 	public:
 		virtual char *trans_format(const char *_format)=0;

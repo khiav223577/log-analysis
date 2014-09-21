@@ -185,6 +185,15 @@ public:
         list->load(inputer);
         return list;
     }
+//-------------------------------------------------------------------------
+//  ACCESS
+//-------------------------------------------------------------------------
+    inline FormatterController *getFormatterByName(const char *variable_name){
+        VALUE rb_gidx = rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("get_buffer_index"), 1, rb_str_new2(variable_name));
+        PERROR(rb_gidx == Qnil, printf("Cannot get_buffer_index of %s.\n", variable_name));
+        unsigned int gidx = FIX2INT(rb_gidx);
+        return glist[gidx];
+    }
 };
 #undef glist
 #endif

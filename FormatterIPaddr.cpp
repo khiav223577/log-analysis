@@ -24,6 +24,12 @@ public:
         }
 	};
     FormatterIPaddr(const char *_format) : super(_format, new VirtualCreator()){
+        initialized = false;
+    }
+    bool initialized;
+    int get_prev_int(){
+        PERROR(!initialized, printf("Error: fails to get_prev_int() in FormatterIPaddr."););
+        return prev_ip;
     }
 public:
     virtual void save_config1(FILE *file);
@@ -34,22 +40,25 @@ public:
 //  execute
 //--------------------------------------
 private:
+    unsigned int prev_ip;
     HashCompressor< unsigned int, std::map<unsigned int, unsigned int> > hashCompressor;
     IndexerIpaddr indexer;
     SizeFlagManager sizeManager;
+public:
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME
             evalu_ip.start();
         #endif
         const char *originInput = *inputStream;
-        unsigned int result = retrieve(inputStream, format);
+        prev_ip = retrieve(inputStream, format);
+        initialized = true;
         if (attr_drop == false){
-            unsigned int output = hashCompressor.compress(result);
+            unsigned int output = hashCompressor.compress(prev_ip);
             outputer->write(output, sizeManager.get_write_byte(output, executeCounter));
         }
         if (attr_peek == true) *inputStream = originInput;
         executeCounter += 1;
-        debug(result);
+        debug(prev_ip);
         #ifdef EVALUATE_TIME
             evalu_ip.stop();
         #endif
@@ -58,19 +67,19 @@ private:
     int execute2(){
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
-        unsigned int result = hashCompressor.decompress(output);
-        if (attr_index == true) indexer.addIndex(result); //store ip in hash.
+        prev_ip = hashCompressor.decompress(output);
+        if (attr_index == true) indexer.addIndex(prev_ip); //store ip in hash.
         outputer->write(output, byte_num);
         executeCounter += 1;
-        debug(result);
+        debug(prev_ip);
         return 0;
     }
     int execute3(){
         unsigned char byte_num = sizeManager.get_read_byte(executeCounter);
         unsigned int output = (unsigned int) inputer->read_int(byte_num);
-        unsigned int result = hashCompressor.decompress(output);
+        prev_ip = hashCompressor.decompress(output);
         executeCounter += 1;
-        debug(result);
+        debug(prev_ip);
         return 0;
     }
     inline void debug(int result){

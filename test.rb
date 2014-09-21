@@ -113,10 +113,10 @@ class QueryInterface
   def self.parseDate(date)
     date_time = DateTime.parse(date)
     return nil if date_time.year > 2037 || date_time.year < 1970 #prevent overflow?
-    return [date_time.year, date_time.month, date_time.day, date_time.hour, date_time.minute, date_time.second]
+    return date_time.to_time.to_i
   end
-  def self.showDate(array)
-    DateTime.new(*array).strftime("%Y-%m-%d %H:%M:%S")
+  def self.showDate(seconds)
+    DateTime.strptime(seconds.to_s,'%s').strftime("%Y-%m-%d %H:%M:%S")
   end
 public
   def self.wait_query
@@ -141,16 +141,17 @@ public
         next puts "Format Error: #{inputArr[1]} is not a IP address" if outputArr[1] == nil
         next puts "Format Error: #{inputArr[2]} is not a Date" if outputArr[2] == nil
         next puts "Format Error: #{inputArr[3]} is not a Date" if outputArr[3] == nil
-        second1 = inputArr[2].to_time.to_i
-        second2 = inputArr[3].to_time.to_i
-        total_span = second2 - second1
+        total_span = outputArr[3] - outputArr[2]
         next puts "start time should earlier than end time" if total_span < 0
-        next puts "start time or end time is overflow" if second1.class != Fixnum || second2.class != Fixnum
+        next puts "start time is overflow: #{outputArr[2]}, class = #{outputArr[2].class}" if outputArr[2] > (1 << 31)
+        next puts "end time is overflow: #{outputArr[3]}, class = #{outputArr[3].class}" if outputArr[3] > (1 << 31)
         next puts "time span should not lower than 1." if outputArr[4] <= 0 || outputArr[4] > 100000000
-        span_num = ((total_span - 1) / outputArr[4]) + 1
+        span_num = (total_span / outputArr[4]) + 1
+        next puts "wtf span_num < 0 ???" if span_num < 0
         next puts "span_num is too large: #{span_num} > 100000" if span_num > 100000
         print "Query the traffice of IP #{showIP(outputArr[0])} against all #{showIP(outputArr[1])} "
         print "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
+        outputArr[5] = span_num;
         return outputArr
       end
       puts "Unown input. Please try again. inputArr = #{inputArr}"
@@ -173,7 +174,7 @@ def system_call_open(link)
   end
 end
 #QueryInterface.wait_query
-##192.168.0.120, 192.168.*.*, 2012/7/12 12:01:03, 2012/7/15 19:00:00, 300
+##140.109.21.163, 140.109.1.10, 2013/12/03 04:01:00, 2013/12/03 04:02:00, 10
 
 
 

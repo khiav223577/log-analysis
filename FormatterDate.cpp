@@ -22,6 +22,10 @@ public:
 	};
     FormatterDate(const char *_format) : super(_format, new VirtualCreator()){
     }
+    int get_prev_int(){
+        PERROR(!streamingRecorder.isInitialized(), printf("Error: fails to get_prev_int() in FormatterDate."););
+        return prev_date;
+    }
 public:
     virtual void save_config1(FILE *file);
     virtual void save_config2(FILE *file);

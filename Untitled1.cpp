@@ -184,16 +184,6 @@ inline unsigned int *createIpArrayBy(VALUE ruby_array){ //ruby_array = [size_xsu
     for(unsigned int i = 0; i < ipsize; ++i) ip_array[i] = FIX2INT(rb_ary_entry(data_array, i));
     return ip_array;
 }
-inline unsigned int createDateBy(VALUE ruby_array){ //[year, month, day, hour, minute, second]
-    unsigned int year   = FIX2INT(rb_ary_entry(ruby_array, 0));
-    unsigned int month  = FIX2INT(rb_ary_entry(ruby_array, 1));
-    unsigned int day    = FIX2INT(rb_ary_entry(ruby_array, 2));
-    unsigned int hour   = FIX2INT(rb_ary_entry(ruby_array, 3));
-    unsigned int minute = FIX2INT(rb_ary_entry(ruby_array, 4));
-    unsigned int second = FIX2INT(rb_ary_entry(ruby_array, 5));
-    RDate date(year, month, day, hour, minute, second);
-    return date.toSecond();
-}
 //------------------------------------------------------------
 //  main
 //------------------------------------------------------------
@@ -333,14 +323,23 @@ int main(int argc, char **argv){
         if (ruby_data != Qnil){
             VALUE ip_rb_data1 = rb_ary_entry(ruby_data, 0);
             VALUE ip_rb_data2 = rb_ary_entry(ruby_data, 1);
-            unsigned int *ip_array1 = createIpArrayBy(ip_rb_data1), ip_array1_size = FIX2INT(rb_ary_entry(ip_rb_data1, 0));
-            unsigned int *ip_array2 = createIpArrayBy(ip_rb_data2), ip_array2_size = FIX2INT(rb_ary_entry(ip_rb_data2, 0));
-            unsigned int date1      = createDateBy(rb_ary_entry(ruby_data, 2));
-            unsigned int date2      = createDateBy(rb_ary_entry(ruby_data, 3));
-            unsigned int time_span  = FIX2INT(rb_ary_entry(ruby_data, 4));
-            unsigned int *output_array = (unsigned int *) malloc(sizeof(unsigned int) * time_span);
+            unsigned int *ip_array1  = createIpArrayBy(ip_rb_data1), ip_array1_size = FIX2INT(rb_ary_entry(ip_rb_data1, 0));
+            unsigned int *ip_array2  = createIpArrayBy(ip_rb_data2), ip_array2_size = FIX2INT(rb_ary_entry(ip_rb_data2, 0));
+            unsigned int date1       = FIX2INT(rb_ary_entry(ruby_data, 2));
+            unsigned int date2       = FIX2INT(rb_ary_entry(ruby_data, 3));
+            unsigned int time_span   = FIX2INT(rb_ary_entry(ruby_data, 4));
+            unsigned int buffer_size = FIX2INT(rb_ary_entry(ruby_data, 5));
 
-            //unsigned int a = rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("get_buffer_index"), 1, rb_str_new2("Receive_Time"));
+            unsigned int *buffer_bytes_sent      = (unsigned int *) malloc(buffer_size * sizeof(unsigned int));
+            unsigned int *buffer_bytes_rece      = (unsigned int *) malloc(buffer_size * sizeof(unsigned int));
+            FormatterController *fc_source_ip    = ruby_interface->getFormatterByName("Source_address");
+            FormatterController *fc_destin_ip    = ruby_interface->getFormatterByName("Destination_address");
+            FormatterController *fc_receive_time = ruby_interface->getFormatterByName("Receive_Time");
+            FormatterController *fc_bytes_sent   = ruby_interface->getFormatterByName("Bytes_Sent");
+            FormatterController *fc_bytes_rece   = ruby_interface->getFormatterByName("Bytes_Received");
+            memset(buffer_bytes_sent, 0, buffer_size * sizeof(unsigned int));
+            memset(buffer_bytes_rece, 0, buffer_size * sizeof(unsigned int));
+            int executeCounter, preExecuteCounter = 0;
 
             BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
             SHOW_LINE_COUNT(0);
@@ -369,6 +368,25 @@ int main(int argc, char **argv){
                 #endif
                 blockinputer->nextLine();
                 formatter->execute3();
+                while(1){
+                    if ((executeCounter = fc_bytes_sent->getExecuteCounter()) != preExecuteCounter){
+                        preExecuteCounter = executeCounter;
+                        unsigned int date = (unsigned int) fc_receive_time->get_prev_int();
+                        unsigned int sIP  = (unsigned int) fc_source_ip->get_prev_int();
+                        unsigned int dIP  = (unsigned int) fc_destin_ip->get_prev_int();
+                        if (date1 > date && date2 < date) break;
+                        unsigned int idx;
+                        for(idx = 0; idx < ip_array1_size; ++idx) if (ip_array1[idx] == sIP) break;
+                        if (idx == ip_array1_size) break;
+                        for(idx = 0; idx < ip_array2_size; ++idx) if (ip_array2[idx] == dIP) break;
+                        if (idx == ip_array2_size) break;
+                        unsigned int site = (date - date1) / time_span; //
+                        PERROR(site >= buffer_size, printf("Unexpected error."));
+                        buffer_bytes_sent[site] += fc_bytes_sent->get_prev_int();
+                        buffer_bytes_rece[site] += fc_bytes_rece->get_prev_int();
+                    }
+                    break;
+                }
                 #ifdef DEBUG
                     puts("");
                 #endif
@@ -378,13 +396,16 @@ int main(int argc, char **argv){
             if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
 
 
-
+            for(unsigned int i = 0; i < buffer_size; ++i){
+                printf("%d: %d %d\n", i, buffer_bytes_sent[i], buffer_bytes_rece[i]);
+            }
 
 
 
             free(ip_array1);
             free(ip_array2);
-            free(output_array);
+            free(buffer_bytes_sent);
+            free(buffer_bytes_rece);
             delete blockinputer;
         }
         //------------------------------------------------------------------
