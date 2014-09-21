@@ -413,7 +413,6 @@ int main(int argc, char **argv){
             free(buffer_bytes_rece);
             delete blockinputer;
             delete formatter;
-            showtime.show("end query","");
         }
         //------------------------------------------------------------------
         free(input_config);
