@@ -17,17 +17,8 @@ public:
     bool ignore_drop_node;
 public:
     ConfigInterfaceIN1(RubyInterpreter *_ruby) : ruby(_ruby){
-    }
-//-------------------------------------------------------------------------
-//  CreateFormatter
-//-------------------------------------------------------------------------
-    InputFormatter *CreateFormatters(const char *filename, bool flag){
-        formatter = new InputFormatter();
-        ignore_drop_node = flag;
-
         ruby->execute_code("$IN_C_CODE = true");
         ruby->execute_file("./test.rb");
-
         VALUE array = rb_ary_new();
         rb_ary_push(array, rb_str_new2("INVALID"));
         rb_ary_push(array, rb_str_new2("#if"));
@@ -43,8 +34,15 @@ public:
         rb_ary_push(array, rb_str_new2("DROP"));
         rb_ary_push(array, rb_str_new2("Char"));
         rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("register_hash"),  1, array);
+    }
+//-------------------------------------------------------------------------
+//  CreateFormatter
+//-------------------------------------------------------------------------
+    InputFormatter *CreateFormatters(const char *filename, bool flag){
+        formatter = new InputFormatter();
+        glist.clear();
+        ignore_drop_node = flag;
         rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("read_config"),  1, rb_str_new2(filename));
-
         inner_retrieve_format(&formatter->formatList);
         return formatter;
     }

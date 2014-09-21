@@ -69,6 +69,7 @@ class ConfigReaderInterface
   @hash = {}
   def self.read_config(config_path)
     result = @config.parse(IO.read(config_path))
+    @result_counter = 0
     @result_buffer = result[:buffer]
     @buffer_symbol_mappings = result[:buffer_symbol_mappings]
   end
@@ -150,7 +151,7 @@ public
         span_num = (total_span / outputArr[4]) + 1
         next puts "wtf span_num < 0 ???" if span_num < 0
         next puts "span_num is too large: #{span_num} > 100000" if span_num > 100000
-        p "outputArr = #{outputArr}"
+        #p "outputArr = #{outputArr}"
         print "Query the traffice of IP #{showIP(outputArr[0])} against all #{showIP(outputArr[1])} "
         print "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
         outputArr[5] = span_num;

@@ -286,9 +286,9 @@ int main(int argc, char **argv){
         puts("#==========================================================");
         puts("#  Query");
         puts("#==========================================================");
-        showtime.show("before query","");
+        showtime.show("before loading indexes","");
         ruby_interface = new ConfigInterfaceIN1(ruby);
-        formatter = ruby_interface->CreateFormatters(ConfigPath, true);
+
         //showFormatList();
         char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
         char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
@@ -296,24 +296,23 @@ int main(int argc, char **argv){
         sprintf(input_path   , "%s"        , InputPath);
         sprintf(input_config , "%s.config2", InputPath);
         sprintf(input_index  , "%s.index"  , InputPath);
+        formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         BlockConfig *config = ruby_interface->load_config2(input_config);
         unsigned int line_count = config->line_count;
         unsigned int block_size = config->block_size;
         unsigned int block_num  = config->get_block_num();
-
         InputManager *index_file_inputer = new InputManager(input_index, FILE_MODE_RAW);
         InputIndexer *input_indexer = new InputIndexer();
-        printf("block_num: %d\n", block_num);
         for(unsigned int i = 0; i < block_num; ++i){
             input_indexer->children.push_back(ruby_interface->CreateIndexers(index_file_inputer));
         }
-
-        free(input_config);
         free(input_index);
         delete index_file_inputer;
         delete config;
+        delete formatter;
+        showtime.show("load indexes","");
         //------------------------------------------------------------------
-        VALUE ruby_data = rb_funcall(rb_const("QueryInterface"), rb_intern("wait_query"), 0);
+
         /*
         RDate date(2013, 12, 3, 4, 0, 1);
         //RIPaddr ip("64.4.11.42");
@@ -321,7 +320,13 @@ int main(int argc, char **argv){
         date.show();
         ip.show();
         puts("");*/
-        if (ruby_data != Qnil){
+        while(1){
+            VALUE ruby_data = rb_funcall(rb_const("QueryInterface"), rb_intern("wait_query"), 0);
+            if (ruby_data == Qnil) break;
+            showtime.reset();
+            formatter = ruby_interface->CreateFormatters(ConfigPath, true);
+            BlockConfig *config = ruby_interface->load_config2(input_config);
+            delete config;
             VALUE ip_rb_data1 = rb_ary_entry(ruby_data, 0);
             VALUE ip_rb_data2 = rb_ary_entry(ruby_data, 1);
             unsigned int *ip_array1  = createIpArrayBy(ip_rb_data1), ip_array1_size = NUM2UINT(rb_ary_entry(ip_rb_data1, 0));
@@ -355,11 +360,11 @@ int main(int argc, char **argv){
                     printf("results: %s %s %s\n", test1 ? "true" : "false", test2 ? "true" : "false", test3 ? "true" : "false");
                     if (test1 && test2 && test3){
                         must_read = block_size;
-                        printf("must_read = %d\n", must_read);
+                        //printf("must_read = %d\n", must_read);
                     }else{
                         counter += block_size;
                         blockinputer->skipBlock();
-                        printf("Skip block%d: %d\n", current_block, counter);
+                        //printf("Skip block%d: %d\n", current_block, counter);
                     }
                     continue;
                 }else must_read -= 1;
@@ -407,11 +412,14 @@ int main(int argc, char **argv){
             free(buffer_bytes_sent);
             free(buffer_bytes_rece);
             delete blockinputer;
+            delete formatter;
+            showtime.show("end query","");
         }
         //------------------------------------------------------------------
+        free(input_config);
         delete input_indexer;
         free(input_path);
-        showtime.show("end query","");
+        delete ruby_interface;
     }
 
     delete ruby;
