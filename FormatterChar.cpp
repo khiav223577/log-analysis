@@ -29,8 +29,6 @@ public:
 //--------------------------------------
 //  execute
 //--------------------------------------
-private:
-    int executeCounter;
 public:
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME

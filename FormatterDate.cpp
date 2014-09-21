@@ -21,7 +21,6 @@ public:
         }
 	};
     FormatterDate(const char *_format) : super(_format, new VirtualCreator()){
-        executeCounter = 0;
     }
 public:
     virtual void save_config1(FILE *file);
@@ -35,7 +34,6 @@ public:
 private:
     unsigned int prev_date;
     SizeFlagManager sizeManager;
-    int executeCounter;
     bool SameFlag;
     DeltaEncoding<int> delta_encoding;
     StreamingRecorder<unsigned int> streamingRecorder;

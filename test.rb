@@ -141,8 +141,14 @@ public
         next puts "Format Error: #{inputArr[1]} is not a IP address" if outputArr[1] == nil
         next puts "Format Error: #{inputArr[2]} is not a Date" if outputArr[2] == nil
         next puts "Format Error: #{inputArr[3]} is not a Date" if outputArr[3] == nil
-        next puts "start time should earlier than end time" if inputArr[2] > inputArr[3] 
+        second1 = inputArr[2].to_time.to_i
+        second2 = inputArr[3].to_time.to_i
+        total_span = second2 - second1
+        next puts "start time should earlier than end time" if total_span < 0
+        next puts "start time or end time is overflow" if second1.class != Fixnum || second2.class != Fixnum
         next puts "time span should not lower than 1." if outputArr[4] <= 0 || outputArr[4] > 100000000
+        span_num = ((total_span - 1) / outputArr[4]) + 1
+        next puts "span_num is too large: #{span_num} > 100000" if span_num > 100000
         print "Query the traffice of IP #{showIP(outputArr[0])} against all #{showIP(outputArr[1])} "
         print "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
         return outputArr
@@ -150,6 +156,20 @@ public
       puts "Unown input. Please try again. inputArr = #{inputArr}"
     end
     return nil
+  end
+end
+
+
+def system_call_open(link)
+  host_os = RbConfig::CONFIG['host_os']
+  if host_os =~ /mswin|mingw|cygwin/
+    system "start #{link}"
+  elsif host_os =~ /darwin/
+    system "open #{link}"
+  elsif host_os =~ /linux|bsd/
+    system "xdg-open #{link}"
+  else
+    p "Unown host: #{host_os}"
   end
 end
 #QueryInterface.wait_query

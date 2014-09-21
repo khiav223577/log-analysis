@@ -12,6 +12,8 @@
 #include "IndexerBase.cpp"
 class InputFormatter;
 class FormatterController{
+protected:
+    int executeCounter;
 public:
     class VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
 	public:
@@ -22,7 +24,7 @@ public:
 	InputManager *inputer;
 	char *format;
 	bool attr_drop, attr_peek, attr_index;
-    FormatterController(const char *_format, VirtualCreator *v) : outputer(NULL), inputer(NULL){
+    FormatterController(const char *_format, VirtualCreator *v) : executeCounter(0), outputer(NULL), inputer(NULL){
         format = v->trans_format(_format);
         attr_drop   = false;
         attr_peek   = false;

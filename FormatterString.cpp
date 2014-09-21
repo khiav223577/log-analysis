@@ -35,7 +35,6 @@ public:
     FormatterString(const char *_format, int maxlen) : super(_format, new VirtualCreator(maxlen)), MaxLen(maxlen){
         prev_result = NULL;
         string_buffer = (char *) malloc((MaxLen + 1) * sizeof(char));
-        executeCounter = 0;
         bit_num = 32;
         format_len = strlen(format);
     }
@@ -58,7 +57,6 @@ public:
 private:
     HashCompressor<char *, MapChar(unsigned int)> hashCompressor;
     SizeFlagManager sizeManager;
-    int executeCounter;
     unsigned char bit_num;
 public:
     int execute1(const char **inputStream){

@@ -33,7 +33,6 @@ public:
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
         BigIntFlagAt1 = -1;
         BigIntFlagAt2 = -1;
-        executeCounter = 0;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!streamingRecorder.isInitialized(), printf("Error: fails to get_prev_int() in FormatterInteger."););
@@ -60,7 +59,7 @@ private:
     FlexibleInt prev_int;
     SizeFlagManager sizeManager1;
     SizeFlagManager sizeManager2;
-    int executeCounter, BigIntFlagAt1, BigIntFlagAt2;
+    int BigIntFlagAt1, BigIntFlagAt2;
     bool SuccessFlag;
     FlexibleInt record_range;
     DeltaEncoding<FlexibleInt> delta_encoding;

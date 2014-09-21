@@ -298,6 +298,7 @@ int main(int argc, char **argv){
         showtime.show("before query","");
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
+        //showFormatList();
         char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
         char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
         char *input_index   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
@@ -315,6 +316,11 @@ int main(int argc, char **argv){
         for(unsigned int i = 0; i < block_num; ++i){
             input_indexer->children.push_back(ruby_interface->CreateIndexers(index_file_inputer));
         }
+
+        free(input_config);
+        free(input_index);
+        delete index_file_inputer;
+        delete config;
         //------------------------------------------------------------------
         VALUE ruby_data = rb_funcall(rb_const("QueryInterface"), rb_intern("wait_query"), 0);
         /*
@@ -324,7 +330,6 @@ int main(int argc, char **argv){
         date.show();
         ip.show();
         puts("");*/
-
         if (ruby_data != Qnil){
             VALUE ip_rb_data1 = rb_ary_entry(ruby_data, 0);
             VALUE ip_rb_data2 = rb_ary_entry(ruby_data, 1);
@@ -333,9 +338,9 @@ int main(int argc, char **argv){
             unsigned int date1      = createDateBy(rb_ary_entry(ruby_data, 2));
             unsigned int date2      = createDateBy(rb_ary_entry(ruby_data, 3));
             unsigned int time_span  = FIX2INT(rb_ary_entry(ruby_data, 4));
+            unsigned int *output_array = (unsigned int *) malloc(sizeof(unsigned int) * time_span);
 
-
-
+            //unsigned int a = rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("get_buffer_index"), 1, rb_str_new2("Receive_Time"));
 
             BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
             SHOW_LINE_COUNT(0);
@@ -379,14 +384,12 @@ int main(int argc, char **argv){
 
             free(ip_array1);
             free(ip_array2);
+            free(output_array);
             delete blockinputer;
         }
         //------------------------------------------------------------------
-        delete index_file_inputer;
         delete input_indexer;
-        delete config;
         free(input_path);
-        free(input_config);
         showtime.show("end query","");
     }
 

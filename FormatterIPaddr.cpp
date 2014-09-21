@@ -24,7 +24,6 @@ public:
         }
 	};
     FormatterIPaddr(const char *_format) : super(_format, new VirtualCreator()){
-        executeCounter = 0;
     }
 public:
     virtual void save_config1(FILE *file);
@@ -38,7 +37,6 @@ private:
     HashCompressor< unsigned int, std::map<unsigned int, unsigned int> > hashCompressor;
     IndexerIpaddr indexer;
     SizeFlagManager sizeManager;
-    int executeCounter;
     int execute1(const char **inputStream){
         #ifdef EVALUATE_TIME
             evalu_ip.start();
