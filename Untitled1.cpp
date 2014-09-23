@@ -1,9 +1,7 @@
 //#define DEBUG 10
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
-//#define TEST_THIRD_PASS
-#define BLOCK_SIZE 20000
-#define DEBUG_START_PASS 3
+#define BLOCK_SIZE 100000
 //---------------------------------------------------
 #include<stdio.h>
 #include<typeinfo>
@@ -35,7 +33,57 @@ InputFormatter *formatter;
 ShowTime showtime;
 #define SHOW_LINE_RANGE 20000
 #define SHOW_LINE_COUNT(COUNT) printf("%8d", (COUNT)); showtime.show("","");
+
+class FilePathManager{
+public:
+    class PathGroup{
+    public:
+        char *input_path, *output_path, *input_config, *output_config;
+        PathGroup(char *a, char *b, char *c, char *d) :
+                input_path(a), output_path(b), input_config(c), output_config(d){
+        }
+        ~PathGroup(){
+            free(input_path);
+            free(output_path);
+            free(input_config);
+            free(output_config);
+        }
+    };
+public:
+    PathGroup *pass1, *pass2, *pass3;
+    const char *InputPath;
+    char *indexPath;
+public:
+    FilePathManager(const char *path) : InputPath(path){
+        #if INPUT_MODE == FILE_MODE_BZ2
+            const char *fileExt = ".bz2";
+        #elif INPUT_MODE == FILE_MODE_RAW
+            const char *fileExt = "";
+        #endif
+        pass1 = new PathGroup(concat(fileExt) , concat(".temp1"), NULL              , concat(".config1"));
+        pass2 = new PathGroup(concat(".temp1"), concat("")      , concat(".config1"), concat(".config2"));
+        pass3 = new PathGroup(concat("")      , NULL            , concat(".config2"), NULL);
+        indexPath = concat(".index");
+    }
+    ~FilePathManager(){
+        delete pass1;
+        delete pass2;
+        delete pass3;
+        free(indexPath);
+    }
+    inline char *concat(const char *string){
+        const static unsigned int input_len = strlen(InputPath) + 1;
+        if (string == NULL) return NULL;
+        unsigned int len = (input_len + strlen(string));
+        char *output = (char *) malloc(sizeof(char) * len);
+        sprintf(output, "%s%s", InputPath, string);
+        return output;
+    }
+};
+
+FilePathManager *filePathMgr = NULL;
 OutputManager *index_file_outputer = NULL;
+
 inline void showFormatList(){
     FormatList &list = ruby_interface->glist;
     for(int i = 0, size = list.size(); i < size; ++i) printf("%d:%s\n", i, typeid(*(list[i])).name());
@@ -115,10 +163,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
             global_formatList[i]->outputer = new OutputManager(output_path2, FILE_MODE_RAW);
         }
     #else
-        char *output_path2 = (char *) malloc((strlen(output_path) + 1 + 6) * sizeof(char));
-        sprintf(output_path2, "%s.index", output_path);
-        index_file_outputer = new OutputManager(output_path2, FILE_MODE_RAW);
-        free(output_path2);
+        index_file_outputer = new OutputManager(filePathMgr->indexPath, FILE_MODE_RAW);
         BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer2);
     #endif
     SHOW_LINE_COUNT(0);
@@ -133,6 +178,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         formatter->execute2();
         #ifdef DEBUG
             puts("");
+            if (i == DEBUG) break;
         #endif
         if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(i); }
     }
@@ -170,6 +216,7 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
         formatter->execute3();
         #ifdef DEBUG
             puts("");
+            if (i == DEBUG) break;
         #endif
         if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(i); }
     }
@@ -185,10 +232,11 @@ inline unsigned int *createIpArrayBy(VALUE ruby_array){ //ruby_array = [size_xsu
     for(unsigned int i = 0; i < ipsize; ++i) ip_array[i] = NUM2UINT(rb_ary_entry(data_array, i));
     return ip_array;
 }
+
+
 //------------------------------------------------------------
 //  main
 //------------------------------------------------------------
-
 int main(int argc, char **argv){
     BzipManager::loadBz2Library("lib/bzip2-1.0.6/libbz2-1.0.2.DLL");
 
@@ -199,15 +247,21 @@ int main(int argc, char **argv){
     std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
     return 0;
     */
-    const char *ConfigPath = "data/dd/input_large.config";
-    //const char *InputPath  = "D:/test/iisfw.log.89"; const char *OutputPath = "D:/test/iisfw.log.89.output";
-    const char *InputPath  = "data/dd/input_large";
-    #if INPUT_MODE == FILE_MODE_BZ2
-        const char *fileExtension = ".bz2";
-    #elif INPUT_MODE == FILE_MODE_RAW
-        const char *fileExtension = "";
-    #endif
-    const int start_pass = (argc == 1 ? DEBUG_START_PASS : 3);
+    const char *action     = ((argc > 1) ? argv[1] : "testing");
+    const char *ConfigPath = ((argc > 2) ? argv[2] : "data/dd/input_large.config");
+    const char *InputPath  = ((argc > 3) ? argv[2] : "data/dd/input_large"); //"D:/test/data2/iisfw.log.89"
+    filePathMgr = new FilePathManager(InputPath);
+    int start_pass;
+    if (strcmp(action, "query") == 0){
+        start_pass = 4;
+    }else if (strcmp(action, "compress") == 0){
+        //printf("")
+        start_pass = 1;
+    }else if (strcmp(action, "testing") == 0){
+        start_pass = 3;
+    }else{
+        PERROR(true, printf("argument-1 should be 'query' or 'compress' or 'testing'."));
+    }
     ruby = new RubyInterpreter();
     switch(start_pass){
     case 1:{
@@ -216,19 +270,8 @@ int main(int argc, char **argv){
         puts("#==========================================================");
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, false);
-        //return 0;
-        char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0 + strlen(fileExtension));
-        char *output_path   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
-        char *input_config  = NULL;
-        char *output_config = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
-        sprintf( input_path  , "%s%s"      , InputPath, fileExtension);
-        sprintf(output_path  , "%s.temp1"  , InputPath);
-        sprintf(output_config, "%s.config1", InputPath);
-        first_pass(input_path, output_path, input_config, output_config, BLOCK_SIZE);
-        free(input_path);
-        free(output_path);
-        free(input_config);
-        free(output_config);
+        FilePathManager::PathGroup *pass = filePathMgr->pass1;
+        first_pass(pass->input_path, pass->output_path, pass->input_config, pass->output_config, BLOCK_SIZE);
         delete formatter;
         delete ruby_interface;
         }
@@ -238,19 +281,8 @@ int main(int argc, char **argv){
         puts("#==========================================================");
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
-        char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
-        char *output_path   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
-        char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
-        char *output_config = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
-        sprintf(input_path   , "%s.temp1"  , InputPath);
-        sprintf(output_path  , "%s"        , InputPath);
-        sprintf(input_config , "%s.config1", InputPath);
-        sprintf(output_config, "%s.config2", InputPath);
-        second_pass(input_path, output_path, input_config, output_config);
-        free(input_path);
-        free(output_path);
-        free(input_config);
-        free(output_config);
+        FilePathManager::PathGroup *pass = filePathMgr->pass2;
+        second_pass(pass->input_path, pass->output_path, pass->input_config, pass->output_config);
         delete formatter;
         delete ruby_interface;
         #ifdef GROUP_FORMATTER_DATA
@@ -258,59 +290,42 @@ int main(int argc, char **argv){
         #endif
         }
     case 3:{ //測試資料是否正確
-        #ifdef TEST_THIRD_PASS
-            puts("#==========================================================");
-            puts("#  Third Pass");
-            puts("#==========================================================");
-            ruby_interface = new ConfigInterfaceIN1(ruby);
-            formatter = ruby_interface->CreateFormatters(ConfigPath, true);
-            char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
-            char *output_path   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
-            char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
-            //char *output_config = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
-            sprintf(input_path   , "%s"        , InputPath);
-            sprintf(output_path  , "%s.temp3"  , InputPath);
-            sprintf(input_config , "%s.config2", InputPath);
-            //sprintf(output_config, "%s.config3", InputPath);
-            third_pass(input_path, output_path, input_config, NULL);
-            free(input_path);
-            free(output_path);
-            free(input_config);
-            //free(output_config);
-            delete formatter;
-            delete ruby_interface;
-        #endif
+        if (start_pass != 3) break;
+        puts("#==========================================================");
+        puts("#  Third Pass");
+        puts("#==========================================================");
+        ruby_interface = new ConfigInterfaceIN1(ruby);
+        formatter = ruby_interface->CreateFormatters(ConfigPath, true);
+        FilePathManager::PathGroup *pass = filePathMgr->pass3;
+        third_pass(pass->input_path, pass->output_path, pass->input_config, pass->output_config);
+        delete formatter;
+        delete ruby_interface;
         }
     }
     if (true){ //Read index
         puts("#==========================================================");
         puts("#  Query");
         puts("#==========================================================");
-        showtime.show("before loading indexes","");
         ruby_interface = new ConfigInterfaceIN1(ruby);
-
         //showFormatList();
-        char *input_path    = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 0);
-        char *input_config  = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 8);
-        char *input_index   = (char *) malloc(sizeof(char) * strlen(InputPath) + 1 + 6);
-        sprintf(input_path   , "%s"        , InputPath);
-        sprintf(input_config , "%s.config2", InputPath);
-        sprintf(input_index  , "%s.index"  , InputPath);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
-        BlockConfig *config = ruby_interface->load_config2(input_config);
+        FilePathManager::PathGroup *pass = filePathMgr->pass3;
+        showtime.show("CreateFormatters","");
+        BlockConfig *config = ruby_interface->load_config2(pass->input_config);
+        showtime.show("Load config","");
         unsigned int line_count = config->line_count;
         unsigned int block_size = config->block_size;
         unsigned int block_num  = config->get_block_num();
-        InputManager *index_file_inputer = new InputManager(input_index, FILE_MODE_RAW);
+        InputManager *index_file_inputer = new InputManager(filePathMgr->indexPath, FILE_MODE_RAW);
         InputIndexer *input_indexer = new InputIndexer();
         for(unsigned int i = 0; i < block_num; ++i){
             input_indexer->children.push_back(ruby_interface->CreateIndexers(index_file_inputer));
+            if ((i + 1) % 20 == 0){ printf("Loading indexes(%d/%d)", i + 1, block_num); showtime.show("","");}
         }
-        free(input_index);
         delete index_file_inputer;
         delete config;
         delete formatter;
-        showtime.show("load indexes","");
+        showtime.show("done","");
         //------------------------------------------------------------------
 
         /*
@@ -325,7 +340,7 @@ int main(int argc, char **argv){
             if (ruby_data == Qnil) break;
             showtime.reset();
             formatter = ruby_interface->CreateFormatters(ConfigPath, true);
-            BlockConfig *config = ruby_interface->load_config2(input_config);
+            BlockConfig *config = ruby_interface->load_config2(pass->input_config);
             delete config;
             VALUE ip_rb_data1 = rb_ary_entry(ruby_data, 0);
             VALUE ip_rb_data2 = rb_ary_entry(ruby_data, 1);
@@ -346,7 +361,7 @@ int main(int argc, char **argv){
             memset(buffer_bytes_rece, 0, buffer_size * sizeof(unsigned int));
             int executeCounter, preExecuteCounter = 0;
 
-            BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
+            BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(pass->input_path , block_size, FILE_MODE_RAW, &setInputer3);
             SHOW_LINE_COUNT(0);
             unsigned int counter = 1;
             unsigned int must_read = 0;
@@ -418,13 +433,12 @@ int main(int argc, char **argv){
             delete formatter;
         }
         //------------------------------------------------------------------
-        free(input_config);
         delete input_indexer;
-        free(input_path);
         delete ruby_interface;
     }
 
     delete ruby;
+    delete filePathMgr;
     //test_InputFormatter();
     //test_FormatterDate();
 

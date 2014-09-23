@@ -29,13 +29,15 @@ private:
     int Start_time,Prev_time;
 public:
     inline ShowTime(){
-        Start_time = GetTickCount();
-        Prev_time = Start_time;
+        reset();
     }
     inline void show(const char *str1, const char *str2){
         int tmp = GetTickCount();
         printf("%-30s%5d/%5dms%s\n",str1,tmp - Prev_time,tmp - Start_time,str2);
         Prev_time = tmp;
+    }
+    inline void reset(){
+        Prev_time = Start_time = GetTickCount();
     }
 };
 class EvaluateTime{

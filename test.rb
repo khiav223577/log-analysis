@@ -93,6 +93,10 @@ class ConfigReaderInterface
   end
 end
 class QueryInterface
+  @current_input_string = ""
+  @current_query_string = ""
+  def self.current_query_string ; return @current_query_string ; end
+  def self.current_input_string ; return @current_input_string ; end
   def self.parseIP(addr)
     array = addr.split(".")
     return nil if array.size != 4
@@ -109,9 +113,6 @@ class QueryInterface
     }}}}
     return [size_xsum, output]
   end
-  def self.showIP(array)
-    return array.map{|s| (s.class == Array ? "*" : s)}.join(".")
-  end
   def self.parseDate(date)
     date_time = DateTime.parse(date)
     return nil if date_time.year > 2037 || date_time.year < 1970 #prevent overflow?
@@ -124,7 +125,8 @@ public
   def self.wait_query
     loop do
       print "Input your query: "
-      inputArr = $stdin.gets.chomp.split(",")
+      @current_input_string = $stdin.gets.chomp
+      inputArr = @current_input_string.split(",")
       size = inputArr.size
       if size == 1  
         case inputArr[0]
@@ -152,8 +154,9 @@ public
         next puts "wtf span_num < 0 ???" if span_num < 0
         next puts "span_num is too large: #{span_num} > 100000" if span_num > 100000
         #p "outputArr = #{outputArr}"
-        print "Query the traffice of IP #{showIP(outputArr[0])} against all #{showIP(outputArr[1])} "
-        print "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
+        @current_query_string = "Query the traffice of IP #{inputArr[0]} against all #{inputArr[1]} "
+        @current_query_string << "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
+        print @current_query_string
         outputArr[5] = span_num;
         return outputArr
       end
@@ -185,6 +188,8 @@ class GraphInterface
     <script src="lib/novus-nvd3-6616c9e/all.min.js"></script>
 </head>
 <body>
+  input: #{QueryInterface.current_input_string}<br>
+  #{QueryInterface.current_query_string}
   <div id="chartZoom"><a href="#" id="zoomIn">Zoom In</a> <a href="#" id="zoomOut">Zoom Out</a></div>
   <div id="chart1" class='with-transitions' style="width: 100%; height: 90%"><svg></svg></div>
 </body>
@@ -198,25 +203,20 @@ class GraphInterface
     });
     chart.yAxis
       .axisLabel('Voltage (v)')
-      .tickFormat(d3.format(',.2f'));
+      .tickFormat(d3.format(',d'));
   },function(){
-    var sin = [], cos = [];
-    for (var i = 0; i < 100; i++) {
-      sin.push({x: i, y: Math.sin(i/10) });
-      cos.push({x: i, y: .5 * Math.cos(i/10)+5});
-    }
     return [
       {
         values: #{lines_str[0]},
         key: "Bytes Sent",
         color: "#ff7f0e",
-        area: false,
+        area: false
       },
       {
         values: #{lines_str[1]},
         key: "Bytes Received",
         color: "#2ca02c",
-        area: false,      //area - set to true if you want this line to turn into a filled area chart.
+        area: false      //area - set to true if you want this line to turn into a filled area chart.
       }
     ];
   });
