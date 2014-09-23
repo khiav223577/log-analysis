@@ -400,11 +400,14 @@ int main(int argc, char **argv){
             }
             if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
 
-
+            VALUE line1 = rb_ary_new();
+            VALUE line2 = rb_ary_new();
             for(unsigned int i = 0; i < buffer_size; ++i){
                 printf("%d: %d %d\n", i, buffer_bytes_sent[i], buffer_bytes_rece[i]);
+                rb_ary_push(line1, UINT2NUM(buffer_bytes_sent[i]));
+                rb_ary_push(line2, UINT2NUM(buffer_bytes_rece[i]));
             }
-
+            rb_funcall(rb_const("GraphInterface"), rb_intern("lineChart"), 5, UINT2NUM(date1), UINT2NUM(time_span), UINT2NUM(buffer_size), line1, line2);
 
 
             free(ip_array1);

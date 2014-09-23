@@ -15,7 +15,7 @@ end
 require './Boolean_parser.rb'
 require './Config_parser.rb'
 require 'date'
-if !$IN_C_CODE
+if !$IN_C_CODE and false
   a = %{
     #MAX_SIZE[511] String
     #DROP_AFTER[,] Int
@@ -162,18 +162,83 @@ public
     return nil
   end
 end
+require 'rbconfig'
+class GraphInterface
+  def self.lineChart(start_time, time_span, span_num, *lines)
+    output = "output.html"
+    file = File.open(output, "w")
+    lines_str = lines.map{|line|
+      str = ""
+      time = start_time
+      line.each{|s| 
+        str << "{x:" << time.to_s << ",y:" << s.to_s << "},"
+        time += time_span
+      }
+      next "[" << str << "]"
+    }
+    file.write(<<-HTML_CONTENT
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="lib/novus-nvd3-6616c9e/src/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="lib/novus-nvd3-6616c9e/all.min.js"></script>
+</head>
+<body>
+  <div id="chartZoom"><a href="#" id="zoomIn">Zoom In</a> <a href="#" id="zoomOut">Zoom Out</a></div>
+  <div id="chart1" class='with-transitions' style="width: 100%; height: 90%"><svg></svg></div>
+</body>
+<script>
+  chart = addGraph(function(chart){
+    chart.xAxis.tickFormat(function(d){ 
+      var date = new Date(0);
+      date.setSeconds(d);
+      return d3.time.format('%H:%M:%S')(date); 
+      return d3.time.format('%Y-%m-%d %H:%M:%S')(date); 
+    });
+    chart.yAxis
+      .axisLabel('Voltage (v)')
+      .tickFormat(d3.format(',.2f'));
+  },function(){
+    var sin = [], cos = [];
+    for (var i = 0; i < 100; i++) {
+      sin.push({x: i, y: Math.sin(i/10) });
+      cos.push({x: i, y: .5 * Math.cos(i/10)+5});
+    }
+    return [
+      {
+        values: #{lines_str[0]},
+        key: "Bytes Sent",
+        color: "#ff7f0e",
+        area: false,
+      },
+      {
+        values: #{lines_str[1]},
+        key: "Bytes Received",
+        color: "#2ca02c",
+        area: false,      //area - set to true if you want this line to turn into a filled area chart.
+      }
+    ];
+  });
+</script>
+</html>
 
-
-def system_call_open(link)
-  host_os = RbConfig::CONFIG['host_os']
-  if host_os =~ /mswin|mingw|cygwin/
-    system "start #{link}"
-  elsif host_os =~ /darwin/
-    system "open #{link}"
-  elsif host_os =~ /linux|bsd/
-    system "xdg-open #{link}"
-  else
-    p "Unown host: #{host_os}"
+HTML_CONTENT
+      )
+    file.close
+    self.system_call_open(output)
+  end
+  def self.system_call_open(link)
+    host_os = RbConfig::CONFIG['host_os']
+    if host_os =~ /mswin|mingw|cygwin/
+      system "start #{link}"
+    elsif host_os =~ /darwin/
+      system "open #{link}"
+    elsif host_os =~ /linux|bsd/
+      system "xdg-open #{link}"
+    else
+      p "Unown host: #{host_os}"
+    end
   end
 end
 #QueryInterface.wait_query
