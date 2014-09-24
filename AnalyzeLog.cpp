@@ -25,7 +25,6 @@
 //#include "FlexibleInt.cpp"
 
 #define MAX_LOG_SIZE 8192
-#define INPUT_MODE FILE_MODE_RAW
 RubyInterpreter *ruby;
 ConfigInterfaceIN1 *ruby_interface;
 InputFormatter *formatter;
@@ -55,12 +54,7 @@ public:
     char *indexPath;
 public:
     FilePathManager(const char *path) : InputPath(path){
-        #if INPUT_MODE == FILE_MODE_BZ2
-            const char *fileExt = ".bz2";
-        #elif INPUT_MODE == FILE_MODE_RAW
-            const char *fileExt = "";
-        #endif
-        pass1 = new PathGroup(concat(fileExt) , concat(".temp1"), NULL              , concat(".config1"));
+        pass1 = new PathGroup(concat("")      , concat(".temp1"), NULL              , concat(".config1"));
         pass2 = new PathGroup(concat(".temp1"), concat("")      , concat(".config1"), concat(".config2"));
         pass3 = new PathGroup(concat("")      , NULL            , concat(".config2"), NULL);
         indexPath = concat(".index");
@@ -113,7 +107,11 @@ void setInputer3(BlockIOManager<InputManager>& blockinputer){
 //------------------------------------------------------------
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config, unsigned int block_size){
     BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer1);
-    InputManager *inputer = new InputManager(input_path, INPUT_MODE);
+    char *ext = get_file_extension(input_path);
+    unsigned int mode = FILE_MODE_RAW;
+    if (strcmp(ext, "bz2") == 0) mode = FILE_MODE_BZ2;
+    free(ext);
+    InputManager *inputer = new InputManager(input_path, mode);
     unsigned int line_count = 0;
     char buffer[MAX_LOG_SIZE];
     SHOW_LINE_COUNT(0);
@@ -256,6 +254,13 @@ int main(int argc, char **argv){
         start_pass = 4;
     }else if (strcmp(action, "compress") == 0){
         start_pass = 1;
+    }else if (strcmp(action, "testing") == 0){
+        start_pass = 3;
+    }else{
+        PERROR(true, printf("argument-1 should be 'query' or 'compress' or 'testing'."));
+    }
+
+    if (start_pass == 1){
         if (file_exist(filePathMgr->indexPath)){
             while(1){
                 printf("%s exists.\nDo you want to re-compress?[Y/N]: ", filePathMgr->indexPath);
@@ -265,11 +270,10 @@ int main(int argc, char **argv){
                 break;
             }
         }
-    }else if (strcmp(action, "testing") == 0){
-        start_pass = 3;
     }else{
-        PERROR(true, printf("argument-1 should be 'query' or 'compress' or 'testing'."));
+        PERROR(!file_exist(filePathMgr->indexPath), printf("%s doesn't exist.\nPlease compress the data before query.", filePathMgr->indexPath));
     }
+    showtime.reset();
     ruby = new RubyInterpreter();
     switch(start_pass){
     case 1:{

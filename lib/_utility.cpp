@@ -3,6 +3,8 @@
 #ifndef ____utility_cpp__
 #define ____utility_cpp__
 #include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
 #include<io.h>
 #define PERROR(E, CODE)\
     if ((E)){\
@@ -17,6 +19,27 @@
 
 inline int file_exist(const char *path){
     return (access(path, F_OK) != -1);
+}
+inline char *get_file_extension(const char *path){
+    unsigned int i = 0, counter = 0;
+    int site = -1;
+    char tmp;
+    while((tmp = path[i]) != '\0'){
+        if (tmp == '.'){
+            site = (int) i;
+            counter = 0;
+        }
+        i += 1;
+        counter += 1;
+    }
+    if (site == -1){
+        char *output = (char *) malloc(sizeof(char));
+        *output = '\0';
+        return output;
+    }
+    char *output = (char *) malloc((counter + 1) * sizeof(char));
+    strcpy(output, path + site + 1);
+    return output;
 }
 inline int wait_yes_or_no_input(){
     char input[2];

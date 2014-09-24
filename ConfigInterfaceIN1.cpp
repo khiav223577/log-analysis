@@ -39,6 +39,7 @@ public:
 //  CreateFormatter
 //-------------------------------------------------------------------------
     InputFormatter *CreateFormatters(const char *filename, bool flag){
+        PERROR(!file_exist(filename), printf("File doesn't exist: %s", filename););
         formatter = new InputFormatter();
         glist.clear();
         ignore_drop_node = flag;
@@ -173,13 +174,6 @@ public:
         if (only_head == false){
             for(unsigned int i = 0, size = glist.size(); i < size; ++i) glist[i]->load_config2(file);
         }
-        fclose(file);
-        return new BlockConfig(line_count, block_size);
-    }
-    BlockConfig *get_config2(const char *filename){
-        FILE *file = fopen2(filename, "rb");
-        unsigned int line_count, block_size;
-        fscanf(file, "%u %u\n", &line_count, &block_size);
         fclose(file);
         return new BlockConfig(line_count, block_size);
     }
