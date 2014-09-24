@@ -1,8 +1,9 @@
 
 
-#ifndef ___windows_cpp__
-#define ___windows_cpp__
+#ifndef ____utility_cpp__
+#define ____utility_cpp__
 #include<stdio.h>
+#include<io.h>
 #define PERROR(E, CODE)\
     if ((E)){\
         SetColor( 7); puts("\n");                    \
@@ -13,6 +14,18 @@
         SetColor( 7); printf("in %s\n",__FILE__);    \
         SetColor( 7); CODE; exit(1);\
     }
+
+inline int file_exist(const char *path){
+    return (access(path, F_OK) != -1);
+}
+inline int wait_yes_or_no_input(){
+    char input[2];
+    fgets(input, 2, stdin);
+    fflush(stdin);
+    if (*input == 'N' || *input == 'n') return 0;
+    if (*input == 'Y' || *input == 'y') return 1;
+    return -1;
+}
 #ifdef _WIN32
     #include<windows.h>
     inline void SetColor(unsigned short color){ //0前藍1前綠2前紅3前景高亮4背藍5背綠6背紅7背景高亮8透明9透明10上劃線11左劃線12右劃線13右劃線14透明15透明
@@ -43,13 +56,5 @@ void SetColor2(){
     SetColor(i);
     i = (i == 8 ? 2 : i + 1);
 }
-
-
-
-
-
-
-
-
-
 #endif
+

@@ -12,8 +12,8 @@ class String
     }
   end
 end
-require './Boolean_parser.rb'
-require './Config_parser.rb'
+require './boolean_parser.rb'
+require './config_parser.rb'
 require 'date'
 if !$IN_C_CODE and false
   a = %{

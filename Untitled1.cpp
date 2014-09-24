@@ -6,7 +6,7 @@
 #include<stdio.h>
 #include<typeinfo>
 #include<iostream>
-#include "windows.cpp"
+#include "lib/_utility.cpp"
 //---------------------------------------------------
 #include "lib/ShowTime.cpp"
 #include "lib/RIPaddr.cpp"
@@ -247,16 +247,24 @@ int main(int argc, char **argv){
     std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
     return 0;
     */
-    const char *action     = ((argc > 1) ? argv[1] : "testing");
-    const char *ConfigPath = ((argc > 2) ? argv[2] : "data/dd/input_large.config");
-    const char *InputPath  = ((argc > 3) ? argv[2] : "data/dd/input_large"); //"D:/test/data2/iisfw.log.89"
+    const char *ConfigPath = ((argc > 1) ? argv[1] : "data/dd/input_large.config");
+    const char *InputPath  = ((argc > 2) ? argv[2] : "data/dd/input_large"); //"D:/test/data2/iisfw.log.89"
+    const char *action     = ((argc > 3) ? argv[3] : "testing");
     filePathMgr = new FilePathManager(InputPath);
     int start_pass;
     if (strcmp(action, "query") == 0){
         start_pass = 4;
     }else if (strcmp(action, "compress") == 0){
-        //printf("")
         start_pass = 1;
+        if (file_exist(filePathMgr->indexPath)){
+            while(1){
+                printf("%s exists.\nDo you want to re-compress?[Y/N]: ", filePathMgr->indexPath);
+                int result = wait_yes_or_no_input();
+                if (result == -1) continue;
+                if (result == 0) start_pass = 4;
+                break;
+            }
+        }
     }else if (strcmp(action, "testing") == 0){
         start_pass = 3;
     }else{
@@ -311,7 +319,7 @@ int main(int argc, char **argv){
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         FilePathManager::PathGroup *pass = filePathMgr->pass3;
         showtime.show("CreateFormatters","");
-        BlockConfig *config = ruby_interface->load_config2(pass->input_config);
+        BlockConfig *config = ruby_interface->load_config2(pass->input_config, true);
         showtime.show("Load config","");
         unsigned int line_count = config->line_count;
         unsigned int block_size = config->block_size;
@@ -325,7 +333,7 @@ int main(int argc, char **argv){
         delete index_file_inputer;
         delete config;
         delete formatter;
-        showtime.show("done","");
+        showtime.show("done.","");
         //------------------------------------------------------------------
 
         /*
@@ -340,7 +348,9 @@ int main(int argc, char **argv){
             if (ruby_data == Qnil) break;
             showtime.reset();
             formatter = ruby_interface->CreateFormatters(ConfigPath, true);
+            showtime.show("CreateFormatters","");
             BlockConfig *config = ruby_interface->load_config2(pass->input_config);
+            showtime.show("Load config","");
             delete config;
             VALUE ip_rb_data1 = rb_ary_entry(ruby_data, 0);
             VALUE ip_rb_data2 = rb_ary_entry(ruby_data, 1);
@@ -372,7 +382,7 @@ int main(int argc, char **argv){
                     bool test1 = indexers->indexList[0]->hasValueBetween(date1, date2);
                     bool test2 = indexers->indexList[1]->hasAnyValueEqualIn((int *) ip_array1, ip_array1_size);
                     bool test3 = indexers->indexList[2]->hasAnyValueEqualIn((int *) ip_array2, ip_array2_size);
-                    printf("results: %s %s %s\n", test1 ? "true" : "false", test2 ? "true" : "false", test3 ? "true" : "false");
+                    printf("index testing: %s %s %s\n", test1 ? "true" : "false", test2 ? "true" : "false", test3 ? "true" : "false");
                     if (test1 && test2 && test3){
                         must_read = block_size;
                         //printf("must_read = %d\n", must_read);
@@ -423,7 +433,6 @@ int main(int argc, char **argv){
                 rb_ary_push(line2, UINT2NUM(buffer_bytes_rece[i]));
             }
             rb_funcall(rb_const("GraphInterface"), rb_intern("lineChart"), 5, UINT2NUM(date1), UINT2NUM(time_span), UINT2NUM(buffer_size), line1, line2);
-
 
             free(ip_array1);
             free(ip_array2);
