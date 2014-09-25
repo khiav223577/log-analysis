@@ -1,0 +1,9 @@
+編譯bzip2
+
+  make -f Makefile-libbz2_so
+  
+編譯ruby1.9.3
+
+  ./configure -prefix=$HOME --enable-shared
+  make
+  sudo make install

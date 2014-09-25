@@ -39,7 +39,7 @@ public:
 //  CreateFormatter
 //-------------------------------------------------------------------------
     InputFormatter *CreateFormatters(const char *filename, bool flag){
-        PERROR(!file_exist(filename), printf("File doesn't exist: %s", filename););
+        PERROR(!file_exists(filename), printf("File doesn't exist: %s", filename););
         formatter = new InputFormatter();
         glist.clear();
         ignore_drop_node = flag;

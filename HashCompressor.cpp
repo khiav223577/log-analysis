@@ -58,7 +58,7 @@ protected:
 //------------------------------------------------------------
 public:
     inline KEY_TYPE decompress(unsigned int &input){
-        PERROR(hashKeys.size() <= input, printf("[%d <= %d] ", hashKeys.size(), input); show_keys(hashKeys););
+        PERROR(hashKeys.size() <= input, printf("[%u <= %u] ", (unsigned int) hashKeys.size(), input); show_keys(hashKeys););
         return hashKeys[input];
     }
 //------------------------------------------------------------
@@ -83,7 +83,7 @@ public:
 //------------------------------------------------------------
 public:
     inline void save(FILE *file){
-        fprintf(file, " %u\n", hashTable.size());
+        fprintf(file, " %u\n", (unsigned int) hashTable.size());
         inner_save(file, key_type);
     }
 protected:

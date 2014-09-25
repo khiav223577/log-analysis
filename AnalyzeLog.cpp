@@ -3,6 +3,7 @@
 #define EVALUATE_TIME
 #define BLOCK_SIZE 100000
 //---------------------------------------------------
+#include "RubyInterpreter.cpp"
 #include<stdio.h>
 #include<typeinfo>
 #include<iostream>
@@ -261,7 +262,7 @@ int main(int argc, char **argv){
     }
 
     if (start_pass == 1){
-        if (file_exist(filePathMgr->indexPath)){
+        if (file_exists(filePathMgr->indexPath)){
             while(1){
                 printf("%s exists.\nDo you want to re-compress?[Y/N]: ", filePathMgr->indexPath);
                 int result = wait_yes_or_no_input();
@@ -271,7 +272,7 @@ int main(int argc, char **argv){
             }
         }
     }else{
-        PERROR(!file_exist(filePathMgr->indexPath), printf("%s doesn't exist.\nPlease compress the data before query.", filePathMgr->indexPath));
+        PERROR(!file_exists(filePathMgr->indexPath), printf("%s doesn't exist.\nPlease compress the data before query.", filePathMgr->indexPath));
     }
     showtime.reset();
     ruby = new RubyInterpreter();

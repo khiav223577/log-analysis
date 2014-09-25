@@ -5,7 +5,6 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
-#include<io.h>
 #define PERROR(E, CODE)\
     if ((E)){\
         SetColor( 7); puts("\n");                    \
@@ -17,9 +16,6 @@
         SetColor( 7); CODE; exit(1);\
     }
 
-inline int file_exist(const char *path){
-    return (access(path, F_OK) != -1);
-}
 inline char *get_file_extension(const char *path){
     unsigned int i = 0, counter = 0;
     int site = -1;
@@ -63,17 +59,21 @@ inline int wait_yes_or_no_input(){
         SetColor(7);
         puts("");
     }
-
+    #include<io.h>
+    int file_exists(const char *filename){
+        return (access(filename, F_OK) != -1);
+    }
 #else
     inline void SetColor(unsigned short color){}
     void ShowColors(int start,int end){}
-    unsigned int GetTickCount() {
-        timespec tp;
-        clock_gettime(CLOCK_MONOTONIC,&tp);
-        return (unsigned int)tp.tv_sec*1000+(unsigned int)(tp.tv_nsec/1000000);
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <unistd.h>
+    int file_exists(const char *filename){
+        struct stat   buffer;
+        return (stat (filename, &buffer) == 0);
     }
 #endif
-
 void SetColor2(){
     static int i = 2;
     SetColor(i);

@@ -26,7 +26,9 @@ public:
 //-------------------------------------------
 private:
     static bool bz2Loaded;
-    static HINSTANCE bz2hLib;
+    #ifdef _WIN32
+        static HINSTANCE bz2hLib;
+    #endif
 public:
 
     #ifdef _WIN32
@@ -59,7 +61,7 @@ public:
             bz2Loaded = false;
         }
     #else
-        static int loadBz2Library(const char *path){
+        static void loadBz2Library(const char *path){
             bz2Loaded = true;
         }
         static void freeBz2Library(){
@@ -119,8 +121,9 @@ public:
     }
 };
 bool BzipManager::bz2Loaded = false;
-HINSTANCE BzipManager::bz2hLib = NULL;
-
+#ifdef _WIN32
+    HINSTANCE BzipManager::bz2hLib = NULL;
+#endif
 /*
 int main(){
     BzipManager bzManager;

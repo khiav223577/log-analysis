@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="lib/novus-nvd3-6616c9e/src/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="lib/novus-nvd3-6616c9e/all.min.js"></script>
+</head>
+<body>
+  input: 140.109.23.120,140.109.254.5,2013/12/03 04:00:01,2013/12/03 04:05:01, 10<br>
+  Query the traffice of IP 140.109.23.120 against all 140.109.254.5 from 2013-12-03 04:00:01 to 2013-12-03 04:05:01 for evey 10 second(s)...
+
+  <div id="chartZoom"><a href="#" id="zoomIn">Zoom In</a> <a href="#" id="zoomOut">Zoom Out</a></div>
+  <div id="chart1" class='with-transitions' style="width: 100%; height: 90%"><svg></svg></div>
+</body>
+<script>
+  chart = addGraph(function(chart){
+    chart.xAxis.tickFormat(function(d){ 
+      var date = new Date(0);
+      date.setSeconds(d);
+      return d3.time.format('%H:%M:%S')(date); 
+      return d3.time.format('%Y-%m-%d %H:%M:%S')(date); 
+    });
+    chart.yAxis
+      .axisLabel('Voltage (v)')
+      .tickFormat(d3.format(',d'));
+  },function(){
+    return [
+      {
+        values: [{x:1386043201,y:740},{x:1386043211,y:740},{x:1386043221,y:740},{x:1386043231,y:740},{x:1386043241,y:740},{x:1386043251,y:740},{x:1386043261,y:740},{x:1386043271,y:740},{x:1386043281,y:740},{x:1386043291,y:740},{x:1386043301,y:740},{x:1386043311,y:740},{x:1386043321,y:740},{x:1386043331,y:740},{x:1386043341,y:222},{x:1386043351,y:0},{x:1386043361,y:0},{x:1386043371,y:0},{x:1386043381,y:0},{x:1386043391,y:0},{x:1386043401,y:0},{x:1386043411,y:0},{x:1386043421,y:0},{x:1386043431,y:0},{x:1386043441,y:0},{x:1386043451,y:0},{x:1386043461,y:0},{x:1386043471,y:0},{x:1386043481,y:0},{x:1386043491,y:0},{x:1386043501,y:0},],
+        key: "Bytes Sent",
+        color: "#ff7f0e",
+        area: false
+      },
+      {
+        values: [{x:1386043201,y:740},{x:1386043211,y:740},{x:1386043221,y:740},{x:1386043231,y:740},{x:1386043241,y:740},{x:1386043251,y:740},{x:1386043261,y:740},{x:1386043271,y:740},{x:1386043281,y:740},{x:1386043291,y:740},{x:1386043301,y:740},{x:1386043311,y:740},{x:1386043321,y:740},{x:1386043331,y:740},{x:1386043341,y:222},{x:1386043351,y:0},{x:1386043361,y:0},{x:1386043371,y:0},{x:1386043381,y:0},{x:1386043391,y:0},{x:1386043401,y:0},{x:1386043411,y:0},{x:1386043421,y:0},{x:1386043431,y:0},{x:1386043441,y:0},{x:1386043451,y:0},{x:1386043461,y:0},{x:1386043471,y:0},{x:1386043481,y:0},{x:1386043491,y:0},{x:1386043501,y:0},],
+        key: "Bytes Received",
+        color: "#2ca02c",
+        area: false      //area - set to true if you want this line to turn into a filled area chart.
+      }
+    ];
+  });
+</script>
+</html>
+

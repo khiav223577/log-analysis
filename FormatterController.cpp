@@ -19,6 +19,7 @@ public:
 public:
     class VirtualCreator{ //避免在construtor時無法正確使用virtual函式的問題
 	public:
+        virtual ~VirtualCreator(){}
 		virtual char *trans_format(const char *_format)=0;
 	};
 	InputFormatter *formatter;

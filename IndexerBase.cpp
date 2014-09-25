@@ -7,6 +7,7 @@ class IndexerBase{
 public:
     IndexerBase(){
     }
+    virtual ~IndexerBase(){}
     virtual void load(InputManager *inputer)=0;
 //-------------------------------------------------------------------------
 //  ACCESS

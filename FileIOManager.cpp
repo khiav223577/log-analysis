@@ -26,9 +26,6 @@ FILE *fopen2(const char *filename, const char *mode){
     PERROR(f == NULL, printf("Cannot open %s",filename); );
     return f;
 }
-bool file_exists(const char *filename){
-    return (access(filename, F_OK) != -1);
-}
 
 class OutputManager{
 private:

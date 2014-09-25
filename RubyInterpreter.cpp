@@ -2,7 +2,12 @@
 
 #ifndef ___RubyInterpreter_cpp__
 #define ___RubyInterpreter_cpp__
+#ifndef _WIN32
+  //Fix redefinition timeval in linux
+  #define RUBY_MISSING_H 1
+#endif
 #include <ruby.h>
+
 #define rb_hash(hash, string) RubyInterpreter::access_hash(hash, string)
 #define rb_const(name) rb_const_get(rb_cObject, rb_intern((name)))
 

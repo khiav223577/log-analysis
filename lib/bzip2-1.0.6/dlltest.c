@@ -137,8 +137,8 @@ int main(int argc,char *argv[]){
           BZ2_LIBNAME, BZ2_bzlibVersion() );
 #endif
 
-
-    compress("test/output_min.temp1", "test/output_min.bz2", 9);
+        decompress("test/output_min.bz2", "test/test.temp2", 9);
+    //compress("test/output_min.temp2", "test/output_min.bz2", 9);
     //compress("test/test.txt", "test/test.bz2", 9);
     //decompress("test/test.bz2", NULL, 9);
     return 0;

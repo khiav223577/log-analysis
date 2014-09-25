@@ -19,7 +19,8 @@
 query方式：
   輸入exit：結束程式。
   輸入help：查看幫助。
-  輸入：[Source IP] [Destination IP] [Start time] [End time] [time span]
+  輸入：[Source IP],[Destination IP],[Start time],[End time],[time span]
+    ※ 注意，以逗號分隔。
     ※ [Source IP]      是來源IP，格式XXX.XXX.XXX.XXX，XXX是數字、也可以是星號。
     ※ [Destination IP] 是目標IP，格式同上。例如：140.112.*.*。(註：最多二個星號)
     ※ [Start time]     起始時間，格式 year/month/day hour:minute:second
