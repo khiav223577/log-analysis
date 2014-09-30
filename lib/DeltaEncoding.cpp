@@ -9,6 +9,10 @@ protected:
     XXXXX current_value;
 public:
     DeltaEncoding() : first_value_flag(false){
+        reset();
+    }
+    inline void reset(){
+        current_value = first_value;
     }
 //---------------------------------------
 //  Core

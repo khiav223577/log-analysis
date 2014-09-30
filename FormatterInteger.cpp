@@ -264,6 +264,9 @@ public:
 //-------------------------------------------------------------------------
 //  block info
 //-------------------------------------------------------------------------
+    void inner_reset(){
+        delta_encoding.reset();
+    }
     void inner_save_block_info(OutputManager *outputer){
         sizeManager1.save(outputer);
         sizeManager1.reset();

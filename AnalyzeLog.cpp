@@ -310,7 +310,7 @@ int main(int argc, char **argv){
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         FilePathManager::PathGroup *pass = filePathMgr->pass3;
         showtime.show("CreateFormatters","");
-        BlockConfig *config = ruby_interface->load_config2(pass->input_config, true);
+        BlockConfig *config = ruby_interface->load_config2(pass->input_config);
         showtime.show("Load config","");
         unsigned int line_count = config->line_count;
         unsigned int block_size = config->block_size;
@@ -323,34 +323,20 @@ int main(int argc, char **argv){
         }
         delete index_file_inputer;
         delete config;
-        delete formatter;
         showtime.show("done.","");
         //------------------------------------------------------------------
-
-        /*
-        RDate date(2013, 12, 3, 4, 0, 1);
-        //RIPaddr ip("64.4.11.42");
-        RIPaddr ip("140.109.1.10");
-        date.show();
-        ip.show();
-        puts("");*/
         while(1){
             VALUE ruby_data = rb_funcall(rb_const("QueryInterface"), rb_intern("wait_query"), 0);
             if (ruby_data == Qnil) break;
             showtime.reset();
-            formatter = ruby_interface->CreateFormatters(ConfigPath, true);
-            showtime.show("CreateFormatters","");
-            BlockConfig *config = ruby_interface->load_config2(pass->input_config);
-            showtime.show("Load config","");
-            delete config;
             VALUE ip_rb_data1 = rb_ary_entry(ruby_data, 0);
             VALUE ip_rb_data2 = rb_ary_entry(ruby_data, 1);
-            unsigned int *ip_array1  = createIpArrayBy(ip_rb_data1), ip_array1_size = NUM2UINT(rb_ary_entry(ip_rb_data1, 0));
-            unsigned int *ip_array2  = createIpArrayBy(ip_rb_data2), ip_array2_size = NUM2UINT(rb_ary_entry(ip_rb_data2, 0));
-            unsigned int date1       = NUM2UINT(rb_ary_entry(ruby_data, 2));
-            unsigned int date2       = NUM2UINT(rb_ary_entry(ruby_data, 3));
-            unsigned int time_span   = NUM2UINT(rb_ary_entry(ruby_data, 4));
-            unsigned int buffer_size = NUM2UINT(rb_ary_entry(ruby_data, 5));
+            const unsigned int date1       = NUM2UINT(rb_ary_entry(ruby_data, 2));
+            const unsigned int date2       = NUM2UINT(rb_ary_entry(ruby_data, 3));
+            const unsigned int time_span   = NUM2UINT(rb_ary_entry(ruby_data, 4));
+            const unsigned int buffer_size = NUM2UINT(rb_ary_entry(ruby_data, 5));
+            unsigned int *ip_array1        = createIpArrayBy(ip_rb_data1), ip_array1_size = NUM2UINT(rb_ary_entry(ip_rb_data1, 0));
+            unsigned int *ip_array2        = createIpArrayBy(ip_rb_data2), ip_array2_size = NUM2UINT(rb_ary_entry(ip_rb_data2, 0));
             unsigned int *buffer_bytes_sent      = (unsigned int *) malloc(buffer_size * sizeof(unsigned int));
             unsigned int *buffer_bytes_rece      = (unsigned int *) malloc(buffer_size * sizeof(unsigned int));
             FormatterController *fc_source_ip    = ruby_interface->getFormatterByName("Source_address");
@@ -361,7 +347,7 @@ int main(int argc, char **argv){
             memset(buffer_bytes_sent, 0, buffer_size * sizeof(unsigned int));
             memset(buffer_bytes_rece, 0, buffer_size * sizeof(unsigned int));
             int executeCounter, preExecuteCounter = 0;
-
+            PERROR(fc_bytes_sent->getExecuteCounter() != preExecuteCounter, printf("?"););
             BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(pass->input_path , block_size, FILE_MODE_RAW, &setInputer3);
             block_info_inputer = new InputManager(filePathMgr->blockInfoPath2, FILE_MODE_RAW);
             SHOW_LINE_COUNT(0);
@@ -424,17 +410,18 @@ int main(int argc, char **argv){
                 rb_ary_push(line2, UINT2NUM(buffer_bytes_rece[i]));
             }
             rb_funcall(rb_const("GraphInterface"), rb_intern("lineChart"), 5, UINT2NUM(date1), UINT2NUM(time_span), UINT2NUM(buffer_size), line1, line2);
-
             free(ip_array1);
             free(ip_array2);
             free(buffer_bytes_sent);
             free(buffer_bytes_rece);
             delete blockinputer;
-            delete formatter;
             delete block_info_inputer;
             block_info_inputer = NULL;
+            FormatList &list = ruby_interface->glist;
+            for(int i = 0, size = list.size(); i < size; ++i) list[i]->reset();
         }
         //------------------------------------------------------------------
+        delete formatter;
         delete input_indexer;
         delete ruby_interface;
     }

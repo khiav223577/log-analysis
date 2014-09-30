@@ -50,10 +50,12 @@ public:
     virtual void save_config2(FILE *file)=0;
     virtual void load_config1(FILE *file)=0;
     virtual void load_config2(FILE *file)=0;
+    inline void reset(){ executeCounter = 0; inner_reset(); }
     inline void output_block_index(OutputManager *outputer){ if (attr_index == true) inner_output_block_index(outputer); }
     inline void output_whole_index(OutputManager *outputer){ if (attr_index == true) inner_output_whole_index(outputer); }
     inline void save_block_info(OutputManager *outputer){ executeCounter = 0; inner_save_block_info(outputer); }
     inline void load_block_info(InputManager *inputer){ executeCounter = 0; inner_load_block_info(inputer); }
+    virtual void inner_reset(){}
     virtual void inner_output_block_index(OutputManager *outputer){} //TODO raise error when not implemented?
     virtual void inner_output_whole_index(OutputManager *outputer){}
     virtual void inner_save_block_info(OutputManager *outputer){}
