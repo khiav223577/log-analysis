@@ -76,6 +76,13 @@ public:
         *input += 1;
         return *inputStr;
     }
+//-------------------------------------------------------------------------
+//  block info
+//-------------------------------------------------------------------------
+    void inner_save_block_info(OutputManager *outputer){
+    }
+    void inner_load_block_info(InputManager *inputer){
+    }
 };
 
 #endif

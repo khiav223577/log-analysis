@@ -261,6 +261,19 @@ public:
         *input += size;
         return new BigInteger(BigUnsignedInABase(bigIntString, n_digit));
     }
+//-------------------------------------------------------------------------
+//  block info
+//-------------------------------------------------------------------------
+    void inner_save_block_info(OutputManager *outputer){
+        sizeManager1.save(outputer);
+        sizeManager1.reset();
+        sizeManager2.save(outputer);
+        sizeManager2.reset();
+    }
+    void inner_load_block_info(InputManager *inputer){
+        sizeManager1.load(inputer);
+        sizeManager2.load(inputer);
+    }
 };
 
 #endif

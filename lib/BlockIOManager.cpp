@@ -4,6 +4,7 @@
 #define ___BlockIOManager_cpp__
 #include<string.h>
 #include<stdlib.h>
+#define CALLBACK_PARAMETERS BlockIOManager<XXXXX>&, bool
 class BlockConfig{
 public:
     unsigned int line_count, block_size;
@@ -22,7 +23,7 @@ private:
     unsigned int path_baselen, line_count, current_block;
     const unsigned int block_size, file_mode;
     XXXXX *manager;
-    void (*onBlockChange)(BlockIOManager<XXXXX>&);
+    void (*onBlockChange)(CALLBACK_PARAMETERS);
 private:
     inline void nextBlock(){ setBlockIndex(current_block + 1); }
     inline void setBlockIndex(unsigned int idx){
@@ -30,10 +31,10 @@ private:
         sprintf(current_path + path_baselen, "%d", current_block);
         delete manager;
         manager = new XXXXX(current_path, file_mode);
-        onBlockChange(*this);
+        onBlockChange(*this, false);
     }
 public:
-    BlockIOManager(const char *_path, unsigned int bs, unsigned int fm, void (*callback)(BlockIOManager<XXXXX>&)) :
+    BlockIOManager(const char *_path, unsigned int bs, unsigned int fm, void (*callback)(CALLBACK_PARAMETERS)) :
             line_count(0), current_block(-1), block_size(bs), file_mode(fm), manager(NULL), onBlockChange(callback){
         static const int max_number_len = 11; //10 billion
         const int len = strlen(_path);
@@ -44,16 +45,18 @@ public:
     }
     ~BlockIOManager(){
         free(current_path);
+        current_path = NULL;
         delete manager;
         manager = NULL;
         current_block += 1;
-        if (line_count % block_size != 1) onBlockChange(*this); //To output index
+        if (line_count % block_size != 1) onBlockChange(*this, false); //To output index
         //remove(current_path);
     }
     inline void skipBlock(){ //skip a block.
         if (line_count % block_size != 0) puts("Warning: line_count % block_size != 0.\nIt's undefined behavior.");
         line_count += block_size;
         current_block += 1;
+        onBlockChange(*this, true);
     }
     inline XXXXX *         getIOManager(){ return manager; }
     inline unsigned int    getLineCount(){ return line_count; }
@@ -61,8 +64,9 @@ public:
     inline BlockConfig *   createConfig(){ return new BlockConfig(line_count, block_size); }
     inline const char *  getCurrentPath(){ return current_path; }
     inline unsigned int getCurrentBlock(){ return current_block; }
+    inline bool       isLastBlockChange(){ return (current_path == NULL); }
 };
-
+#undef CALLBACK_PARAMETERS
 #endif
 
 

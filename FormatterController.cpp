@@ -50,10 +50,14 @@ public:
     virtual void save_config2(FILE *file)=0;
     virtual void load_config1(FILE *file)=0;
     virtual void load_config2(FILE *file)=0;
-    inline void output_block_info(OutputManager *outputer){ if (attr_index == true) inner_output_block_info(outputer); }
-    inline void output_whole_info(OutputManager *outputer){ if (attr_index == true) inner_output_whole_info(outputer); }
-    virtual void inner_output_block_info(OutputManager *outputer){}
-    virtual void inner_output_whole_info(OutputManager *outputer){}
+    inline void output_block_index(OutputManager *outputer){ if (attr_index == true) inner_output_block_index(outputer); }
+    inline void output_whole_index(OutputManager *outputer){ if (attr_index == true) inner_output_whole_index(outputer); }
+    inline void save_block_info(OutputManager *outputer){ executeCounter = 0; inner_save_block_info(outputer); }
+    inline void load_block_info(InputManager *inputer){ executeCounter = 0; inner_load_block_info(inputer); }
+    virtual void inner_output_block_index(OutputManager *outputer){} //TODO raise error when not implemented?
+    virtual void inner_output_whole_index(OutputManager *outputer){}
+    virtual void inner_save_block_info(OutputManager *outputer){}
+    virtual void inner_load_block_info(InputManager *inputer){}
     inline IndexerBase *create_indexer(){ return (attr_index ? inner_create_indexer() : NULL); };
     virtual IndexerBase *inner_create_indexer(){ return NULL; };
 };

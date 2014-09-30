@@ -13,7 +13,6 @@ void FormatterDate::load_config2(FILE *file){
     PERROR(strcmp("Date", type), printf("Config Error: %s != Date", type););
     fscanf(file, " %d", &first_value);
     delta_encoding.set_first_value(first_value);
-    sizeManager.load(file);
     streamingRecorder.load(file);
     fscanf(file, "\n");
     SameFlag = (streamingRecorder.getMinMaxRange() == 0);
@@ -35,12 +34,8 @@ void FormatterInteger::load_config2(FILE *file){
     }else{ //fprintf(file, "BigInt %d", BigIntFlagAt1);
         fscanf(file, " %d", &BigIntFlagAt1);
     }
-    //sizeManager1.save(file);
-    //sizeManager2.save(file);
     //streamingRecorder.save(file);
     //if (streamingRecorder.isAlwaysIncreasing()) delta_encoding.get_first_value().save(file);
-    sizeManager1.load(file);
-    sizeManager2.load(file);
     streamingRecorder.load(file);
     if (streamingRecorder.isInitialized() && streamingRecorder.isAlwaysIncreasing()) delta_encoding.set_first_value(FlexibleInt::load(file));
     fscanf(file, "\n");
@@ -50,25 +45,21 @@ void FormatterInteger::load_config2(FILE *file){
 };
 void FormatterIPaddr::load_config2(FILE *file){
     //fprintf(file, "IPv4");
-    //sizeManager.save(file);
     //hashCompressor.save(file);
     char type[5];
     if (fscanf(file, "%4s", type) != 1) PERROR(true, printf("read IPv4 fail"); );
     PERROR(strcmp("IPv4", type), printf("Config Error: %s != IPv4", type););
-    sizeManager.load(file);
     hashCompressor.load(file);
     fscanf(file, "\n");
 };
 void FormatterString::load_config2(FILE *file){
     //fprintf(file, "String %u", bit_num);
-    //sizeManager.save(file);
     //hashCompressor.save(file);
     unsigned int bit_num_int;
     char type[7];
     if (fscanf(file, "%6s", type) != 1) PERROR(true, printf("read String fail"); );
     fscanf(file, " %u", &bit_num_int);
     PERROR(strcmp("String", type), printf("Config Error: %s != String", type););
-    sizeManager.load(file);
     hashCompressor.load(file);
     fscanf(file, "\n");
     bit_num = bit_num_int; //avoid memory overflow

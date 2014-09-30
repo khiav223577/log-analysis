@@ -12,7 +12,7 @@ class String
     }
   end
 end
-$LOAD_PATH.unshift File.expand_path('../lib/ruby-1.9.1', __FILE__)
+$LOAD_PATH.unshift File.expand_path('lib/ruby-1.9.1', __FILE__)
 require './boolean_parser.rb'
 require './config_parser.rb'
 #require 'rbconfig'

@@ -13,7 +13,6 @@ void FormatterDate::load_config1(FILE *file){
     PERROR(strcmp("Date", type), printf("Config Error: %s != Date", type););
     fscanf(file, " %d", &first_value);
     delta_encoding.set_first_value(first_value);
-    sizeManager.load(file);
     streamingRecorder.load(file);
     fscanf(file, "\n");
     SameFlag = (streamingRecorder.getMinMaxRange() == 0);
@@ -35,9 +34,7 @@ void FormatterInteger::load_config1(FILE *file){
     }else{ //fprintf(file, "BigInt %d", BigIntFlagAt1);
         fscanf(file, " %d", &BigIntFlagAt1);
     }
-    //sizeManager1.save(file);
     //streamingRecorder.save(file);
-    sizeManager1.load(file);
     streamingRecorder.load(file);
     fscanf(file, "\n");
     record_range = streamingRecorder.getMinMaxRange();
@@ -46,23 +43,19 @@ void FormatterInteger::load_config1(FILE *file){
 };
 void FormatterIPaddr::load_config1(FILE *file){
     //fprintf(file, "IPv4");
-    //sizeManager.save(file);
     //hashCompressor.save(file);
     char type[5];
     if (fscanf(file, "%4s", type) != 1) PERROR(true, printf("read IPv4 fail"); );
     PERROR(strcmp("IPv4", type), printf("Config Error: %s != IPv4", type););
-    sizeManager.load(file);
     hashCompressor.load(file);
     fscanf(file, "\n");
 };
 void FormatterString::load_config1(FILE *file){
     //fprintf(file, "String");
-    //sizeManager.save(file);
     //hashCompressor.save(file);
     char type[7];
     if (fscanf(file, "%6s", type) != 1) PERROR(true, printf("read String fail"); );
     PERROR(strcmp("String", type), printf("Config Error: %s != String", type););
-    sizeManager.load(file);
     hashCompressor.load(file);
     fscanf(file, "\n");
     unsigned int hashValueCounter = hashCompressor.getHashValueCounter();
@@ -72,7 +65,7 @@ void FormatterString::load_config1(FILE *file){
         while(tmp >>= 1, tmp != 0) bit_num += 1;
     }else bit_num = 0;
     bit_num = ((bit_num + 7)/ 8) * 8;
-    if (bit_num <= 8) sizeManager.setSize2FlagAt(-1); //no need to use partial 1-byte compressor.
+    //if (bit_num <= 8) sizeManager.setSize2FlagAt(-1); //no need to use partial 1-byte compressor.
 };
 void FormatterChar::load_config2(FILE *file){
     //fprintf(file, "Char\n");

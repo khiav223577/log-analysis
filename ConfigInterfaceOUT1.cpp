@@ -5,7 +5,6 @@
 
 void FormatterDate::save_config1(FILE *file){
     fprintf(file, "Date %d", delta_encoding.get_first_value());
-    sizeManager.save(file);
     streamingRecorder.save(file);
     fprintf(file, "\n");
 };
@@ -20,18 +19,15 @@ void FormatterInteger::save_config1(FILE *file){
     }else{  //BigInt
         fprintf(file, "BigInt %d", BigIntFlagAt1);
     }
-    sizeManager1.save(file);
     streamingRecorder.save(file);
 };
 void FormatterIPaddr::save_config1(FILE *file){
     fprintf(file, "IPv4");
-    sizeManager.save(file);
     hashCompressor.save(file);
     fprintf(file, "\n");
 };
 void FormatterString::save_config1(FILE *file){
     fprintf(file, "String");
-    sizeManager.save(file);
     hashCompressor.save(file);
     fprintf(file, "\n");
 };

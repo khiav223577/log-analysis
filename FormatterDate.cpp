@@ -256,14 +256,21 @@ public:
         return output;
     }
 //-------------------------------------------------------------------------
-//  add index.
+//  block info
 //-------------------------------------------------------------------------
+    void inner_save_block_info(OutputManager *outputer){
+        sizeManager.save(outputer);
+        sizeManager.reset();
+    }
+    void inner_load_block_info(InputManager *inputer){
+        sizeManager.load(inputer);
+    }
     IndexerBase *inner_create_indexer(){ return new IndexerDate();}
-    void inner_output_block_info(OutputManager *outputer){
+    void inner_output_block_index(OutputManager *outputer){
         indexer.save(outputer);
         indexer.clear();
     }
-    void inner_output_whole_info(OutputManager *outputer){
+    void inner_output_whole_index(OutputManager *outputer){
         IndexerDate indexer(streamingRecorder);
         indexer.save(outputer);
     }

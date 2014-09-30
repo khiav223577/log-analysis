@@ -12,8 +12,10 @@ class String
     }
   end
 end
+$LOAD_PATH.unshift File.expand_path('lib/ruby-1.9.1', __FILE__)
 require './boolean_parser.rb'
 require './config_parser.rb'
+#require 'rbconfig'
 require 'date'
 if !$IN_C_CODE and false
   a = %{
@@ -155,7 +157,7 @@ public
         next puts "span_num is too large: #{span_num} > 100000" if span_num > 100000
         #p "outputArr = #{outputArr}"
         @current_query_string = "Query the traffice of IP #{inputArr[0]} against all #{inputArr[1]} "
-        @current_query_string << "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
+        @current_query_string << "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for every #{outputArr[4]} second(s)...\n"
         print @current_query_string
         outputArr[5] = span_num;
         return outputArr
@@ -165,7 +167,6 @@ public
     return nil
   end
 end
-require 'rbconfig'
 class GraphInterface
   def self.lineChart(start_time, time_span, span_num, *lines)
     output = "output.html"
@@ -229,15 +230,15 @@ HTML_CONTENT
     self.system_call_open(output)
   end
   def self.system_call_open(link)
-    host_os = RbConfig::CONFIG['host_os']
-    if host_os =~ /mswin|mingw|cygwin/
+    #host_os = RbConfig::CONFIG['host_os']
+    if $host_os =~ /mswin|mingw|cygwin/
       system "start #{link}"
-    elsif host_os =~ /darwin/
+    elsif $host_os =~ /darwin/
       system "open #{link}"
-    elsif host_os =~ /linux|bsd/
+    elsif $host_os =~ /linux|bsd/
       system "xdg-open #{link}"
     else
-      p "Unown host: #{host_os}"
+      p "Unown host: #{$host_os}"
     end
   end
 end

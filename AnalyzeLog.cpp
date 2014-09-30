@@ -1,7 +1,7 @@
-//#define DEBUG 10
+//#define DEBUG 30
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
-#define BLOCK_SIZE 100000
+#define BLOCK_SIZE 20000
 //---------------------------------------------------
 #include "RubyInterpreter.cpp"
 #include<stdio.h>
@@ -33,80 +33,54 @@ InputFormatter *formatter;
 ShowTime showtime;
 #define SHOW_LINE_RANGE 20000
 #define SHOW_LINE_COUNT(COUNT) printf("%8d", (COUNT)); showtime.show("","");
-
-class FilePathManager{
-public:
-    class PathGroup{
-    public:
-        char *input_path, *output_path, *input_config, *output_config;
-        PathGroup(char *a, char *b, char *c, char *d) :
-                input_path(a), output_path(b), input_config(c), output_config(d){
-        }
-        ~PathGroup(){
-            free(input_path);
-            free(output_path);
-            free(input_config);
-            free(output_config);
-        }
-    };
-public:
-    PathGroup *pass1, *pass2, *pass3;
-    const char *InputPath;
-    char *indexPath;
-public:
-    FilePathManager(const char *path) : InputPath(path){
-        pass1 = new PathGroup(concat("")      , concat(".temp1"), NULL              , concat(".config1"));
-        pass2 = new PathGroup(concat(".temp1"), concat("")      , concat(".config1"), concat(".config2"));
-        pass3 = new PathGroup(concat("")      , NULL            , concat(".config2"), NULL);
-        indexPath = concat(".index");
-    }
-    ~FilePathManager(){
-        delete pass1;
-        delete pass2;
-        delete pass3;
-        free(indexPath);
-    }
-    inline char *concat(const char *string){
-        const static unsigned int input_len = strlen(InputPath) + 1;
-        if (string == NULL) return NULL;
-        unsigned int len = (input_len + strlen(string));
-        char *output = (char *) malloc(sizeof(char) * len);
-        sprintf(output, "%s%s", InputPath, string);
-        return output;
-    }
-};
-
+#include "FilePathManager.cpp"
 FilePathManager *filePathMgr = NULL;
 OutputManager *index_file_outputer = NULL;
-
+InputManager *block_info_inputer = NULL;
+OutputManager *block_info_outputer = NULL;
 inline void showFormatList(){
     FormatList &list = ruby_interface->glist;
     for(int i = 0, size = list.size(); i < size; ++i) printf("%d:%s\n", i, typeid(*(list[i])).name());
 }
-void setOutputer1(BlockIOManager<OutputManager>& blockoutputer){
+void setOutputer1(BlockIOManager<OutputManager>& blockoutputer, bool skip){
     FormatList &list = ruby_interface->glist;
-    for(int i = 0, size = list.size(); i < size; ++i) list[i]->outputer = blockoutputer.getIOManager();
-}
-void setInputer2(BlockIOManager<InputManager>& blockinputer){
-    FormatList &list = ruby_interface->glist;
-    for(int i = 0, size = list.size(); i < size; ++i) list[i]->inputer = blockinputer.getIOManager();
-}
-void setOutputer2(BlockIOManager<OutputManager>& blockoutputer){
-    FormatList &list = ruby_interface->glist;
-    for(int i = 0, size = list.size(); i < size; ++i) list[i]->outputer = blockoutputer.getIOManager();
-    if (blockoutputer.getCurrentBlock() != 0){
-        for(int i = 0, size = list.size(); i < size; ++i) list[i]->output_block_info(index_file_outputer);
+    bool prev_block_end = (blockoutputer.getCurrentBlock() != 0);
+    for(int i = 0, size = list.size(); i < size; ++i){
+        list[i]->outputer = blockoutputer.getIOManager();
+        if (prev_block_end) list[i]->save_block_info(block_info_outputer);
     }
 }
-void setInputer3(BlockIOManager<InputManager>& blockinputer){
+void setInputer2(BlockIOManager<InputManager>& blockinputer, bool skip){
     FormatList &list = ruby_interface->glist;
-    for(int i = 0, size = list.size(); i < size; ++i) list[i]->inputer = blockinputer.getIOManager();
+    bool lastBlock = blockinputer.isLastBlockChange();
+    for(int i = 0, size = list.size(); i < size; ++i){
+        list[i]->inputer = blockinputer.getIOManager();
+        if (!lastBlock) list[i]->load_block_info(block_info_inputer);
+    }
+}
+void setOutputer2(BlockIOManager<OutputManager>& blockoutputer, bool skip){
+    FormatList &list = ruby_interface->glist;
+    bool prev_block_end = (blockoutputer.getCurrentBlock() != 0);
+    for(int i = 0, size = list.size(); i < size; ++i){
+        list[i]->outputer = blockoutputer.getIOManager();
+        if (prev_block_end) list[i]->output_block_index(index_file_outputer);
+        if (prev_block_end) list[i]->save_block_info(block_info_outputer);
+    }
+}
+void setInputer3(BlockIOManager<InputManager>& blockinputer, bool skip){
+    FormatList &list = ruby_interface->glist;
+    bool lastBlock = blockinputer.isLastBlockChange();
+    for(int i = 0, size = list.size(); i < size; ++i){
+        list[i]->inputer = blockinputer.getIOManager();
+        if (!lastBlock) list[i]->load_block_info(block_info_inputer);
+    }
 }
 
 //------------------------------------------------------------
 //  first_pass
 //------------------------------------------------------------
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config, unsigned int block_size){
+    block_info_outputer = new OutputManager(filePathMgr->blockInfoPath1, FILE_MODE_RAW);
     BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer1);
     char *ext = get_file_extension(input_path);
     unsigned int mode = FILE_MODE_RAW;
@@ -137,6 +111,8 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
     delete config;
     delete inputer;
     delete blockoutputer;
+    delete block_info_outputer;
+    block_info_outputer = NULL;
     #ifdef EVALUATE_TIME
         evalu_int.show("Int");
         evalu_string.show("String");
@@ -162,6 +138,8 @@ inline void second_pass(const char *input_path, const char *output_path, const c
             global_formatList[i]->outputer = new OutputManager(output_path2, FILE_MODE_RAW);
         }
     #else
+        block_info_inputer = new InputManager(filePathMgr->blockInfoPath1, FILE_MODE_RAW);
+        block_info_outputer = new OutputManager(filePathMgr->blockInfoPath2, FILE_MODE_RAW);
         index_file_outputer = new OutputManager(filePathMgr->indexPath, FILE_MODE_RAW);
         BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer2);
     #endif
@@ -170,10 +148,10 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         #ifdef DEBUG
             printf("%02d: ", i);
         #endif
-        blockinputer->nextLine();
         #ifndef GROUP_FORMATTER_DATA
             blockoutputer->nextLine();
         #endif
+        blockinputer->nextLine();
         formatter->execute2();
         #ifdef DEBUG
             puts("");
@@ -196,7 +174,12 @@ inline void second_pass(const char *input_path, const char *output_path, const c
     #else
         delete blockoutputer;
     #endif
+    delete block_info_inputer;
+    delete block_info_outputer;
     delete index_file_outputer;
+    block_info_inputer = NULL;
+    block_info_outputer = NULL;
+    index_file_outputer = NULL;
 }
 //------------------------------------------------------------
 //  third_pass
@@ -206,6 +189,7 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
     unsigned int line_count = config->line_count;
     unsigned int block_size = config->block_size;
     BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
+    block_info_inputer = new InputManager(filePathMgr->blockInfoPath2, FILE_MODE_RAW);
     SHOW_LINE_COUNT(0);
     for(unsigned int i = 1; i <= line_count; ++i){
         #ifdef DEBUG
@@ -222,6 +206,8 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
     if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
     delete config;
     delete blockinputer;
+    delete block_info_inputer;
+    block_info_inputer = NULL;
 }
 
 inline unsigned int *createIpArrayBy(VALUE ruby_array){ //ruby_array = [size_xsum, data_array]
@@ -246,7 +232,7 @@ int main(int argc, char **argv){
     std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
     return 0;
     */
-    const char *ConfigPath = ((argc > 1) ? argv[1] : "data/dd/input_large.config");
+    const char *ConfigPath = ((argc > 1) ? argv[1] : "data/dd/config");
     const char *InputPath  = ((argc > 2) ? argv[2] : "data/dd/input_large"); //"D:/test/data2/iisfw.log.89"
     const char *action     = ((argc > 3) ? argv[3] : "testing");
     filePathMgr = new FilePathManager(InputPath);
@@ -377,6 +363,7 @@ int main(int argc, char **argv){
             int executeCounter, preExecuteCounter = 0;
 
             BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(pass->input_path , block_size, FILE_MODE_RAW, &setInputer3);
+            block_info_inputer = new InputManager(filePathMgr->blockInfoPath2, FILE_MODE_RAW);
             SHOW_LINE_COUNT(0);
             unsigned int counter = 1;
             unsigned int must_read = 0;
@@ -429,7 +416,6 @@ int main(int argc, char **argv){
                 counter += 1;
             }
             if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
-
             VALUE line1 = rb_ary_new();
             VALUE line2 = rb_ary_new();
             for(unsigned int i = 0; i < buffer_size; ++i){
@@ -445,6 +431,8 @@ int main(int argc, char **argv){
             free(buffer_bytes_rece);
             delete blockinputer;
             delete formatter;
+            delete block_info_inputer;
+            block_info_inputer = NULL;
         }
         //------------------------------------------------------------------
         delete input_indexer;

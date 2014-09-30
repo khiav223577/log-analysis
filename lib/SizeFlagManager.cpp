@@ -11,6 +11,9 @@ public:
     inline void setSize4FlagAt(int val){ Size4FlagAt = val; }
 public:
     SizeFlagManager(){
+        reset();
+    }
+    inline void reset(){
         Size2FlagAt = -1;
         Size3FlagAt = -1;
         Size4FlagAt = -1;
@@ -58,6 +61,16 @@ public:
     }
     inline void load(FILE *file){
         fscanf(file, " %d %d %d", &Size2FlagAt, &Size3FlagAt, &Size4FlagAt);
+    }
+    inline void save(OutputManager *outputer){
+        outputer->write(Size2FlagAt);
+        outputer->write(Size3FlagAt);
+        outputer->write(Size4FlagAt);
+    }
+    inline void load(InputManager *inputer){
+        Size2FlagAt = inputer->read_int();
+        Size3FlagAt = inputer->read_int();
+        Size4FlagAt = inputer->read_int();
     }
 };
 

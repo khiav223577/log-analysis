@@ -126,6 +126,16 @@ public:
         string_buffer[scanfLen] = '\0'; //avoid error when scanfLen == 0
         return string_buffer;
     }
+//-------------------------------------------------------------------------
+//  block info
+//-------------------------------------------------------------------------
+    void inner_save_block_info(OutputManager *outputer){
+        sizeManager.save(outputer);
+        sizeManager.reset();
+    }
+    void inner_load_block_info(InputManager *inputer){
+        sizeManager.load(inputer);
+    }
 };
 
 #endif
