@@ -18,11 +18,6 @@ public:
 public:
     ConfigInterfaceIN1(RubyInterpreter *_ruby) : ruby(_ruby){
         ruby->execute_code("$IN_C_CODE = true");
-        #ifdef _WIN32
-          ruby->execute_code("$host_os = 'mswin'");
-        #else
-          ruby->execute_code("$host_os = 'linux'");
-        #endif
         ruby->execute_file("./test.rb");
         VALUE array = rb_ary_new();
         rb_ary_push(array, rb_str_new2("INVALID"));
