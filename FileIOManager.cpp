@@ -12,6 +12,12 @@
         DATA >>= (SIZE_OF_UINT << 2);\
         DATA >>= (SIZE_OF_UINT << 2);\
     }
+#define CHECK_AND_READ_BLOCK(DATA, INDEX, CURRENT_SHIFT)\
+    if (sizeof(unsigned long) > INDEX * SIZE_OF_UINT){\
+        unsigned long num = (unsigned int) read_int();\
+        DATA |= (num << CURRENT_SHIFT);\
+        CURRENT_SHIFT += (SIZE_OF_UINT << 3);\
+    }
 #include<stdio.h>
 #include<stdlib.h>
 #include<memory.h>
@@ -110,7 +116,6 @@ public:
         CHECK_AND_WRITE_BLOCK(data, 5);
         CHECK_AND_WRITE_BLOCK(data, 6);
         CHECK_AND_WRITE_BLOCK(data, 7);
-        CHECK_AND_WRITE_BLOCK(data, 8);
     }
 //-------------------------------------------
 //  Extend
@@ -223,7 +228,17 @@ public:
         return bytes_to_int_Little(fourBytes);
     }
     inline long read_long(){
-        return (long) read_int(); //TODO: What to do when "long" is not 4-bytes.
+        unsigned long data = 0;
+        unsigned int current_shift = 0;
+        CHECK_AND_READ_BLOCK(data, 0, current_shift);
+        CHECK_AND_READ_BLOCK(data, 1, current_shift);
+        CHECK_AND_READ_BLOCK(data, 2, current_shift);
+        CHECK_AND_READ_BLOCK(data, 3, current_shift);
+        CHECK_AND_READ_BLOCK(data, 4, current_shift);
+        CHECK_AND_READ_BLOCK(data, 5, current_shift);
+        CHECK_AND_READ_BLOCK(data, 6, current_shift);
+        CHECK_AND_READ_BLOCK(data, 7, current_shift);
+        return data;
     }
     inline char *readLine(char *output, int maxLength){
         if (is_eof()) return NULL;
@@ -245,7 +260,7 @@ public:
         int sign = read_char() - 1;
         unsigned int array_len = (unsigned int) read_int();
         unsigned long *array = (unsigned long *) malloc(array_len * sizeof(unsigned long));
-        for(unsigned int i = 0; i < array_len; ++i) array[i] = read_long();
+        for(unsigned int i = 0; i < array_len; ++i) array[i] = (unsigned long) read_long();
         BigInteger *bigInt = new BigInteger(array, array_len, BigInteger::Sign(sign));
         free(array);
         return bigInt;
