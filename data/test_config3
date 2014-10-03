@@ -1,9 +1,0 @@
-#MAX_SIZE[511] String
-Int[10] Type
-#if Type >= 12 || Type < 10
-	Date[MMM d HH:mm:ss ] time1
-#else
-	Date[yyyy/MM/dd HH:mm:ss] time1
-#end
-String[,] Serial4
-String[\n] Serial5
