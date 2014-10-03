@@ -30,7 +30,7 @@ public:
         }
     }
     void save(OutputManager *outputer){
-        outputer->write(hashTable.size());
+        outputer->write((unsigned int) hashTable.size()); //若沒有轉型成unsigned int，在64bit作業系統下會爆炸。
         for(ITERATOR it = hashTable.begin(); it != hashTable.end(); ++it) outputer->write(it->first);
     }
     void clear(){

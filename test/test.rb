@@ -1,3 +1,4 @@
+p "OS: #{RUBY_PLATFORM}"
 class String
   def extract_escape_symbol
     return self.gsub(/\\(?:\\|n|r|t|"|')/){|t| #處理config中跳脫字元
@@ -12,7 +13,7 @@ class String
     }
   end
 end
-$LOAD_PATH.unshift File.expand_path('lib/ruby-1.9.1', __FILE__)
+$LOAD_PATH.unshift File.expand_path('../lib/ruby-1.9.1', __FILE__)
 require './boolean_parser.rb'
 require './config_parser.rb'
 #require 'rbconfig'
@@ -157,7 +158,7 @@ public
         next puts "span_num is too large: #{span_num} > 100000" if span_num > 100000
         #p "outputArr = #{outputArr}"
         @current_query_string = "Query the traffice of IP #{inputArr[0]} against all #{inputArr[1]} "
-        @current_query_string << "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for every #{outputArr[4]} second(s)...\n"
+        @current_query_string << "from #{showDate(outputArr[2])} to #{showDate(outputArr[3])} for evey #{outputArr[4]} second(s)...\n"
         print @current_query_string
         outputArr[5] = span_num;
         return outputArr
@@ -231,11 +232,11 @@ HTML_CONTENT
   end
   def self.system_call_open(link)
     #host_os = RbConfig::CONFIG['host_os']
-    if $host_os =~ /mswin|mingw|cygwin/
+    if RUBY_PLATFORM =~ /mswin|mingw|cygwin/
       system "start #{link}"
-    elsif $host_os =~ /darwin/
+    elsif RUBY_PLATFORM =~ /darwin/
       system "open #{link}"
-    elsif $host_os =~ /linux|bsd/
+    elsif RUBY_PLATFORM =~ /linux|bsd/
       system "xdg-open #{link}"
     else
       p "Unown host: #{$host_os}"

@@ -1,11 +1,17 @@
-執行方法：
-  AnalyzeLog.exe [CONFIG] [INPUT] [ACTION]
+﻿執行方法：
+  ●(windows) 
+    AnalyzeLog.exe [CONFIG] [INPUT] [ACTION]
+  ●(linux 32bit) 
+    LD_LIBRARY_PATH=./lib/shared_library/i686-linux ./AnalyzeLog [CONFIG] [INPUT] [ACTION]
+  ●(linux 64bit) 
+    LD_LIBRARY_PATH=./lib/shared_library/x86_64-linux ./AnalyzeLog [CONFIG] [INPUT] [ACTION]
+     
     ※ [CONFIG] 是config檔所在的路徑
     ※ [INPUT]  是input檔所在的路徑
     ※ [ACTION] 可以是compress或query
     
   例如: AnalyzeLog.exe data/config data/input_large.bz2 compress
-  (註：程式會去抓[INPUT]的副檔名，若是bz2的話會視為bz2壓縮檔，否則視為純文字檔。)
+  (註：程式會去抓[INPUT]的副檔名，若是bz2的話會視為bz2壓縮檔，否則視為純文字檔。直接從純文字檔讀會快很多)
   
 
 壓縮後會產生：(XXX是數字)

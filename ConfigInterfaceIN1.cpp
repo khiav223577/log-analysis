@@ -104,7 +104,7 @@ public:
                 node->attr_peek  = RTEST(rb_hash(hash, "peek"));
                 node->attr_index = RTEST(rb_hash(hash, "index"));
             }
-            push_node(node);
+            push_node(node); //TODO memory leak
             if (ignore_drop_node == false || node->attr_drop == false) formatList->push_back(node);
         }
     }

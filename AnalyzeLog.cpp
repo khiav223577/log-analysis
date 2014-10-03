@@ -1,4 +1,4 @@
-//#define DEBUG 30
+//#define DEBUG 2
 //#define GROUP_FORMATTER_DATA
 #define EVALUATE_TIME
 #define BLOCK_SIZE 20000
@@ -306,10 +306,10 @@ int main(int argc, char **argv){
         puts("#  Query");
         puts("#==========================================================");
         ruby_interface = new ConfigInterfaceIN1(ruby);
-        //showFormatList();
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         FilePathManager::PathGroup *pass = filePathMgr->pass3;
         showtime.show("CreateFormatters","");
+        //showFormatList();
         BlockConfig *config = ruby_interface->load_config2(pass->input_config);
         showtime.show("Load config","");
         unsigned int line_count = config->line_count;

@@ -25,7 +25,7 @@
 #include "lib/FlexibleFile.cpp"
 #include <ruby.h> // it defines F_OK
 #ifndef PERROR
-  #include "windows.cpp"
+  #include "lib/_utility.cpp"
 #endif
 FILE *fopen2(const char *filename, const char *mode){
     FILE *f = fopen(filename, mode);
