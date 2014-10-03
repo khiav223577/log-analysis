@@ -1,0 +1,7 @@
+cd ..;g++ AnalyzeLog.cpp -I lib/ruby-1.9.1/ -I lib/ruby-1.9.1/x86-64-linux/ -L lib/ruby-1.9.1/ -L lib/bzip2-1.0.6/ -lruby_x86_64_linux -lbz2_x86_64_linux -Wall;cp a.out test/a.out;cd test;LD_LIBRARY_PATH=./lib/shared_library/x86_64-linux ./a.out data/config data/input_large.bz2 compress
+
+
+cd ..;g++ AnalyzeLog.cpp -I lib/ruby-1.9.1/ -I lib/ruby-1.9.1/i686-linux/ -L lib/ruby-1.9.1/ -L lib/bzip2-1.0.6/ -lruby -lbz2 -Wall;cp a.out test/a.out;cd test;LD_LIBRARY_PATH=./lib/shared_library/i686-linux ./a.out data/config data/input_large.bz2 compress
+
+140.109.20.250, 140.109.1.10, 2014/1/09 04:00:00, 2014/1/09 05:00:00, 60
+140.109.21.*,140.109.*.*, 2013/12/03 04:00:0,0 2013/12/03 04:02:00, 10

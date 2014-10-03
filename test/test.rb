@@ -119,7 +119,8 @@ class QueryInterface
   def self.parseDate(date)
     date_time = DateTime.parse(date)
     return nil if date_time.year > 2037 || date_time.year < 1970 #prevent overflow?
-    return date_time.to_time.to_i
+    return ((date_time - DateTime.new(1970,1,1)) * 86400).round
+    #return date_time.to_time.to_i
   end
   def self.showDate(seconds)
     DateTime.strptime(seconds.to_s,'%s').strftime("%Y-%m-%d %H:%M:%S")
