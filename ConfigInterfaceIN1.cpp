@@ -15,6 +15,7 @@ public:
     FormatList glist; //global_formatList
     RubyInterpreter *ruby;
     bool ignore_drop_node;
+    unsigned int show_line_range;
 public:
     ConfigInterfaceIN1(RubyInterpreter *_ruby) : ruby(_ruby){
         ruby->execute_code("$IN_C_CODE = true");
@@ -44,6 +45,7 @@ public:
         glist.clear();
         ignore_drop_node = flag;
         rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("read_config"),  1, rb_str_new2(filename));
+        show_line_range = NUM2UINT(rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("config"),  1, rb_symbol("setting_show_line_range")));
         inner_retrieve_format(&formatter->formatList);
         return formatter;
     }

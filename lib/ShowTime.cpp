@@ -31,9 +31,9 @@ public:
     inline ShowTime(){
         reset();
     }
-    inline void show(const char *str1, const char *str2){
+    inline void show(const char *str1, const char *str2, int padding1 = -35){
         int tmp = GetTickCount();
-        printf("%-30s%5d/%5dms%s\n",str1,tmp - Prev_time,tmp - Start_time,str2);
+        printf("%*s%5d/%5dms%s\n", padding1, str1,tmp - Prev_time,tmp - Start_time,str2);
         Prev_time = tmp;
     }
     inline void reset(){

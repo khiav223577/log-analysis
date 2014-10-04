@@ -1,6 +1,7 @@
 #MAX_SIZE[511] String
 #DROP_AFTER[,] Int
 #DROP_AFTER[,] IPv4
+#SHOW_LINE_RANGE[20000] //show info for every [SHOW_LINE_RANGE] lines.
 Date[MMM d HH:mm:ss ] time1
 String[ ] server
 #if server != "logserv"

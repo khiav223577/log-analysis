@@ -1,6 +1,6 @@
 //#define DEBUG 2
 //#define GROUP_FORMATTER_DATA
-#define EVALUATE_TIME
+//#define EVALUATE_TIME
 #define BLOCK_SIZE 20000
 //---------------------------------------------------
 #include "RubyInterpreter.cpp"
@@ -31,8 +31,8 @@ ConfigInterfaceIN1 *ruby_interface;
 InputFormatter *formatter;
 //---------------------------------------------------
 ShowTime showtime;
-#define SHOW_LINE_RANGE 20000
-#define SHOW_LINE_COUNT(COUNT) printf("%8d", (COUNT)); showtime.show("","");
+#define SHOW_LINE_COUNT(COUNT) printf("%9d", (COUNT)); showtime.show("","", -26);
+#define SHOW_LINE_COUNT_WITH_PER(COUNT, MAX) printf("%9d: %6.1f%%", (COUNT), (((double) COUNT) * 100) / (MAX)); showtime.show("","", -17);
 #include "FilePathManager.cpp"
 FilePathManager *filePathMgr = NULL;
 OutputManager *index_file_outputer = NULL;
@@ -80,6 +80,7 @@ void setInputer3(BlockIOManager<InputManager>& blockinputer, bool skip){
 //  first_pass
 //------------------------------------------------------------
 inline void first_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config, unsigned int block_size){
+    const unsigned int SHOW_LINE_RANGE = ruby_interface->show_line_range;
     block_info_outputer = new OutputManager(filePathMgr->blockInfoPath1, FILE_MODE_RAW);
     BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer1);
     char *ext = get_file_extension(input_path);
@@ -126,6 +127,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
 //  second_pass
 //------------------------------------------------------------
 inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
+    const unsigned int SHOW_LINE_RANGE = ruby_interface->show_line_range;
     BlockConfig *config = ruby_interface->load_config1(input_config);
     unsigned int line_count = config->line_count;
     unsigned int block_size = config->block_size;
@@ -143,7 +145,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
         index_file_outputer = new OutputManager(filePathMgr->indexPath, FILE_MODE_RAW);
         BlockIOManager<OutputManager> *blockoutputer = new BlockIOManager<OutputManager>(output_path, block_size, FILE_MODE_RAW, &setOutputer2);
     #endif
-    SHOW_LINE_COUNT(0);
+    SHOW_LINE_COUNT_WITH_PER(0, line_count);
     for(unsigned int i = 1; i <= line_count; ++i){
         #ifdef DEBUG
             printf("%02d: ", i);
@@ -157,9 +159,9 @@ inline void second_pass(const char *input_path, const char *output_path, const c
             puts("");
             if (i == DEBUG) break;
         #endif
-        if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(i); }
+        if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT_WITH_PER(i, line_count); }
     }
-    if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
+    if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT_WITH_PER(line_count, line_count); }
     ruby_interface->save_config2(output_config, config);
     delete config;
     delete blockinputer;
@@ -185,12 +187,13 @@ inline void second_pass(const char *input_path, const char *output_path, const c
 //  third_pass
 //------------------------------------------------------------
 inline void third_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
+    const unsigned int SHOW_LINE_RANGE = ruby_interface->show_line_range;
     BlockConfig *config = ruby_interface->load_config2(input_config);
     unsigned int line_count = config->line_count;
     unsigned int block_size = config->block_size;
     BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);
     block_info_inputer = new InputManager(filePathMgr->blockInfoPath2, FILE_MODE_RAW);
-    SHOW_LINE_COUNT(0);
+    SHOW_LINE_COUNT_WITH_PER(0, line_count);
     for(unsigned int i = 1; i <= line_count; ++i){
         #ifdef DEBUG
             printf("%02d: ", i);
@@ -201,9 +204,9 @@ inline void third_pass(const char *input_path, const char *output_path, const ch
             puts("");
             if (i == DEBUG) break;
         #endif
-        if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(i); }
+        if (i % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT_WITH_PER(i, line_count); }
     }
-    if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
+    if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT_WITH_PER(line_count, line_count); }
     delete config;
     delete blockinputer;
     delete block_info_inputer;
@@ -353,6 +356,7 @@ int main(int argc, char **argv){
             SHOW_LINE_COUNT(0);
             unsigned int counter = 1;
             unsigned int must_read = 0;
+            const unsigned int SHOW_LINE_RANGE = ruby_interface->show_line_range;
             while(counter <= line_count){
                 if (must_read == 0){
                     unsigned int current_block = blockinputer->getCurrentBlock() + 1;

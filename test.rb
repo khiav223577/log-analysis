@@ -1,4 +1,4 @@
-p "OS: #{RUBY_PLATFORM}"
+puts "OS: #{RUBY_PLATFORM}"
 class String
   def extract_escape_symbol
     return self.gsub(/\\(?:\\|n|r|t|"|')/){|t| #處理config中跳脫字元
@@ -94,6 +94,9 @@ class ConfigReaderInterface
     p "variable: #{variable_name} not defined." if index == nil
     return index
   end
+  def self.config(symbol, *args)
+    return @config.send(symbol, *args)
+  end
 end
 class QueryInterface
   @current_input_string = ""
@@ -119,7 +122,8 @@ class QueryInterface
   def self.parseDate(date)
     date_time = DateTime.parse(date)
     return nil if date_time.year > 2037 || date_time.year < 1970 #prevent overflow?
-    return date_time.to_time.to_i
+    return ((date_time - DateTime.new(1970,1,1)) * 86400).round
+    #return date_time.to_time.to_i
   end
   def self.showDate(seconds)
     DateTime.strptime(seconds.to_s,'%s').strftime("%Y-%m-%d %H:%M:%S")

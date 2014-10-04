@@ -1,4 +1,4 @@
-p "OS: #{RUBY_PLATFORM}"
+puts "OS: #{RUBY_PLATFORM}"
 class String
   def extract_escape_symbol
     return self.gsub(/\\(?:\\|n|r|t|"|')/){|t| #處理config中跳脫字元
@@ -93,6 +93,9 @@ class ConfigReaderInterface
     index = @buffer_symbol_mappings[variable_name]
     p "variable: #{variable_name} not defined." if index == nil
     return index
+  end
+  def self.config(symbol, *args)
+    return @config.send(symbol, *args)
   end
 end
 class QueryInterface

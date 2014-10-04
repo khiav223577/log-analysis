@@ -8,8 +8,9 @@
 #endif
 #include <ruby.h>
 
-#define rb_hash(hash, string) RubyInterpreter::access_hash(hash, string)
-#define rb_const(name) rb_const_get(rb_cObject, rb_intern((name)))
+#define rb_hash(HASH, STRING) rb_hash_aref(HASH, rb_symbol(STRING))
+#define rb_const(NAME) rb_const_get(rb_cObject, rb_intern(NAME))
+#define rb_symbol(NAME) ID2SYM(rb_intern(NAME))
 
 RUBY_GLOBAL_SETUP
 class RubyInterpreter{
@@ -71,15 +72,6 @@ public:
     void execute_file(const char *path){ //will not exit C program when ruby raise RuntimeError.
         rb_load_protect(rb_str_new2(path), 0, &error_status);
         error_handling();
-    }
-//--------------------------------------------------------
-//  Utility
-//--------------------------------------------------------
-    static inline VALUE get_rb_symbol(const char *string){
-        return ID2SYM(rb_intern(string));
-    }
-    static inline VALUE access_hash(VALUE hash, const char *string){
-        return rb_hash_aref(hash, get_rb_symbol(string));
     }
 };
 

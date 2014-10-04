@@ -1,8 +1,10 @@
 class ConfigParser
   attr_reader   :setting_drop_after 
   attr_reader   :setting_max_size 
+  attr_reader   :setting_show_line_range
   MAP_OPERATOR = {"==" => "=".ord, "!=" => "!".ord, ">" => ">".ord, "<" => "<".ord, ">=" => ".".ord, "<=" => ",".ord}
   def parse(input)
+    @setting_show_line_range = 20000
     @setting_drop_after    = {}
     @setting_max_size      = {}
     global_symbols         = {} #記錄當前有效的所有symbol
@@ -32,6 +34,10 @@ class ConfigParser
         @setting_max_size[$3] = ($2 == "" ? 511 : $2.to_i)
       when line =~ /^#(DROP_AFTER)\[(.*)\] \s*(\w+)/
         @setting_drop_after[$3] = ($2 == "" ? nil : $2)
+      when line =~ /^#(SHOW_LINE_RANGE)\[([0-9]+)\]/
+        val = ($2 == "" ? 20000 : $2.to_i)
+        perror.call("SHOW_LINE_RANGE should between 100 ~ 100,000,000") and next if val < 100 or val > 100000000
+        @setting_show_line_range = val
       when line =~ /^(#(?:els)?if) \s*(.*)/
         exit_block.call if $1 == "#elsif" #exit block and get into another block
         nested_symbols << (local_symbols = {:buffer_start => buffer_item_counter})
