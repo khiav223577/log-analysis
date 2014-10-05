@@ -12,12 +12,13 @@
 class ConfigInterfaceIN1{
 public:
     InputFormatter *formatter;
+    InputFormatter *formatter_unneeded ; //formatter->formatList + formatter_unneeded->formatList = glist
     FormatList glist; //global_formatList
     RubyInterpreter *ruby;
     bool ignore_drop_node;
     unsigned int show_line_range;
 public:
-    ConfigInterfaceIN1(RubyInterpreter *_ruby) : ruby(_ruby){
+    ConfigInterfaceIN1(RubyInterpreter *_ruby) : formatter_unneeded(NULL), ruby(_ruby){
         ruby->execute_code("$IN_C_CODE = true");
         ruby->execute_file("./test.rb");
         VALUE array = rb_ary_new();
@@ -42,6 +43,8 @@ public:
     InputFormatter *CreateFormatters(const char *filename, bool flag){
         PERROR(!file_exists(filename), printf("File doesn't exist: %s", filename););
         formatter = new InputFormatter();
+        delete formatter_unneeded;
+        formatter_unneeded = new InputFormatter();
         glist.clear();
         ignore_drop_node = flag;
         rb_funcall(rb_const("ConfigReaderInterface"), rb_intern("read_config"),  1, rb_str_new2(filename));
@@ -106,8 +109,9 @@ public:
                 node->attr_peek  = RTEST(rb_hash(hash, "peek"));
                 node->attr_index = RTEST(rb_hash(hash, "index"));
             }
-            push_node(node); //TODO memory leak
+            push_node(node);
             if (ignore_drop_node == false || node->attr_drop == false) formatList->push_back(node);
+            else formatter_unneeded->formatList.push_back(node); //to deal with protential memory leak problem.
         }
     }
 //-------------------------------------------------------------------------
