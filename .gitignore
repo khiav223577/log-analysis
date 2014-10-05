@@ -1,6 +1,7 @@
 .svn/
 .git/
 
+/test/output.html
 # Compiled Object files
 *.slo
 *.lo
