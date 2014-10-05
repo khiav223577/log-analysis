@@ -34,7 +34,8 @@ public:
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!streamingRecorder.isInitialized(), printf("Error: fails to get_prev_int() in FormatterInteger."););
-        PERROR(prev_int.isBigInt(), printf("Unable to compare with BigInteger in IF-Statement."););
+        if (prev_int.isBigInt()) prev_int.try_to_cast_to_int();
+        PERROR(prev_int.isBigInt(), printf("Unable to compare with BigInteger in IF-Statement: "); prev_int.output(); );
         return prev_int.getValue(); // TODO BigInt.
     }
 public:

@@ -32,7 +32,7 @@ InputFormatter *formatter;
 //---------------------------------------------------
 ShowTime showtime;
 #define SHOW_LINE_COUNT(COUNT) printf("%9d", (COUNT)); showtime.show("","", -26);
-#define SHOW_LINE_COUNT_WITH_PER(COUNT, MAX) printf("%9d: %6.1f%%", (COUNT), (((double) COUNT) * 100) / (MAX)); showtime.show("","", -17);
+#define SHOW_LINE_COUNT_WITH_PER(COUNT, MAX) printf("%9d: %6.2f%%", (COUNT), (((double) COUNT) * 100) / (MAX)); showtime.show("","", -17);
 #include "FilePathManager.cpp"
 FilePathManager *filePathMgr = NULL;
 OutputManager *index_file_outputer = NULL;
@@ -239,7 +239,7 @@ int main(int argc, char **argv){
     */
     const char *ConfigPath = ((argc > 1) ? argv[1] : "data/config");
     const char *InputPath  = ((argc > 2) ? argv[2] : "data/input_large"); //"D:/test/data2/iisfw.log.89"
-    const char *action     = ((argc > 3) ? argv[3] : "compress");
+    const char *action     = ((argc > 3) ? argv[3] : "testing");
     filePathMgr = new FilePathManager(InputPath);
     int start_pass;
     if (strcmp(action, "query") == 0){
@@ -331,7 +331,7 @@ int main(int argc, char **argv){
         InputIndexer *input_indexer = new InputIndexer();
         for(unsigned int i = 0; i < block_num; ++i){
             input_indexer->children.push_back(ruby_interface->CreateIndexers(index_file_inputer));
-            if ((i + 1) % 20 == 0){ printf("Loading indexes(%d/%d)", i + 1, block_num); showtime.show("","");}
+            if ((i + 1) % 20 == 0){ printf("Loading indexes(%4d/%4d)", i + 1, block_num); showtime.show("","",-9);}
         }
         delete index_file_inputer;
         delete config;
@@ -362,7 +362,7 @@ int main(int argc, char **argv){
             PERROR(fc_bytes_sent->getExecuteCounter() != preExecuteCounter, printf("?"););
             BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(pass->input_path , block_size, FILE_MODE_RAW, &setInputer3);
             block_info_inputer = new InputManager(filePathMgr->blockInfoPath2, FILE_MODE_RAW);
-            SHOW_LINE_COUNT(0);
+            SHOW_LINE_COUNT_WITH_PER(0, line_count);
             unsigned int counter = 1;
             unsigned int must_read = 0;
             const unsigned int SHOW_LINE_RANGE = ruby_interface->show_line_range;
@@ -411,10 +411,10 @@ int main(int argc, char **argv){
                 #ifdef DEBUG
                     puts("");
                 #endif
-                if (counter % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT(counter); }
+                if (counter % SHOW_LINE_RANGE == 0){ SHOW_LINE_COUNT_WITH_PER(counter, line_count); }
                 counter += 1;
             }
-            if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT(line_count); }
+            if (line_count % SHOW_LINE_RANGE != 0){ SHOW_LINE_COUNT_WITH_PER(line_count, line_count); }
             VALUE line1 = rb_ary_new();
             VALUE line2 = rb_ary_new();
             for(unsigned int i = 0; i < buffer_size; ++i){
