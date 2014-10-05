@@ -14,11 +14,7 @@ void FormatterIFStatement::save_config2(FILE *file){ //TODO
     fprintf(file, "IF\n");
 };
 void FormatterInteger::save_config2(FILE *file){
-    if (BigIntFlagAt1 == -1){ //Int
-        fprintf(file, "Int");
-    }else{  //BigInt
-        fprintf(file, "BigInt %d", BigIntFlagAt1);
-    }
+    fprintf(file, "Int");
     streamingRecorder.save(file);
     if (streamingRecorder.isInitialized() && streamingRecorder.isAlwaysIncreasing()) delta_encoding.get_first_value().save(file);
     fprintf(file, "\n");

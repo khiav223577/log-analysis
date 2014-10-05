@@ -8,6 +8,7 @@
 #include "lib/DeltaEncoding.cpp"
 #include "lib/StreamingRecorder.cpp"
 #include "lib/SizeFlagManager.cpp"
+#include "lib/SimpleFlagManager.cpp"
 #include "HashCompressor.cpp"
 #include "IndexerBase.cpp"
 class InputFormatter;

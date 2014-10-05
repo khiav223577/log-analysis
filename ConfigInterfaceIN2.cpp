@@ -26,14 +26,9 @@ void FormatterIFStatement::load_config1(FILE *file){
     PERROR(strcmp("IF", type), printf("Config Error: %s != IF", type););
 };
 void FormatterInteger::load_config1(FILE *file){
-    char type[7];
-    if (fscanf(file, "%6s", type) != 1) PERROR(true, printf("read Int fail"); );
-    PERROR(strcmp("Int", type) && strcmp("BigInt", type), printf("Config Error: %s != Int, BigInt", type););
-    if (type[0] == 'I'){ //fprintf(file, "Int");
-
-    }else{ //fprintf(file, "BigInt %d", BigIntFlagAt1);
-        fscanf(file, " %d", &BigIntFlagAt1);
-    }
+    char type[4];
+    if (fscanf(file, "%3s", type) != 1) PERROR(true, printf("read Int fail"); );
+    PERROR(strcmp("Int", type), printf("Config Error: %s != Int", type););
     //streamingRecorder.save(file);
     streamingRecorder.load(file);
     fscanf(file, "\n");

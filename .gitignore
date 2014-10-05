@@ -1,11 +1,12 @@
 .svn/
 .git/
 
-/test/output.html
-/test/data/*.config[12]
-/test/data/*.index
-/test/data/*.part.info[12]
-/test/data/*.part[0-9]*
+output.html
+data/input_large
+data/*.config[12]
+data/*.index
+data/*.part.info[12]
+data/*.part[0-9]*
 
 # Compiled Object files
 *.slo

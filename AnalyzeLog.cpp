@@ -1,7 +1,7 @@
 //#define DEBUG 2
 //#define GROUP_FORMATTER_DATA
 //#define EVALUATE_TIME
-#define BLOCK_SIZE 20000
+#define BLOCK_SIZE 100000
 //---------------------------------------------------
 #include "RubyInterpreter.cpp"
 #include<stdio.h>
@@ -235,9 +235,9 @@ int main(int argc, char **argv){
     std::cout << bigIntegerToString(BigInteger(BigUnsignedInABase("01Aa", 16)));
     return 0;
     */
-    const char *ConfigPath = ((argc > 1) ? argv[1] : "data/dd/config");
-    const char *InputPath  = ((argc > 2) ? argv[2] : "data/dd/input_large"); //"D:/test/data2/iisfw.log.89"
-    const char *action     = ((argc > 3) ? argv[3] : "testing");
+    const char *ConfigPath = ((argc > 1) ? argv[1] : "data/config");
+    const char *InputPath  = ((argc > 2) ? argv[2] : "data/input_large"); //"D:/test/data2/iisfw.log.89"
+    const char *action     = ((argc > 3) ? argv[3] : "compress");
     filePathMgr = new FilePathManager(InputPath);
     int start_pass;
     if (strcmp(action, "query") == 0){
@@ -249,7 +249,11 @@ int main(int argc, char **argv){
     }else{
         PERROR(true, printf("argument-1 should be 'query' or 'compress' or 'testing'."));
     }
-
+    printf("AnalyzeLog v1.0 (2014/10/05)\n");
+    printf("  Config: %s\n", ConfigPath);
+    printf("  Input : %s\n", InputPath);
+    printf("  Action: %s\n", action);
+    printf("\n");
     if (start_pass == 1){
         if (file_exists(filePathMgr->indexPath)){
             while(1){
@@ -273,6 +277,7 @@ int main(int argc, char **argv){
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, false);
         FilePathManager::PathGroup *pass = filePathMgr->pass1;
+        showtime.show("CreateFormatters","");
         first_pass(pass->input_path, pass->output_path, pass->input_config, pass->output_config, BLOCK_SIZE);
         delete formatter;
         delete ruby_interface;
@@ -284,6 +289,7 @@ int main(int argc, char **argv){
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         FilePathManager::PathGroup *pass = filePathMgr->pass2;
+        showtime.show("CreateFormatters","");
         second_pass(pass->input_path, pass->output_path, pass->input_config, pass->output_config);
         delete formatter;
         delete ruby_interface;
@@ -299,6 +305,7 @@ int main(int argc, char **argv){
         ruby_interface = new ConfigInterfaceIN1(ruby);
         formatter = ruby_interface->CreateFormatters(ConfigPath, true);
         FilePathManager::PathGroup *pass = filePathMgr->pass3;
+        showtime.show("CreateFormatters","");
         third_pass(pass->input_path, pass->output_path, pass->input_config, pass->output_config);
         delete formatter;
         delete ruby_interface;

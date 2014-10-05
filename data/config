@@ -1,0 +1,92 @@
+#MAX_SIZE[511] String
+#DROP_AFTER[,] Int
+#DROP_AFTER[,] IPv4
+#SHOW_LINE_RANGE[20000] //show info for every [SHOW_LINE_RANGE] lines.
+Date[MMM d HH:mm:ss ] time1
+String[ ] server
+#if server != "logserv"
+	Int[10] Domain
+	Date[yyyy/MM/dd HH:mm:ss,] Receive_Time{
+		:index => true //add index
+	}
+	String[,] Serial
+	String[,] Type
+	#if Type == "TRAFFIC" || Type == "THREAT"
+		String[,] Threat_OR_Content_Type
+		Int[10] Config_Version
+		Date[yyyy/MM/dd HH:mm:ss,] Generate_Time
+		IPv4[.] Source_address{
+			:index => true //add index
+		}
+		IPv4[.] Destination_address{
+			:index => true //add index
+		}
+		IPv4[.] NAT_Source_IP
+		IPv4[.] NAT_Destination_IP
+		String[,] Rule
+		String[,] Source_User
+		String[,] Destination_User
+		String[,] Application
+		String[,] Virtual_System
+		String[,] Source_Zone
+		String[,] Destination_Zone
+		String[,] Inbound_Interface
+		String[,] Outbound_Interface
+		String[,] Log_Action
+		Date[yyyy/MM/dd HH:mm:ss,] Time_Logged
+		Int[10] Session_ID
+		Int[10] Repeat_Count
+		Int[10] Source_Port
+		Int[10] Destination_Port
+		Int[10] NAT_Source_Port
+		Int[10] NAT_Destination_Port
+		String[,] Flags //Int[16] Flags
+		String[,] IP_Protocol
+		String[,] Action
+		Char formatTest{
+			:peek => true, //peek data
+		}
+		#if formatTest != "\""
+			Int[10] Bytes{
+				:drop => true,
+			}
+			Int[10] Bytes_Sent
+			Int[10] Bytes_Received
+			Int[10] Packets
+			Date[yyyy/MM/dd HH:mm:ss,] Start_Time
+			Int[10] Elapsed_Time_sec
+			String[,] Category
+			Int[10] Padding
+			Int[10] seqno
+			String[,] actionflags //Int[16] actionflags
+			String[,] Source_Country
+			String[,] Destination_Country
+			Int[10] cpadding
+			Int[10] pkts_sent
+			Int[10] pkts_received
+		#else
+			DROP["]
+			String["] string2
+			DROP[,]
+			String[,] string3
+			String[,] string4
+			String[,] string5
+			String[,] direction
+			Int[10] int2
+			String[,] actionflags //Int[16] actionflags
+			String[,] Source_Country
+			String[,] Destination_Country
+			Int[10] int3
+		#end
+	#end
+#end
+
+
+
+
+
+
+
+
+
+

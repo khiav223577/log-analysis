@@ -31,8 +31,6 @@ public:
         }
 	};
     FormatterInteger(const char *_format) : super(_format, new VirtualCreator()){
-        BigIntFlagAt1 = -1;
-        BigIntFlagAt2 = -1;
     }
     int get_prev_int(){ //Will be called by FormatterIFStatement.
         PERROR(!streamingRecorder.isInitialized(), printf("Error: fails to get_prev_int() in FormatterInteger."););
@@ -59,7 +57,7 @@ private:
     FlexibleInt prev_int;
     SizeFlagManager sizeManager1;
     SizeFlagManager sizeManager2;
-    int BigIntFlagAt1, BigIntFlagAt2;
+    SimpleFlagManager BigIntFlagAt1, BigIntFlagAt2;
     bool SuccessFlag;
     FlexibleInt record_range;
     DeltaEncoding<FlexibleInt> delta_encoding;
@@ -70,21 +68,23 @@ public:
             evalu_int.start();
         #endif
         const char *originInput = *inputStream;
-        if (BigIntFlagAt1 == -1){
+        bool isBigInt = BigIntFlagAt1.getFlag(executeCounter);
+        if (isBigInt == false){
             int value = retrieve(inputStream, format);
-            if (SuccessFlag) prev_int = FlexibleInt(value);
-            else BigIntFlagAt1 = executeCounter;
-        }
-        if (BigIntFlagAt1 != -1) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
-        if (attr_drop == false){
-            if (BigIntFlagAt1 == -1){ //just for speed up. (reduce exec-time from 0.8s to 0.08s for 100k lines of data)
-                streamingRecorder.nextData_quick(prev_int);
+            if (SuccessFlag){
+                prev_int = FlexibleInt(value);
             }else{
-                streamingRecorder.nextData(prev_int);
+                isBigInt = true;
+                BigIntFlagAt1.setFlagAt(executeCounter);
             }
-            if (prev_int.isBigInt()){
+        }
+        if (isBigInt) prev_int = FlexibleInt(retrieveBInt(inputStream, format));
+        if (attr_drop == false){
+            if (isBigInt){
+                streamingRecorder.nextData(prev_int);
                 outputer->write(prev_int.getValuePtr());
             }else{
+                streamingRecorder.nextData_quick(prev_int); //just for speed up. (reduce exec-time from 0.8s to 0.08s for 100k lines of data)
                 outputer->write(prev_int.getValue(), sizeManager1.get_write_byte(prev_int.getValue(), executeCounter));
             }
         }
@@ -98,8 +98,7 @@ public:
     }
     int execute2(){
         unsigned char byte_num = 1;
-        bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
-        if (isBigInt){
+        if (BigIntFlagAt1.getFlag(executeCounter) == true){
             prev_int = FlexibleInt(inputer->read_bigInt());
         }else{
             byte_num = sizeManager1.get_read_byte(executeCounter);
@@ -110,9 +109,9 @@ public:
             break;}
         case Mode_deltaEncoding:{
             FlexibleInt output = delta_encoding.encode(prev_int); //delta encoding
-            if (BigIntFlagAt2 == -1){
+            if (BigIntFlagAt2.getFlag(executeCounter) == false){
                 output.try_to_cast_to_int();
-                if (output.isBigInt()) BigIntFlagAt2 = executeCounter;
+                if (output.isBigInt()) BigIntFlagAt2.setFlagAt(executeCounter);
             }
             if (output.isBigInt()){
                 outputer->write(output.getValuePtr());
@@ -146,9 +145,8 @@ public:
             prev_int = streamingRecorder.getMinValue();
             break;}
         case Mode_deltaEncoding:{
-            bool isBigInt = (BigIntFlagAt2 != -1 && executeCounter >= BigIntFlagAt2);
             FlexibleInt delta;
-            if (isBigInt){
+            if (BigIntFlagAt2.getFlag(executeCounter) == true){
                 delta = FlexibleInt(inputer->read_bigInt());
             }else{
                 unsigned char byte_num = sizeManager2.get_read_byte(executeCounter);
@@ -161,8 +159,7 @@ public:
             prev_int = streamingRecorder.getMinValue() + FlexibleInt(inputer->read_n_byte_int(byte_num));
             break;}
         case Mode_none:{
-            bool isBigInt = (BigIntFlagAt1 != -1 && executeCounter >= BigIntFlagAt1);
-            if (isBigInt){
+            if (BigIntFlagAt1.getFlag(executeCounter) == true){
                 prev_int = FlexibleInt(inputer->read_bigInt());
             }else{
                 unsigned char byte_num = sizeManager1.get_read_byte(executeCounter);
@@ -269,13 +266,19 @@ public:
     }
     void inner_save_block_info(OutputManager *outputer){
         sizeManager1.save(outputer);
-        sizeManager1.reset();
         sizeManager2.save(outputer);
+        BigIntFlagAt1.save(outputer);
+        BigIntFlagAt2.save(outputer);
+        sizeManager1.reset();
         sizeManager2.reset();
+        BigIntFlagAt1.reset();
+        BigIntFlagAt2.reset();
     }
     void inner_load_block_info(InputManager *inputer){
         sizeManager1.load(inputer);
         sizeManager2.load(inputer);
+        BigIntFlagAt1.load(inputer);
+        BigIntFlagAt2.load(inputer);
     }
 };
 
