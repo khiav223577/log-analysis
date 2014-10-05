@@ -71,13 +71,14 @@ public:
     inline void output() const{
         std::cout << GETVALUE(*this) << " ";
     }
-    inline bool try_to_cast_to_int(){
+    inline bool try_to_cast_to_int(bool show_error_message = false){
         if (!isBigInt()) return true;
         try{
             int result = getValuePtr()->toInt(); //may cause exception
             setValue(result);
             return true;
         }catch (const char* message){
+            if (show_error_message) printf("%s", message);
             return false; //fails
         }
     }
@@ -134,8 +135,8 @@ public:
 	inline bool operator !=(const FlexibleInt &x) const { return GETVALUE(*this) != GETVALUE(x); }
 	inline bool operator < (const FlexibleInt &x) const { return GETVALUE(*this) <  GETVALUE(x); }
 	inline bool operator <=(const FlexibleInt &x) const { return GETVALUE(*this) <= GETVALUE(x); }
-	inline bool operator >=(const FlexibleInt &x) const { return GETVALUE(*this) >  GETVALUE(x); }
-	inline bool operator > (const FlexibleInt &x) const { return GETVALUE(*this) >= GETVALUE(x); }
+	inline bool operator >=(const FlexibleInt &x) const { return GETVALUE(*this) >= GETVALUE(x); }
+	inline bool operator > (const FlexibleInt &x) const { return GETVALUE(*this) >  GETVALUE(x); }
 //----------------------------------------------
 //  Save / Load
 //----------------------------------------------

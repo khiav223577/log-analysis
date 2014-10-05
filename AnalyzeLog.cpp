@@ -129,6 +129,7 @@ inline void first_pass(const char *input_path, const char *output_path, const ch
 inline void second_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     const unsigned int SHOW_LINE_RANGE = ruby_interface->show_line_range;
     BlockConfig *config = ruby_interface->load_config1(input_config);
+    showtime.show("Load config","");
     unsigned int line_count = config->line_count;
     unsigned int block_size = config->block_size;
     BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer2);
@@ -189,6 +190,7 @@ inline void second_pass(const char *input_path, const char *output_path, const c
 inline void third_pass(const char *input_path, const char *output_path, const char *input_config, const char *output_config){
     const unsigned int SHOW_LINE_RANGE = ruby_interface->show_line_range;
     BlockConfig *config = ruby_interface->load_config2(input_config);
+    showtime.show("Load config","");
     unsigned int line_count = config->line_count;
     unsigned int block_size = config->block_size;
     BlockIOManager<InputManager> *blockinputer = new BlockIOManager<InputManager>(input_path , block_size, FILE_MODE_RAW, &setInputer3);

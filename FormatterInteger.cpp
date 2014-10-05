@@ -122,8 +122,15 @@ public:
             break;}
         case Mode_shift:{
             FlexibleInt output = (prev_int - streamingRecorder.getMinValue());
-            bool success = output.try_to_cast_to_int();
-            PERROR(success == false, printf("Unable to cast BigInt to int");); //should always be able to.
+            bool success = output.try_to_cast_to_int(true);
+            PERROR(success == false,
+                   printf("Unable to cast BigInt to int: ");
+                   printf("prev_int: "); prev_int.output();
+                   printf("output: "); output.output();
+                   printf("min: "); streamingRecorder.getMinValue().output();
+                   printf("max: "); streamingRecorder.getMaxValue().output();
+                   printf("range: "); record_range.output();
+            ); //should always be able to.
             int value = output.getValue();
             outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
             break;}
