@@ -127,6 +127,18 @@ public:
         write(buffer_len);
         for(unsigned int i = 0; i < buffer_len; ++i) write(buffer[i]);
     }
+    inline void write(FlexibleInt *data){
+        if (data->isBigInt()){
+            write('B');
+            write(data->getValuePtr());
+        }else{
+            write('I');
+            write(data->getValue());
+        }
+    }
+    inline void write(FlexibleInt &data){
+        write(&data);
+    }
     inline void write_bits(unsigned int value, unsigned char bit_num){
         while(bit_num >= 8){
             write((unsigned char) value);
@@ -264,6 +276,11 @@ public:
         BigInteger *bigInt = new BigInteger(array, array_len, BigInteger::Sign(sign));
         free(array);
         return bigInt;
+    }
+    inline FlexibleInt *read_flexibleInt(){
+        char flag = read_char();
+        PERROR(flag != 'B' && flag != 'I', printf("Unown format when read_flexibleInt."););
+        return ((flag == 'B') ? (new FlexibleInt(read_bigInt())) : (new FlexibleInt(read_int())));
     }
     inline int read_n_byte_int(unsigned char byte_num){
         if (eof_flag) return 0;

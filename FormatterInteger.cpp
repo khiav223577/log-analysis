@@ -124,12 +124,12 @@ public:
             FlexibleInt output = (prev_int - streamingRecorder.getMinValue());
             bool success = output.try_to_cast_to_int(true);
             PERROR(success == false,
-                   printf("Unable to cast BigInt to int: ");
-                   printf("prev_int: "); prev_int.output();
-                   printf("output: "); output.output();
-                   printf("min: "); streamingRecorder.getMinValue().output();
-                   printf("max: "); streamingRecorder.getMaxValue().output();
-                   printf("range: "); record_range.output();
+                   printf("Unable to cast BigInt to int: \n");
+                   printf("prev_int: "); prev_int.output(); printf("\n");
+                   printf("output: "); output.output(); printf("\n");
+                   printf("min: "); streamingRecorder.getMinValue().output(); printf("\n");
+                   printf("max: "); streamingRecorder.getMaxValue().output(); printf("\n");
+                   printf("range: "); record_range.output(); printf("\n");
             ); //should always be able to.
             int value = output.getValue();
             outputer->write(value, sizeManager2.get_write_byte(value, executeCounter));
@@ -269,23 +269,31 @@ public:
 //  block info
 //-------------------------------------------------------------------------
     void inner_reset(){
-        delta_encoding.reset();
     }
     void inner_save_block_info(OutputManager *outputer){
         sizeManager1.save(outputer);
         sizeManager2.save(outputer);
         BigIntFlagAt1.save(outputer);
         BigIntFlagAt2.save(outputer);
+        delta_encoding.save(outputer);
+        streamingRecorder.save(outputer);
         sizeManager1.reset();
         sizeManager2.reset();
         BigIntFlagAt1.reset();
         BigIntFlagAt2.reset();
+        delta_encoding.reset();
+        streamingRecorder.reset();
     }
     void inner_load_block_info(InputManager *inputer){
         sizeManager1.load(inputer);
         sizeManager2.load(inputer);
         BigIntFlagAt1.load(inputer);
         BigIntFlagAt2.load(inputer);
+        delta_encoding.load(inputer);
+        streamingRecorder.load(inputer);
+        record_range = streamingRecorder.getMinMaxRange();
+        record_range.try_to_cast_to_int();
+        compress_mode = caculate_compress_mode();
     }
 };
 

@@ -6,16 +6,10 @@
 #include "FormatterController.cpp"
 
 void FormatterDate::load_config1(FILE *file){
-    //fprintf(file, "Date %d\n", first_date);
-    int first_value;
     char type[5];
     if (fscanf(file, "%4s", type) != 1) PERROR(true, printf("read Date fail"); );
     PERROR(strcmp("Date", type), printf("Config Error: %s != Date", type););
-    fscanf(file, " %d", &first_value);
-    delta_encoding.set_first_value(first_value);
-    streamingRecorder.load(file);
     fscanf(file, "\n");
-    SameFlag = (streamingRecorder.getMinMaxRange() == 0);
 };
 void FormatterDebug::load_config1(FILE *file){};
 void FormatterDiscard::load_config1(FILE *file){};
@@ -29,12 +23,7 @@ void FormatterInteger::load_config1(FILE *file){
     char type[4];
     if (fscanf(file, "%3s", type) != 1) PERROR(true, printf("read Int fail"); );
     PERROR(strcmp("Int", type), printf("Config Error: %s != Int", type););
-    //streamingRecorder.save(file);
-    streamingRecorder.load(file);
     fscanf(file, "\n");
-    record_range = streamingRecorder.getMinMaxRange();
-    record_range.try_to_cast_to_int();
-    compress_mode = caculate_compress_mode();
 };
 void FormatterIPaddr::load_config1(FILE *file){
     //fprintf(file, "IPv4");

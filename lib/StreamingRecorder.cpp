@@ -46,7 +46,11 @@ public:
     inline bool& isAlwaysDecreasing(){  return decreasingFuncFlag; }
     inline bool& isInitialized(){       return initialized; }
 public:
-    StreamingRecorder() : initialized(false), recordingFlag(true){
+    StreamingRecorder() : recordingFlag(true){
+        reset();
+    }
+    inline void reset(){
+        initialized = false;
     }
     inline void nextData_quick(FlexibleInt &value){
         if (recordingFlag) initialized ? updateValue_quick(value) : setFirstValue_quick(value);
@@ -55,9 +59,6 @@ public:
     inline void nextData(XXXXX &value){
         if (recordingFlag) initialized ? updateValue(value) : setFirstValue(value);
         prev_value = value;
-    }
-    inline void reset(){
-        initialized = false;
     }
 //------------------------------------------------------------
 //  save
@@ -68,6 +69,13 @@ public:
         if (!initialized) return;
         fprintf(file, " %c", (increasingFuncFlag ? 'I' : (decreasingFuncFlag ? 'D' : '.')));
         inner_save(file, prev_value);
+    }
+    inline void save(OutputManager *outputer){
+        outputer->write(initialized ? 'T' : 'F');
+        if (!initialized) return;
+        outputer->write(increasingFuncFlag ? 'I' : (decreasingFuncFlag ? 'D' : '.'));
+        outputer->write(record_min);
+        outputer->write(record_max);
     }
 protected:
     inline void inner_save(FILE *file, unsigned int &unused){
@@ -81,19 +89,20 @@ protected:
 //  load
 //------------------------------------------------------------
 public:
-    inline void load(FILE *file){
-        char tmp1;
-        fscanf(file, " %c", &tmp1);
+    inline char read_char(FILE *file){ char c; fscanf(file, " %c", &c); return c; }
+    inline char read_char(InputManager *inputer){ return inputer->read_char(); }
+    template<typename INPUT_TYPE> inline void load(INPUT_TYPE *inputer){
+        char tmp1 = read_char(inputer);
         if (tmp1 == 'F') return; //uninitialize
         if (tmp1 != 'T') Perror("syntax error");
-        fscanf(file, " %c", &tmp1);
-        switch(tmp1){
+        char tmp2 = read_char(inputer);
+        switch(tmp2){
         case 'I':{ increasingFuncFlag =  true; decreasingFuncFlag = false; break;}
         case 'D':{ increasingFuncFlag = false; decreasingFuncFlag =  true; break;}
         case '.':{ increasingFuncFlag = false; decreasingFuncFlag = false; break;}
         default:{ Perror("syntax error"); return;}
         }
-        inner_load(file, prev_value);
+        inner_load(inputer, prev_value);
         initialized = true;
         recordingFlag = false;
     }
@@ -104,6 +113,18 @@ protected:
     inline void inner_load(FILE *file, FlexibleInt &unused){
         record_min = FlexibleInt::load(file);
         record_max = FlexibleInt::load(file);
+    }
+    inline void inner_load(InputManager *inputer, unsigned int &unused){
+        record_min = (unsigned int) inputer->read_int();
+        record_max = (unsigned int) inputer->read_int();
+    }
+    inline void inner_load(InputManager *inputer, FlexibleInt &unused){
+        FlexibleInt *tmp1 = inputer->read_flexibleInt();
+        FlexibleInt *tmp2 = inputer->read_flexibleInt();
+        record_min = *tmp1;
+        record_max = *tmp2;
+        delete tmp1;
+        delete tmp2;
     }
 //----------------------------------------------
 //  Operators

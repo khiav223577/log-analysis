@@ -51,7 +51,8 @@ public:
         prev_date = retrieve(inputStream, format);
         if (attr_drop == false){
             streamingRecorder.nextData(prev_date);
-            int delta = delta_encoding.encode(prev_date); //delta encoding
+            int date_tmp = (int) prev_date;
+            int delta = delta_encoding.encode(date_tmp); //delta encoding
             outputer->write(delta, sizeManager.get_write_byte(delta, executeCounter));
         }
         if (attr_peek == true) *inputStream = originInput;
@@ -259,14 +260,20 @@ public:
 //  block info
 //-------------------------------------------------------------------------
     void inner_reset(){
-        delta_encoding.reset();
     }
     void inner_save_block_info(OutputManager *outputer){
         sizeManager.save(outputer);
+        delta_encoding.save(outputer);
+        streamingRecorder.save(outputer);
         sizeManager.reset();
+        delta_encoding.reset();
+        streamingRecorder.reset();
     }
     void inner_load_block_info(InputManager *inputer){
         sizeManager.load(inputer);
+        delta_encoding.load(inputer);
+        streamingRecorder.load(inputer);
+        SameFlag = (streamingRecorder.getMinMaxRange() == 0);
     }
     IndexerBase *inner_create_indexer(){ return new IndexerDate();}
     void inner_output_block_index(OutputManager *outputer){
@@ -274,8 +281,8 @@ public:
         indexer.clear();
     }
     void inner_output_whole_index(OutputManager *outputer){
-        IndexerDate indexer(streamingRecorder);
-        indexer.save(outputer);
+        //IndexerDate indexer(streamingRecorder); //TODO global streamingRecorder
+        //indexer.save(outputer);
     }
 };
 
