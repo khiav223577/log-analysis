@@ -2,6 +2,11 @@
 .git/
 
 /test/output.html
+/test/data/*.config[12]
+/test/data/*.index
+/test/data/*.part.info[12]
+/test/data/*.part[0-9]*
+
 # Compiled Object files
 *.slo
 *.lo
