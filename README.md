@@ -1,5 +1,8 @@
 # log-analysis
 
+可壓縮log（支援streaming），並且支援在壓縮的資料內下query指令。
+
+[這裡](https://github.com/khiav223577/log-analysis/blob/master/texts/Analyze.xlsx)有詳細的壓縮率分析
 
 ## 執行方法
   ●(windows) 
